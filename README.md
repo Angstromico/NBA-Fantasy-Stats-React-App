@@ -1,5 +1,7 @@
 # MVP Race Fantasy NBA Player App
 
+![image](./src/assets/nbaStats.png)
+
 The MVP Race Fantasy NBA Player App is a React and TypeScript-based web application designed to help users track player statistics, career highs, and season summaries for fantasy NBA gameplay. This app is built with Vite for fast development and includes support for ESLint to maintain code quality.
 
 ## Features
