@@ -101,6 +101,7 @@ const App: React.FC = () => {
     <div className='App'>
       <header>
         <h1>MVP Race Fantasy NBA Player</h1>
+        <p>Welcome, {currentUser}</p>
         <button onClick={logout}>Logout</button>
       </header>
       <GameForm addGameStats={addGameStats} />

@@ -19,16 +19,25 @@ body {
 
 header {
   display: flex;
+  flex-direction: column;
   justify-content: space-between;
   align-items: center;
   padding: 10px 20px;
   background-color: #282c34;
   color: white;
+  gap: 2rem;
+  width: 100%;
 }
 
 header h1 {
   margin: 0;
   font-size: 1.5rem;
+}
+
+header p {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 700;
 }
 
 label {
