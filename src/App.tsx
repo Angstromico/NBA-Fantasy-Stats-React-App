@@ -118,12 +118,17 @@ const Login: React.FC<{
   const [password, setPassword] = useState('')
 
   const register = () => {
+    if (!username.trim() || !password.trim()) {
+      alert('Username and password cannot be empty.')
+      return
+    }
+
     if (!users.some((u) => u.username === username)) {
       const newUsers = [...users, { username, password }]
       saveUsers(newUsers)
       alert('Registration successful!')
     } else {
-      alert('Username already exists')
+      alert('Username already exists.')
     }
   }
 
@@ -178,7 +183,6 @@ const GameForm: React.FC<{ addGameStats: (game: GameStats) => void }> = ({ addGa
           value={game.points || ''}
           onChange={(e) => setGame({ ...game, points: +e.target.value })}
           id='points'
-          /* When I update any of this inputs number I still see the 0 is I write 24 I see 024 AND NOT 24 */ //I just need to fix this error
         />
         <label htmlFor='assists'>Assist</label>
         <input
