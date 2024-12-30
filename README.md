@@ -119,3 +119,5 @@ This project is licensed under the MIT License. See the `LICENSE` file for detai
 ---
 
 Enjoy tracking your fantasy NBA stats with the MVP Race Fantasy NBA Player App!
+
+## See the site here: [NBA stats](https://nba-stats-app-memz.netlify.app/)
