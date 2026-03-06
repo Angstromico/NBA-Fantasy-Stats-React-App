@@ -1,5 +1,4 @@
-import Login from './Login'
-import GameForm from './GameForm'
-import StatsDisplay from './StatsDisplay'
-
-export { Login, GameForm, StatsDisplay }
+export { default as Login } from './Login'
+export { default as GameForm } from './GameForm'
+export { default as StatsDisplay } from './StatsDisplay'
+export { default as ComparisonDisplay } from './ComparisonDisplay'

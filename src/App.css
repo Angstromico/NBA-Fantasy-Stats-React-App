@@ -119,8 +119,39 @@ body.dark-mode .absence-notice {
   border-color: #b8860b;
 }
 
-body.dark-mode .absence-notice p {
+.absence-notice p {
   color: #e0e0e0;
+}
+
+.game-info {
+  background-color: #f8f9fa;
+  border: 1px solid #dee2e6;
+  border-radius: 8px;
+  padding: 15px;
+  margin: 20px 0;
+}
+
+.game-info h3 {
+  margin: 0 0 10px 0;
+  color: #282c34;
+}
+
+.game-info p {
+  margin: 5px 0;
+  color: #333;
+}
+
+body.dark-mode .game-info {
+  background-color: #2d2d2d;
+  border-color: #444;
+}
+
+body.dark-mode .game-info h3 {
+  color: #61dafb;
+}
+
+body.dark-mode .game-info p {
+  color: #ffffff;
 }
 
 /* Dark mode text color overrides for better contrast */

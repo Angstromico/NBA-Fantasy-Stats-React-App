@@ -7,6 +7,8 @@ type Team = {
   id: string
   name: string
   city: string
+  conference: 'Eastern' | 'Western'
+  division: string
 }
 
 type AbsenceType = 'none' | 'rest' | 'injury' | 'personal' | 'suspension'
@@ -40,6 +42,32 @@ type GameStats = {
   isDoubleDouble: boolean
   isTripleDouble: boolean
   playoffSeries?: PlayoffSeries
+  season: string
+}
+
+type SeasonAwards = {
+  mvp: {
+    player: string
+    team: string
+  }
+  champion: {
+    team: string
+    record: string
+  }
+  scoringChampion: {
+    player: string
+    team: string
+    ppg: number
+  }
+  defensivePlayerOfYear: {
+    player: string
+    team: string
+  }
+  winningestTeam: {
+    team: string
+    record: string
+    wins: number
+  }
 }
 
 type SeasonStats = {
@@ -99,6 +127,7 @@ type SeasonStats = {
       '10+': number
     }
   }
+  seasonAwards?: SeasonAwards
 }
 
 type CareerHighs = {
@@ -148,5 +177,5 @@ type StatsSummary = {
   }
 }
 
-export type { User, Team, GameStats, SeasonStats, CareerHighs, StatsSummary, AbsenceType, GameType, PlayoffSeries }
+export type { User, Team, GameStats, SeasonStats, CareerHighs, StatsSummary, AbsenceType, GameType, PlayoffSeries, SeasonAwards }
 export type StatisticalMilestones = SeasonStats['statisticalMilestones']

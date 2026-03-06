@@ -1,48 +1,28 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import type { GameStats, AbsenceType, GameType, Team } from '../interfaces'
+import { NBA_TEAMS, getTeamSchedule, getAvailableSeasons } from '../data/nbaData'
 
-const NBA_TEAMS: Team[] = [
-  { id: 'atl', name: 'Hawks', city: 'Atlanta' },
-  { id: 'bos', name: 'Celtics', city: 'Boston' },
-  { id: 'bkn', name: 'Nets', city: 'Brooklyn' },
-  { id: 'cha', name: 'Hornets', city: 'Charlotte' },
-  { id: 'chi', name: 'Bulls', city: 'Chicago' },
-  { id: 'cle', name: 'Cavaliers', city: 'Cleveland' },
-  { id: 'dal', name: 'Mavericks', city: 'Dallas' },
-  { id: 'den', name: 'Nuggets', city: 'Denver' },
-  { id: 'det', name: 'Pistons', city: 'Detroit' },
-  { id: 'gsw', name: 'Warriors', city: 'Golden State' },
-  { id: 'hou', name: 'Rockets', city: 'Houston' },
-  { id: 'ind', name: 'Pacers', city: 'Indiana' },
-  { id: 'lac', name: 'Clippers', city: 'LA' },
-  { id: 'lal', name: 'Lakers', city: 'LA' },
-  { id: 'mem', name: 'Grizzlies', city: 'Memphis' },
-  { id: 'mia', name: 'Heat', city: 'Miami' },
-  { id: 'mil', name: 'Bucks', city: 'Milwaukee' },
-  { id: 'min', name: 'Timberwolves', city: 'Minnesota' },
-  { id: 'nop', name: 'Pelicans', city: 'New Orleans' },
-  { id: 'nyk', name: 'Knicks', city: 'New York' },
-  { id: 'okc', name: 'Thunder', city: 'Oklahoma City' },
-  { id: 'orl', name: 'Magic', city: 'Orlando' },
-  { id: 'phi', name: '76ers', city: 'Philadelphia' },
-  { id: 'phx', name: 'Suns', city: 'Phoenix' },
-  { id: 'por', name: 'Trail Blazers', city: 'Portland' },
-  { id: 'sac', name: 'Kings', city: 'Sacramento' },
-  { id: 'sas', name: 'Spurs', city: 'San Antonio' },
-  { id: 'tor', name: 'Raptors', city: 'Toronto' },
-  { id: 'uta', name: 'Jazz', city: 'Utah' },
-  { id: 'was', name: 'Wizards', city: 'Washington' }
-]
-
-const GameForm: React.FC<{ addGameStats: (game: GameStats) => void; currentGameNumber: number; gameType: GameType }> = ({ 
+const GameForm: React.FC<{ 
+  addGameStats: (game: GameStats) => void
+  currentGameNumber: number
+  gameType: GameType
+  selectedTeam: string
+  selectedSeason: string
+  onTeamChange: (team: string) => void
+  onSeasonChange: (season: string) => void
+}> = ({ 
   addGameStats, 
   currentGameNumber, 
-  gameType 
+  gameType,
+  selectedTeam,
+  selectedSeason,
+  onTeamChange,
+  onSeasonChange
 }) => {
   const [game, setGame] = useState<GameStats>({
     id: Date.now().toString(),
     date: new Date().toISOString().split('T')[0],
-    team: '',
+    team: selectedTeam,
     opponent: '',
     gameNumber: currentGameNumber,
     gameType,
@@ -57,7 +37,34 @@ const GameForm: React.FC<{ addGameStats: (game: GameStats) => void; currentGameN
     won: false,
     isDoubleDouble: false,
     isTripleDouble: false,
+    season: selectedSeason
   })
+
+  const [currentSchedule, setCurrentSchedule] = useState<any[]>([])
+
+  useEffect(() => {
+    if (selectedTeam && selectedSeason) {
+      const schedule = getTeamSchedule(
+        NBA_TEAMS.find(t => `${t.city} ${t.name}` === selectedTeam)?.id || '',
+        selectedSeason
+      )
+      setCurrentSchedule(schedule)
+      
+      // Set current game date and opponent based on schedule
+      const currentGameIndex = currentGameNumber - 1
+      if (schedule[currentGameIndex]) {
+        const currentScheduledGame = schedule[currentGameIndex]
+        setGame(prev => ({
+          ...prev,
+          date: currentScheduledGame.date,
+          opponent: currentScheduledGame.opponent,
+          team: selectedTeam,
+          season: selectedSeason,
+          gameType: currentScheduledGame.isPlayoff ? 'playoffs' : 'regular'
+        }))
+      }
+    }
+  }, [selectedTeam, selectedSeason, currentGameNumber])
 
   const calculateDoubleDouble = (stats: GameStats): boolean => {
     const categories = [stats.points, stats.assists, stats.rebounds, stats.blocks, stats.steals]
@@ -93,79 +100,70 @@ const GameForm: React.FC<{ addGameStats: (game: GameStats) => void; currentGameN
       return
     }
     if (!game.opponent) {
-      alert('Please enter an opponent')
+      alert('No opponent scheduled for this game')
       return
     }
     addGameStats(game)
-    setGame({
-      id: Date.now().toString(),
-      date: new Date().toISOString().split('T')[0],
-      team: game.team,
-      opponent: '',
-      gameNumber: currentGameNumber + 1,
-      gameType,
-      absenceType: 'none',
-      isAbsent: false,
-      points: 0,
-      assists: 0,
-      rebounds: 0,
-      blocks: 0,
-      steals: 0,
-      minutes: 0,
-      won: false,
-      isDoubleDouble: false,
-      isTripleDouble: false,
-    })
   }
+
+  const availableSeasons = getAvailableSeasons()
 
   return (
     <div className='GameForm'>
       <h2>Enter Game Stats - {gameType === 'regular' ? 'Regular Season' : 'Playoffs'} Game {currentGameNumber}</h2>
+      
+      {/* Season and Team Selection */}
+      <div className="form-row">
+        <div>
+          <label htmlFor='season'>Season</label>
+          <select
+            value={selectedSeason}
+            onChange={(e) => onSeasonChange(e.target.value)}
+            id='season'
+            required
+          >
+            <option value=''>Select Season</option>
+            {availableSeasons.map(season => (
+              <option key={season} value={season}>
+                {season}
+              </option>
+            ))}
+          </select>
+        </div>
+        <div>
+          <label htmlFor='team'>Team</label>
+          <select
+            value={selectedTeam}
+            onChange={(e) => onTeamChange(e.target.value)}
+            id='team'
+            required
+          >
+            <option value=''>Select Team</option>
+            {NBA_TEAMS.map(team => (
+              <option key={team.id} value={`${team.city} ${team.name}`}>
+                {team.city} {team.name}
+              </option>
+            ))}
+          </select>
+        </div>
+      </div>
+
+      {/* Current Game Info */}
+      {selectedTeam && selectedSeason && (
+        <div className="game-info">
+          <h3>Current Game</h3>
+          <p><strong>Date:</strong> {game.date}</p>
+          <p><strong>Opponent:</strong> {game.opponent}</p>
+          <p><strong>Game Type:</strong> {gameType === 'regular' ? 'Regular Season' : 'Playoffs'}</p>
+        </div>
+      )}
+
       <form
         onSubmit={(e) => {
           e.preventDefault()
           submitGame()
         }}
       >
-        <div className="form-row">
-          <div>
-            <label htmlFor='date'>Date</label>
-            <input
-              type='date'
-              value={game.date}
-              onChange={(e) => updateStats({ date: e.target.value })}
-              id='date'
-            />
-          </div>
-          <div>
-            <label htmlFor='team'>Team</label>
-            <select
-              value={game.team}
-              onChange={(e) => updateStats({ team: e.target.value })}
-              id='team'
-              required
-            >
-              <option value=''>Select Team</option>
-              {NBA_TEAMS.map(team => (
-                <option key={team.id} value={`${team.city} ${team.name}`}>
-                  {team.city} {team.name}
-                </option>
-              ))}
-            </select>
-          </div>
-          <div>
-            <label htmlFor='opponent'>Opponent</label>
-            <input
-              type='text'
-              placeholder='Opponent Team'
-              value={game.opponent}
-              onChange={(e) => updateStats({ opponent: e.target.value })}
-              id='opponent'
-              required
-            />
-          </div>
-        </div>
-
         <div className="form-row">
           <div>
             <label htmlFor='absenceType'>Absence Status</label>
@@ -297,7 +295,9 @@ const GameForm: React.FC<{ addGameStats: (game: GameStats) => void; currentGameN
           </div>
         )}
 
-        <button type='submit'>Submit Game</button>
+        <button type='submit' disabled={!selectedTeam || !selectedSeason || !game.opponent}>
+          Submit Game
+        </button>
       </form>
     </div>
   )

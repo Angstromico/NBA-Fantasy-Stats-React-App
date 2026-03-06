@@ -1,0 +1,228 @@
+.ComparisonDisplay {
+  margin: 20px auto;
+  padding: 20px;
+  background: white;
+  border-radius: 10px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  max-width: 800px;
+  text-align: left;
+  width: 100%;
+}
+
+.ComparisonDisplay h2 {
+  text-align: center;
+  color: #282c34;
+  margin-bottom: 20px;
+  border-bottom: 2px solid #61dafb;
+  padding-bottom: 10px;
+}
+
+.ComparisonDisplay h3 {
+  color: #21a1f1;
+  margin: 20px 0 15px 0;
+  font-size: 1.1rem;
+}
+
+.comparison-section {
+  margin-bottom: 30px;
+  padding: 15px;
+  background-color: #f8f9fa;
+  border-radius: 8px;
+  border: 1px solid #e9ecef;
+}
+
+.comparison-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 10px 0;
+  padding: 8px;
+  border-radius: 5px;
+  transition: background-color 0.3s ease;
+}
+
+.comparison-item.better {
+  background-color: #d4edda;
+  border-left: 4px solid #28a745;
+}
+
+.comparison-item.worse {
+  background-color: #f8d7da;
+  border-left: 4px solid #dc3545;
+}
+
+.comparison-item .label {
+  font-weight: 600;
+  color: #333;
+  min-width: 200px;
+}
+
+.comparison-item .player-value {
+  font-weight: bold;
+  color: #282c34;
+  min-width: 60px;
+  text-align: right;
+}
+
+.comparison-item .vs {
+  color: #666;
+  font-size: 0.9rem;
+  min-width: 30px;
+  text-align: center;
+}
+
+.comparison-item .reference-value {
+  color: #333;
+  min-width: 120px;
+}
+
+.comparison-item .difference {
+  font-weight: bold;
+  font-size: 0.9rem;
+  min-width: 100px;
+  text-align: right;
+}
+
+.comparison-item .difference.positive {
+  color: #28a745;
+}
+
+.comparison-item .difference.negative {
+  color: #dc3545;
+}
+
+.champion-info,
+.award-info {
+  margin-top: 15px;
+  padding: 10px;
+  background-color: white;
+  border-radius: 5px;
+  border: 1px solid #dee2e6;
+}
+
+.champion-info p,
+.award-info .award-item {
+  margin: 5px 0;
+  color: #333;
+  font-size: 0.9rem;
+}
+
+.summary-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 15px;
+  margin-top: 15px;
+}
+
+.summary-item {
+  display: flex;
+  justify-content: space-between;
+  padding: 10px;
+  background-color: white;
+  border-radius: 5px;
+  border: 1px solid #dee2e6;
+}
+
+.summary-item .label {
+  font-weight: 600;
+  color: #333;
+}
+
+.summary-item .value {
+  font-weight: bold;
+  color: #282c34;
+}
+
+/* Dark mode styles */
+body.dark-mode .ComparisonDisplay {
+  background: #2d2d2d;
+  color: #e0e0e0;
+}
+
+body.dark-mode .ComparisonDisplay h2 {
+  color: #61dafb;
+  border-bottom-color: #61dafb;
+}
+
+body.dark-mode .ComparisonDisplay h3 {
+  color: #61dafb;
+}
+
+body.dark-mode .comparison-section {
+  background-color: #333;
+  border-color: #555;
+}
+
+body.dark-mode .comparison-item.better {
+  background-color: #1e3a2e;
+  border-left-color: #28a745;
+}
+
+body.dark-mode .comparison-item.worse {
+  background-color: #3e1e1e;
+  border-left-color: #dc3545;
+}
+
+body.dark-mode .comparison-item .label {
+  color: #e0e0e0;
+}
+
+body.dark-mode .comparison-item .player-value {
+  color: #ffffff;
+}
+
+body.dark-mode .comparison-item .reference-value {
+  color: #e0e0e0;
+}
+
+body.dark-mode .champion-info,
+body.dark-mode .award-info {
+  background-color: #333;
+  border-color: #555;
+}
+
+body.dark-mode .champion-info p,
+body.dark-mode .award-info .award-item {
+  color: #e0e0e0;
+}
+
+body.dark-mode .summary-item {
+  background-color: #333;
+  border-color: #555;
+}
+
+body.dark-mode .summary-item .label {
+  color: #e0e0e0;
+}
+
+body.dark-mode .summary-item .value {
+  color: #ffffff;
+}
+
+@media (max-width: 768px) {
+  .ComparisonDisplay {
+    padding: 15px;
+    margin: 10px 0;
+  }
+  
+  .comparison-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 5px;
+  }
+  
+  .comparison-item .label {
+    min-width: auto;
+  }
+  
+  .comparison-item .player-value,
+  .comparison-item .vs,
+  .comparison-item .reference-value,
+  .comparison-item .difference {
+    min-width: auto;
+  }
+  
+  .summary-grid {
+    grid-template-columns: 1fr;
+  }
+}

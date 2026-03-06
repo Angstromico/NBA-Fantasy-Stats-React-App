@@ -1,13 +1,14 @@
 // MVP Race Fantasy NBA Player App
 
 import React, { useState, useEffect } from 'react'
-import { Login, GameForm, StatsDisplay } from './components'
+import { Login, GameForm, StatsDisplay, ComparisonDisplay } from './components'
 import type { User, GameStats, CareerHighs, StatsSummary, SeasonStats, GameType } from './interfaces'
 import { 
   calculateCareerHighs as calcCareerHighs, 
   calculateStatsSummary as calcStatsSummary, 
   organizeSeasonStats as orgSeasonStats
 } from './utils/statsCalculations'
+import { getAvailableSeasons, SEASONS_DATA } from './data/nbaData'
 import './App.css'
 
 const App: React.FC = () => {
@@ -20,6 +21,8 @@ const App: React.FC = () => {
   const [currentGameType, setCurrentGameType] = useState<GameType>('regular')
   const [currentGameNumber, setCurrentGameNumber] = useState(1)
   const [darkMode, setDarkMode] = useState(false)
+  const [selectedTeam, setSelectedTeam] = useState('')
+  const [selectedSeason, setSelectedSeason] = useState('')
 
   useEffect(() => {
     const savedUsers = localStorage.getItem('users')
@@ -110,13 +113,14 @@ const App: React.FC = () => {
     const newStats = [...stats, game]
     saveStats(newStats)
     
-    // Update game numbers and type
+    // Update game numbers
+    const currentSeasonGames = newStats.filter(g => g.season === selectedSeason && g.team === selectedTeam)
     if (game.gameType === 'regular') {
-      setCurrentGameNumber(game.gameNumber + 1)
+      setCurrentGameNumber(currentSeasonGames.filter(g => g.gameType === 'regular').length + 1)
     }
     
-    // Check if we should switch to playoffs
-    const regularSeasonGames = newStats.filter(g => g.gameType === 'regular')
+    // Check if we should switch to playoffs (after 82 regular season games)
+    const regularSeasonGames = currentSeasonGames.filter(g => g.gameType === 'regular')
     if (regularSeasonGames.length >= 82) {
       setCurrentGameType('playoffs')
       setCurrentGameNumber(1)
@@ -135,7 +139,15 @@ const App: React.FC = () => {
 
   const organizeSeasonStats = (games: GameStats[]) => {
     const seasons = orgSeasonStats(games)
-    setSeasonStats(seasons)
+    // Add season awards data
+    const seasonsWithAwards = seasons.map(season => {
+      const seasonData = SEASONS_DATA.find(s => s.season === season.seasonYear)
+      return {
+        ...season,
+        seasonAwards: seasonData?.awards
+      }
+    })
+    setSeasonStats(seasonsWithAwards)
   }
 
   const switchToPlayoffs = () => {
@@ -145,11 +157,23 @@ const App: React.FC = () => {
 
   const switchToRegularSeason = () => {
     setCurrentGameType('regular')
-    const regularSeasonGames = stats.filter(g => g.gameType === 'regular')
+    const regularSeasonGames = stats.filter(g => g.gameType === 'regular' && g.season === selectedSeason && g.team === selectedTeam)
     const maxGameNumber = regularSeasonGames.length > 0 
       ? Math.max(...regularSeasonGames.map(g => g.gameNumber)) 
       : 0
     setCurrentGameNumber(maxGameNumber + 1)
+  }
+
+  const handleTeamChange = (team: string) => {
+    setSelectedTeam(team)
+    setCurrentGameNumber(1)
+    setCurrentGameType('regular')
+  }
+
+  const handleSeasonChange = (season: string) => {
+    setSelectedSeason(season)
+    setCurrentGameNumber(1)
+    setCurrentGameType('regular')
   }
 
   if (!currentUser) {
@@ -190,6 +214,10 @@ const App: React.FC = () => {
         addGameStats={addGameStats} 
         currentGameNumber={currentGameNumber}
         gameType={currentGameType}
+        selectedTeam={selectedTeam}
+        selectedSeason={selectedSeason}
+        onTeamChange={handleTeamChange}
+        onSeasonChange={handleSeasonChange}
       />
       <StatsDisplay 
         stats={stats} 
@@ -197,6 +225,14 @@ const App: React.FC = () => {
         statsSummary={statsSummary}
         seasonStats={seasonStats}
       />
+      {selectedSeason && selectedTeam && statsSummary && (
+        <ComparisonDisplay 
+          playerStats={statsSummary}
+          seasonAwards={seasonStats.find(s => s.seasonYear === selectedSeason)?.seasonAwards || null}
+          playerTeam={selectedTeam}
+          season={selectedSeason}
+        />
+      )}
     </div>
   )
 }
