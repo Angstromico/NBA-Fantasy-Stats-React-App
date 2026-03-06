@@ -2,7 +2,12 @@
 
 import React, { useState, useEffect } from 'react'
 import { Login, GameForm, StatsDisplay } from './components'
-import type { User, GameStats, CareerHighs, StatsSummary } from './interfaces'
+import type { User, GameStats, CareerHighs, StatsSummary, SeasonStats, GameType } from './interfaces'
+import { 
+  calculateCareerHighs as calcCareerHighs, 
+  calculateStatsSummary as calcStatsSummary, 
+  organizeSeasonStats as orgSeasonStats
+} from './utils/statsCalculations'
 import './App.css'
 
 const App: React.FC = () => {
@@ -11,6 +16,9 @@ const App: React.FC = () => {
   const [stats, setStats] = useState<GameStats[]>([])
   const [careerHighs, setCareerHighs] = useState<CareerHighs | null>(null)
   const [statsSummary, setStatsSummary] = useState<StatsSummary | null>(null)
+  const [seasonStats, setSeasonStats] = useState<SeasonStats[]>([])
+  const [currentGameType, setCurrentGameType] = useState<GameType>('regular')
+  const [currentGameNumber, setCurrentGameNumber] = useState(1)
 
   useEffect(() => {
     const savedUsers = localStorage.getItem('users')
@@ -25,7 +33,21 @@ const App: React.FC = () => {
 
     const savedStats = localStorage.getItem('stats')
     if (savedStats) {
-      setStats(JSON.parse(savedStats))
+      const parsedStats = JSON.parse(savedStats)
+      setStats(parsedStats)
+      
+      // Calculate game numbers and set current game type
+      const regularSeasonGames = parsedStats.filter((g: GameStats) => g.gameType === 'regular')
+      const playoffGames = parsedStats.filter((g: GameStats) => g.gameType === 'playoffs')
+      
+      if (regularSeasonGames.length > 0) {
+        const maxRegularGameNumber = Math.max(...regularSeasonGames.map((g: GameStats) => g.gameNumber))
+        setCurrentGameNumber(maxRegularGameNumber + 1)
+      }
+      
+      if (playoffGames.length > 0) {
+        setCurrentGameType('playoffs')
+      }
     }
   }, [])
 
@@ -33,6 +55,7 @@ const App: React.FC = () => {
     if (stats.length) {
       calculateCareerHighs(stats)
       calculateStatsSummary(stats)
+      organizeSeasonStats(stats)
     }
   }, [stats])
 
@@ -64,38 +87,51 @@ const App: React.FC = () => {
   const addGameStats = (game: GameStats) => {
     const newStats = [...stats, game]
     saveStats(newStats)
-    calculateCareerHighs(newStats)
+    
+    // Update game numbers and type
+    if (game.gameType === 'regular') {
+      setCurrentGameNumber(game.gameNumber + 1)
+    }
+    
+    // Check if we should switch to playoffs
+    const regularSeasonGames = newStats.filter(g => g.gameType === 'regular')
+    if (regularSeasonGames.length >= 82) {
+      setCurrentGameType('playoffs')
+      setCurrentGameNumber(1)
+    }
   }
 
   const calculateCareerHighs = (games: GameStats[]) => {
-    const highs: CareerHighs = {
-      points: Math.max(...games.map((g) => g.points), 0),
-      assists: Math.max(...games.map((g) => g.assists), 0),
-      rebounds: Math.max(...games.map((g) => g.rebounds), 0),
-      blocks: Math.max(...games.map((g) => g.blocks), 0),
-      steals: Math.max(...games.map((g) => g.steals), 0),
-    }
+    const highs = calcCareerHighs(games)
     setCareerHighs(highs)
+  }
+
+  const calculateStatsSummary = (games: GameStats[]) => {
+    const summary = calcStatsSummary(games)
+    setStatsSummary(summary)
+  }
+
+  const organizeSeasonStats = (games: GameStats[]) => {
+    const seasons = orgSeasonStats(games)
+    setSeasonStats(seasons)
+  }
+
+  const switchToPlayoffs = () => {
+    setCurrentGameType('playoffs')
+    setCurrentGameNumber(1)
+  }
+
+  const switchToRegularSeason = () => {
+    setCurrentGameType('regular')
+    const regularSeasonGames = stats.filter(g => g.gameType === 'regular')
+    const maxGameNumber = regularSeasonGames.length > 0 
+      ? Math.max(...regularSeasonGames.map(g => g.gameNumber)) 
+      : 0
+    setCurrentGameNumber(maxGameNumber + 1)
   }
 
   if (!currentUser) {
     return <Login users={users} login={login} saveUsers={saveUsers} />
-  }
-
-  const calculateStatsSummary = (games: GameStats[]) => {
-    const totalGames = games.length
-    const wins = games.filter((g) => g.won).length
-    const losses = totalGames - wins
-
-    const averages = {
-      points: games.reduce((sum, g) => sum + g.points, 0) / totalGames,
-      assists: games.reduce((sum, g) => sum + g.assists, 0) / totalGames,
-      rebounds: games.reduce((sum, g) => sum + g.rebounds, 0) / totalGames,
-      blocks: games.reduce((sum, g) => sum + g.blocks, 0) / totalGames,
-      steals: games.reduce((sum, g) => sum + g.steals, 0) / totalGames,
-    }
-
-    setStatsSummary({ wins, losses, averages })
   }
 
   return (
@@ -103,10 +139,33 @@ const App: React.FC = () => {
       <header>
         <h1>MVP Race Fantasy NBA Player</h1>
         <p>Welcome, {currentUser}</p>
+        <div className="game-type-switcher">
+          <button 
+            onClick={switchToRegularSeason}
+            className={currentGameType === 'regular' ? 'active' : ''}
+          >
+            Regular Season
+          </button>
+          <button 
+            onClick={switchToPlayoffs}
+            className={currentGameType === 'playoffs' ? 'active' : ''}
+          >
+            Playoffs
+          </button>
+        </div>
         <button onClick={logout}>Logout</button>
       </header>
-      <GameForm addGameStats={addGameStats} />
-      <StatsDisplay stats={stats} careerHighs={careerHighs} statsSummary={statsSummary} />
+      <GameForm 
+        addGameStats={addGameStats} 
+        currentGameNumber={currentGameNumber}
+        gameType={currentGameType}
+      />
+      <StatsDisplay 
+        stats={stats} 
+        careerHighs={careerHighs} 
+        statsSummary={statsSummary}
+        seasonStats={seasonStats}
+      />
     </div>
   )
 }

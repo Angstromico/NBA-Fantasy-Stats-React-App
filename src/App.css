@@ -15,6 +15,8 @@ body {
 .App {
   text-align: center;
   padding: 20px;
+  max-width: 1200px;
+  width: 100%;
 }
 
 header {
@@ -25,8 +27,10 @@ header {
   padding: 10px 20px;
   background-color: #282c34;
   color: white;
-  gap: 2rem;
+  gap: 1rem;
   width: 100%;
+  border-radius: 10px;
+  margin-bottom: 20px;
 }
 
 header h1 {
@@ -40,9 +44,36 @@ header p {
   font-weight: 700;
 }
 
+.game-type-switcher {
+  display: flex;
+  gap: 10px;
+}
+
+.game-type-switcher button {
+  background-color: #61dafb;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 5px;
+  color: #282c34;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: background-color 0.3s;
+}
+
+.game-type-switcher button.active {
+  background-color: #21a1f1;
+  color: white;
+}
+
+.game-type-switcher button:hover {
+  background-color: #21a1f1;
+}
+
 label {
   font-weight: 900;
   color: #21a1f1;
+  display: block;
+  margin-bottom: 5px;
 }
 
 header button {
@@ -67,10 +98,14 @@ header button:hover {
   background: white;
   border-radius: 10px;
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  max-width: 500px;
+  max-width: 800px;
   text-align: left;
   width: 100%;
-  margin: auto;
+  margin-bottom: 20px;
+}
+
+.StatsDisplay {
+  max-width: 1000px;
 }
 
 form {
@@ -79,7 +114,19 @@ form {
   gap: 15px;
 }
 
+.form-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 15px;
+}
+
+.form-row > div {
+  display: flex;
+  flex-direction: column;
+}
+
 form input,
+form select,
 form button {
   padding: 10px;
   font-size: 1rem;
@@ -87,11 +134,17 @@ form button {
   border-radius: 5px;
 }
 
+form select {
+  background-color: white;
+  cursor: pointer;
+}
+
 form button {
   background-color: #61dafb;
   color: white;
   border: none;
   cursor: pointer;
+  margin-top: 10px;
 }
 
 form button:hover {
@@ -103,6 +156,31 @@ form button:hover {
   align-items: center;
   gap: 10px;
   font-size: 1rem;
+  font-weight: normal;
+  color: #333;
+  margin-bottom: 0;
+}
+
+.GameForm label[for="date"],
+.GameForm label[for="team"],
+.GameForm label[for="opponent"],
+.GameForm label[for="absenceType"] {
+  font-weight: 900;
+  color: #21a1f1;
+  margin-bottom: 5px;
+}
+
+.absence-notice {
+  background-color: #fff3cd;
+  border: 1px solid #ffeaa7;
+  border-radius: 5px;
+  padding: 15px;
+  margin: 10px 0;
+}
+
+.absence-notice p {
+  margin: 0 0 10px 0;
+  color: #856404;
 }
 
 .StatsDisplay {
@@ -111,14 +189,122 @@ form button:hover {
 
 .StatsDisplay h2 {
   margin-bottom: 15px;
+  color: #282c34;
+  border-bottom: 2px solid #61dafb;
+  padding-bottom: 10px;
 }
 
-.StatsDisplay div {
-  margin-bottom: 10px;
-  padding: 10px;
+.StatsDisplay h3 {
+  color: #21a1f1;
+  margin: 15px 0 10px 0;
+}
+
+.StatsDisplay h4 {
+  color: #333;
+  margin: 10px 0 5px 0;
+}
+
+.StatsDisplay h5 {
+  color: #666;
+  margin: 5px 0;
+}
+
+.season-filter {
+  margin-bottom: 20px;
+  padding: 15px;
+  background-color: #f8f9fa;
+  border-radius: 5px;
+}
+
+.season-filter select {
+  margin-left: 10px;
+  min-width: 150px;
+}
+
+.game-record {
+  margin-bottom: 15px;
+  padding: 15px;
   background-color: #f9f9f9;
   border: 1px solid #ddd;
   border-radius: 5px;
+  transition: background-color 0.3s;
+}
+
+.game-record:hover {
+  background-color: #f0f8ff;
+}
+
+.game-record.absent {
+  background-color: #fff3cd;
+  border-color: #ffeaa7;
+}
+
+.game-record h4 {
+  margin: 0 0 10px 0;
+  color: #282c34;
+}
+
+.game-record p {
+  margin: 5px 0;
+  color: #333;
+}
+
+.summary-section,
+.season-stats-section,
+.career-highs-section,
+.totals-section {
+  margin: 30px 0;
+  padding: 20px;
+  background-color: #f8f9fa;
+  border-radius: 10px;
+  border: 1px solid #dee2e6;
+}
+
+.summary-grid,
+.averages-grid,
+.highs-grid,
+.totals-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 20px;
+  margin: 15px 0;
+}
+
+.summary-grid > div,
+.averages-grid > div {
+  background-color: white;
+  padding: 15px;
+  border-radius: 8px;
+  border: 1px solid #e9ecef;
+}
+
+.season-card {
+  background-color: white;
+  padding: 20px;
+  border-radius: 8px;
+  border: 1px solid #e9ecef;
+  margin-bottom: 20px;
+}
+
+.milestones {
+  margin-top: 15px;
+  padding: 15px;
+  background-color: #f8f9fa;
+  border-radius: 5px;
+}
+
+.milestone-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 15px;
+  margin-top: 10px;
+}
+
+.milestone-grid > div {
+  background-color: white;
+  padding: 10px;
+  border-radius: 5px;
+  border: 1px solid #e9ecef;
 }
 
 button {
@@ -129,6 +315,7 @@ button {
   background-color: #61dafb;
   color: white;
   cursor: pointer;
+  transition: background-color 0.3s;
 }
 
 button:hover {
@@ -149,6 +336,7 @@ button:disabled {
   header {
     flex-direction: column;
     align-items: flex-start;
+    padding: 15px;
   }
 
   header h1 {
@@ -163,5 +351,30 @@ button:disabled {
   .GameForm,
   .StatsDisplay {
     padding: 15px;
+    margin: 10px 0;
+  }
+
+  .form-row {
+    grid-template-columns: 1fr;
+  }
+
+  .summary-grid,
+  .averages-grid,
+  .highs-grid,
+  .totals-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .milestone-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .game-type-switcher {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .game-type-switcher button {
+    width: 100%;
   }
 }
