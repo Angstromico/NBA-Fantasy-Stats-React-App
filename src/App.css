@@ -10,6 +10,138 @@ body {
   justify-content: center;
   align-items: center;
   flex-direction: column;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Dark Mode Styles */
+body.dark-mode {
+  background-color: #1a1a1a;
+  color: #e0e0e0;
+}
+
+body.dark-mode .App {
+  background-color: #1a1a1a;
+}
+
+body.dark-mode header {
+  background-color: #2d2d2d;
+  color: #e0e0e0;
+}
+
+body.dark-mode .Login,
+body.dark-mode .GameForm,
+body.dark-mode .StatsDisplay {
+  background: #2d2d2d;
+  color: #e0e0e0;
+  border-color: #444;
+}
+
+body.dark-mode form input,
+body.dark-mode form select {
+  background-color: #3a3a3a;
+  color: #e0e0e0;
+  border-color: #555;
+}
+
+body.dark-mode form select option {
+  background-color: #3a3a3a;
+  color: #e0e0e0;
+}
+
+body.dark-mode .game-record {
+  background-color: #333;
+  border-color: #555;
+}
+
+body.dark-mode .game-record p {
+  color: #ffffff;
+}
+
+body.dark-mode .game-record h4 {
+  color: #ffffff;
+}
+
+body.dark-mode .game-record:hover {
+  background-color: #3a3a3a;
+}
+
+body.dark-mode .game-record.absent {
+  background-color: #8b6914;
+  border-color: #b8860b;
+}
+
+body.dark-mode .summary-section,
+body.dark-mode .season-stats-section,
+body.dark-mode .career-highs-section,
+body.dark-mode .totals-section {
+  background-color: #2d2d2d;
+  border-color: #444;
+}
+
+body.dark-mode .summary-grid > div,
+body.dark-mode .averages-grid > div {
+  background-color: #333;
+  border-color: #555;
+}
+
+body.dark-mode .summary-grid > div p,
+body.dark-mode .averages-grid > div p {
+  color: #ffffff;
+  opacity: 1;
+}
+
+body.dark-mode .summary-grid > div h3,
+body.dark-mode .averages-grid > div h4 {
+  color: #61dafb;
+  opacity: 1;
+}
+
+body.dark-mode .season-card {
+  background-color: #333;
+  border-color: #555;
+}
+
+body.dark-mode .milestones {
+  background-color: #2d2d2d;
+}
+
+body.dark-mode .milestone-grid > div {
+  background-color: #333;
+  border-color: #555;
+}
+
+body.dark-mode .season-filter {
+  background-color: #2d2d2d;
+}
+
+body.dark-mode .absence-notice {
+  background-color: #8b6914;
+  border-color: #b8860b;
+}
+
+body.dark-mode .absence-notice p {
+  color: #e0e0e0;
+}
+
+/* Dark mode text color overrides for better contrast */
+body.dark-mode label {
+  color: #61dafb;
+}
+
+body.dark-mode .GameForm label[for="date"],
+body.dark-mode .GameForm label[for="team"],
+body.dark-mode .GameForm label[for="opponent"],
+body.dark-mode .GameForm label[for="absenceType"] {
+  color: #61dafb;
+}
+
+body.dark-mode .StatsDisplay h3 {
+  color: #61dafb;
+}
+
+body.dark-mode .StatsDisplay h2 {
+  color: #61dafb;
+  border-bottom-color: #61dafb;
 }
 
 .App {
@@ -44,6 +176,14 @@ header p {
   font-weight: 700;
 }
 
+.header-controls {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
 .game-type-switcher {
   display: flex;
   gap: 10px;
@@ -67,6 +207,25 @@ header p {
 
 .game-type-switcher button:hover {
   background-color: #21a1f1;
+}
+
+.dark-mode-toggle {
+  background-color: #444 !important;
+  color: #fff !important;
+  font-size: 1.2rem !important;
+  padding: 8px 12px !important;
+  min-width: 44px;
+  height: 44px;
+  border-radius: 50% !important;
+}
+
+body.dark-mode .dark-mode-toggle {
+  background-color: #61dafb !important;
+  color: white !important;
+}
+
+.dark-mode-toggle:hover {
+  transform: scale(1.1) !important;
 }
 
 label {
@@ -136,7 +295,13 @@ form button {
 
 form select {
   background-color: white;
+  color: #333;
   cursor: pointer;
+}
+
+form select option {
+  color: #333;
+  background-color: white;
 }
 
 form button {
@@ -343,8 +508,19 @@ button:disabled {
     font-size: 1.2rem;
   }
 
-  header button {
-    margin-top: 10px;
+  .header-controls {
+    flex-direction: column;
+    width: 100%;
+    gap: 10px;
+  }
+
+  .game-type-switcher {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .game-type-switcher button {
+    width: 100%;
   }
 
   .Login,
@@ -367,14 +543,5 @@ button:disabled {
 
   .milestone-grid {
     grid-template-columns: 1fr;
-  }
-
-  .game-type-switcher {
-    flex-direction: column;
-    width: 100%;
-  }
-
-  .game-type-switcher button {
-    width: 100%;
   }
 }

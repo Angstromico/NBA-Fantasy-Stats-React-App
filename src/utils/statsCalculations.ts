@@ -1,6 +1,8 @@
 import type { GameStats, SeasonStats, StatsSummary, CareerHighs, StatisticalMilestones } from '../interfaces'
 
 export const calculateStatisticalMilestones = (games: GameStats[]): StatisticalMilestones => {
+  const playedGames = games.filter(game => !game.isAbsent)
+  
   const milestones = {
     points: { '10+': 0, '20+': 0, '30+': 0, '35+': 0, '40+': 0, '50+': 0, '60+': 0, '70+': 0, '80+': 0, '100+': 0, '100++': 0 },
     assists: { '5+': 0, '10+': 0, '15+': 0, '20+': 0, '25+': 0 },
@@ -9,8 +11,8 @@ export const calculateStatisticalMilestones = (games: GameStats[]): StatisticalM
     steals: { '2+': 0, '5+': 0, '10+': 0 }
   }
 
-  games.filter(game => !game.isAbsent).forEach(game => {
-    // Points milestones
+  playedGames.forEach(game => {
+    // Points milestones - cumulative counting
     if (game.points >= 10) milestones.points['10+']++
     if (game.points >= 20) milestones.points['20+']++
     if (game.points >= 30) milestones.points['30+']++
@@ -23,26 +25,26 @@ export const calculateStatisticalMilestones = (games: GameStats[]): StatisticalM
     if (game.points >= 100) milestones.points['100+']++
     if (game.points > 100) milestones.points['100++']++
 
-    // Assists milestones
+    // Assists milestones - cumulative counting
     if (game.assists >= 5) milestones.assists['5+']++
     if (game.assists >= 10) milestones.assists['10+']++
     if (game.assists >= 15) milestones.assists['15+']++
     if (game.assists >= 20) milestones.assists['20+']++
     if (game.assists >= 25) milestones.assists['25+']++
 
-    // Rebounds milestones
+    // Rebounds milestones - cumulative counting
     if (game.rebounds >= 5) milestones.rebounds['5+']++
     if (game.rebounds >= 10) milestones.rebounds['10+']++
     if (game.rebounds >= 15) milestones.rebounds['15+']++
     if (game.rebounds >= 20) milestones.rebounds['20+']++
     if (game.rebounds >= 25) milestones.rebounds['25+']++
 
-    // Blocks milestones
+    // Blocks milestones - cumulative counting
     if (game.blocks >= 2) milestones.blocks['2+']++
     if (game.blocks >= 5) milestones.blocks['5+']++
     if (game.blocks >= 10) milestones.blocks['10+']++
 
-    // Steals milestones
+    // Steals milestones - cumulative counting
     if (game.steals >= 2) milestones.steals['2+']++
     if (game.steals >= 5) milestones.steals['5+']++
     if (game.steals >= 10) milestones.steals['10+']++

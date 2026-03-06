@@ -19,6 +19,7 @@ const App: React.FC = () => {
   const [seasonStats, setSeasonStats] = useState<SeasonStats[]>([])
   const [currentGameType, setCurrentGameType] = useState<GameType>('regular')
   const [currentGameNumber, setCurrentGameNumber] = useState(1)
+  const [darkMode, setDarkMode] = useState(false)
 
   useEffect(() => {
     const savedUsers = localStorage.getItem('users')
@@ -49,6 +50,12 @@ const App: React.FC = () => {
         setCurrentGameType('playoffs')
       }
     }
+
+    // Load dark mode preference
+    const savedDarkMode = localStorage.getItem('darkMode')
+    if (savedDarkMode) {
+      setDarkMode(JSON.parse(savedDarkMode))
+    }
   }, [])
 
   useEffect(() => {
@@ -58,6 +65,21 @@ const App: React.FC = () => {
       organizeSeasonStats(stats)
     }
   }, [stats])
+
+  useEffect(() => {
+    // Apply dark mode class to body
+    if (darkMode) {
+      document.body.classList.add('dark-mode')
+    } else {
+      document.body.classList.remove('dark-mode')
+    }
+    // Save dark mode preference
+    localStorage.setItem('darkMode', JSON.stringify(darkMode))
+  }, [darkMode])
+
+  const toggleDarkMode = () => {
+    setDarkMode(!darkMode)
+  }
 
   const saveUsers = (newUsers: User[]) => {
     setUsers(newUsers)
@@ -139,21 +161,30 @@ const App: React.FC = () => {
       <header>
         <h1>MVP Race Fantasy NBA Player</h1>
         <p>Welcome, {currentUser}</p>
-        <div className="game-type-switcher">
+        <div className="header-controls">
+          <div className="game-type-switcher">
+            <button 
+              onClick={switchToRegularSeason}
+              className={currentGameType === 'regular' ? 'active' : ''}
+            >
+              Regular Season
+            </button>
+            <button 
+              onClick={switchToPlayoffs}
+              className={currentGameType === 'playoffs' ? 'active' : ''}
+            >
+              Playoffs
+            </button>
+          </div>
           <button 
-            onClick={switchToRegularSeason}
-            className={currentGameType === 'regular' ? 'active' : ''}
+            onClick={toggleDarkMode}
+            className="dark-mode-toggle"
+            aria-label="Toggle dark mode"
           >
-            Regular Season
+            {darkMode ? '☀️' : '🌙'}
           </button>
-          <button 
-            onClick={switchToPlayoffs}
-            className={currentGameType === 'playoffs' ? 'active' : ''}
-          >
-            Playoffs
-          </button>
+          <button onClick={logout}>Logout</button>
         </div>
-        <button onClick={logout}>Logout</button>
       </header>
       <GameForm 
         addGameStats={addGameStats} 
