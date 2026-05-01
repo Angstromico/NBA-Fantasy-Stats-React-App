@@ -1,14 +1,22 @@
 // MVP Race Fantasy NBA Player App
 
 import React, { useState, useEffect } from 'react'
+import bcrypt from 'bcryptjs'
 import { Login, GameForm, StatsDisplay, ComparisonDisplay } from './components'
-import type { User, GameStats, CareerHighs, StatsSummary, SeasonStats, GameType } from './interfaces'
-import { 
-  calculateCareerHighs as calcCareerHighs, 
-  calculateStatsSummary as calcStatsSummary, 
-  organizeSeasonStats as orgSeasonStats
+import type {
+  User,
+  GameStats,
+  CareerHighs,
+  StatsSummary,
+  SeasonStats,
+  GameType,
+} from './interfaces'
+import {
+  calculateCareerHighs as calcCareerHighs,
+  calculateStatsSummary as calcStatsSummary,
+  organizeSeasonStats as orgSeasonStats,
 } from './utils/statsCalculations'
-import { getAvailableSeasons, SEASONS_DATA } from './data/nbaData'
+import { SEASONS_DATA } from './data/nbaData'
 import './App.css'
 
 const App: React.FC = () => {
@@ -25,9 +33,13 @@ const App: React.FC = () => {
   const [selectedSeason, setSelectedSeason] = useState('')
 
   useEffect(() => {
-    const savedUsers = localStorage.getItem('users')
-    if (savedUsers) {
-      setUsers(JSON.parse(savedUsers))
+    try {
+      const savedUsers = localStorage.getItem('users')
+      if (savedUsers) {
+        setUsers(JSON.parse(savedUsers))
+      }
+    } catch {
+      setUsers([])
     }
 
     const savedCurrentUser = localStorage.getItem('currentUser')
@@ -35,29 +47,41 @@ const App: React.FC = () => {
       setCurrentUser(savedCurrentUser)
     }
 
-    const savedStats = localStorage.getItem('stats')
-    if (savedStats) {
-      const parsedStats = JSON.parse(savedStats)
-      setStats(parsedStats)
-      
-      // Calculate game numbers and set current game type
-      const regularSeasonGames = parsedStats.filter((g: GameStats) => g.gameType === 'regular')
-      const playoffGames = parsedStats.filter((g: GameStats) => g.gameType === 'playoffs')
-      
-      if (regularSeasonGames.length > 0) {
-        const maxRegularGameNumber = Math.max(...regularSeasonGames.map((g: GameStats) => g.gameNumber))
-        setCurrentGameNumber(maxRegularGameNumber + 1)
+    try {
+      const savedStats = localStorage.getItem('stats')
+      if (savedStats) {
+        const parsedStats = JSON.parse(savedStats)
+        setStats(parsedStats)
+
+        const regularSeasonGames = parsedStats.filter(
+          (g: GameStats) => g.gameType === 'regular',
+        )
+        const playoffGames = parsedStats.filter(
+          (g: GameStats) => g.gameType === 'playoffs',
+        )
+
+        if (regularSeasonGames.length > 0) {
+          const maxRegularGameNumber = Math.max(
+            ...regularSeasonGames.map((g: GameStats) => g.gameNumber),
+          )
+          setCurrentGameNumber(maxRegularGameNumber + 1)
+        }
+
+        if (playoffGames.length > 0) {
+          setCurrentGameType('playoffs')
+        }
       }
-      
-      if (playoffGames.length > 0) {
-        setCurrentGameType('playoffs')
-      }
+    } catch {
+      setStats([])
     }
 
-    // Load dark mode preference
-    const savedDarkMode = localStorage.getItem('darkMode')
-    if (savedDarkMode) {
-      setDarkMode(JSON.parse(savedDarkMode))
+    try {
+      const savedDarkMode = localStorage.getItem('darkMode')
+      if (savedDarkMode) {
+        setDarkMode(JSON.parse(savedDarkMode))
+      }
+    } catch {
+      setDarkMode(false)
     }
   }, [])
 
@@ -94,14 +118,21 @@ const App: React.FC = () => {
     localStorage.setItem('stats', JSON.stringify(newStats))
   }
 
-  const login = (username: string, password: string) => {
-    const user = users.find((u) => u.username === username && u.password === password)
-    if (user) {
+  const login = async (
+    username: string,
+    password: string,
+  ): Promise<boolean> => {
+    const user = users.find((u) => u.username === username)
+    if (!user) {
+      return false
+    }
+
+    const isValid = await bcrypt.compare(password, user.hashedPassword)
+    if (isValid) {
       setCurrentUser(username)
       localStorage.setItem('currentUser', username)
-    } else {
-      alert('Invalid username or password')
     }
+    return isValid
   }
 
   const logout = () => {
@@ -112,15 +143,21 @@ const App: React.FC = () => {
   const addGameStats = (game: GameStats) => {
     const newStats = [...stats, game]
     saveStats(newStats)
-    
+
     // Update game numbers
-    const currentSeasonGames = newStats.filter(g => g.season === selectedSeason && g.team === selectedTeam)
+    const currentSeasonGames = newStats.filter(
+      (g) => g.season === selectedSeason && g.team === selectedTeam,
+    )
     if (game.gameType === 'regular') {
-      setCurrentGameNumber(currentSeasonGames.filter(g => g.gameType === 'regular').length + 1)
+      setCurrentGameNumber(
+        currentSeasonGames.filter((g) => g.gameType === 'regular').length + 1,
+      )
     }
-    
+
     // Check if we should switch to playoffs (after 82 regular season games)
-    const regularSeasonGames = currentSeasonGames.filter(g => g.gameType === 'regular')
+    const regularSeasonGames = currentSeasonGames.filter(
+      (g) => g.gameType === 'regular',
+    )
     if (regularSeasonGames.length >= 82) {
       setCurrentGameType('playoffs')
       setCurrentGameNumber(1)
@@ -140,11 +177,13 @@ const App: React.FC = () => {
   const organizeSeasonStats = (games: GameStats[]) => {
     const seasons = orgSeasonStats(games)
     // Add season awards data
-    const seasonsWithAwards = seasons.map(season => {
-      const seasonData = SEASONS_DATA.find(s => s.season === season.seasonYear)
+    const seasonsWithAwards = seasons.map((season) => {
+      const seasonData = SEASONS_DATA.find(
+        (s) => s.season === season.seasonYear,
+      )
       return {
         ...season,
-        seasonAwards: seasonData?.awards
+        seasonAwards: seasonData?.awards,
       }
     })
     setSeasonStats(seasonsWithAwards)
@@ -157,10 +196,16 @@ const App: React.FC = () => {
 
   const switchToRegularSeason = () => {
     setCurrentGameType('regular')
-    const regularSeasonGames = stats.filter(g => g.gameType === 'regular' && g.season === selectedSeason && g.team === selectedTeam)
-    const maxGameNumber = regularSeasonGames.length > 0 
-      ? Math.max(...regularSeasonGames.map(g => g.gameNumber)) 
-      : 0
+    const regularSeasonGames = stats.filter(
+      (g) =>
+        g.gameType === 'regular' &&
+        g.season === selectedSeason &&
+        g.team === selectedTeam,
+    )
+    const maxGameNumber =
+      regularSeasonGames.length > 0
+        ? Math.max(...regularSeasonGames.map((g) => g.gameNumber))
+        : 0
     setCurrentGameNumber(maxGameNumber + 1)
   }
 
@@ -185,33 +230,33 @@ const App: React.FC = () => {
       <header>
         <h1>MVP Race Fantasy NBA Player</h1>
         <p>Welcome, {currentUser}</p>
-        <div className="header-controls">
-          <div className="game-type-switcher">
-            <button 
+        <div className='header-controls'>
+          <div className='game-type-switcher'>
+            <button
               onClick={switchToRegularSeason}
               className={currentGameType === 'regular' ? 'active' : ''}
             >
               Regular Season
             </button>
-            <button 
+            <button
               onClick={switchToPlayoffs}
               className={currentGameType === 'playoffs' ? 'active' : ''}
             >
               Playoffs
             </button>
           </div>
-          <button 
+          <button
             onClick={toggleDarkMode}
-            className="dark-mode-toggle"
-            aria-label="Toggle dark mode"
+            className='dark-mode-toggle'
+            aria-label='Toggle dark mode'
           >
             {darkMode ? '☀️' : '🌙'}
           </button>
           <button onClick={logout}>Logout</button>
         </div>
       </header>
-      <GameForm 
-        addGameStats={addGameStats} 
+      <GameForm
+        addGameStats={addGameStats}
         currentGameNumber={currentGameNumber}
         gameType={currentGameType}
         selectedTeam={selectedTeam}
@@ -219,16 +264,19 @@ const App: React.FC = () => {
         onTeamChange={handleTeamChange}
         onSeasonChange={handleSeasonChange}
       />
-      <StatsDisplay 
-        stats={stats} 
-        careerHighs={careerHighs} 
+      <StatsDisplay
+        stats={stats}
+        careerHighs={careerHighs}
         statsSummary={statsSummary}
         seasonStats={seasonStats}
       />
       {selectedSeason && selectedTeam && statsSummary && (
-        <ComparisonDisplay 
+        <ComparisonDisplay
           playerStats={statsSummary}
-          seasonAwards={seasonStats.find(s => s.seasonYear === selectedSeason)?.seasonAwards || null}
+          seasonAwards={
+            seasonStats.find((s) => s.seasonYear === selectedSeason)
+              ?.seasonAwards || null
+          }
           playerTeam={selectedTeam}
           season={selectedSeason}
         />

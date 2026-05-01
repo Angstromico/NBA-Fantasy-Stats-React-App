@@ -11,15 +11,17 @@ This app provides game stat tracking for NBA fantasy players with comparison fea
 ### 1. Plain Text Passwords in localStorage
 **Severity:** CRITICAL | **Files:** `src/components/Login.tsx:19`, `src/App.tsx`
 
-Passwords are stored in plain text with no hashing:
+~~Passwords are stored in plain text with no hashing:~~
 ```tsx
 const newUsers = [...users, { username, password }]
 localStorage.setItem('users', JSON.stringify(newUsers))
 ```
 
-**Impact:** Any XSS vulnerability or malicious script can steal all user credentials.
+~~**Impact:** Any XSS vulnerability or malicious script can steal all user credentials.~~
 
-**Recommendation:** Use bcrypt for password hashing, or integrate a proper authentication service (Auth0, Firebase Auth, Supabase).
+~~**Recommendation:** Use bcrypt for password hashing, or integrate a proper authentication service (Auth0, Firebase Auth, Supabase).~~
+
+**STATUS: RESOLVED** - Passwords are now hashed using bcryptjs before storage. Login verification uses bcrypt.compare().
 
 ---
 

@@ -1,6 +1,6 @@
 type User = {
   username: string
-  password: string
+  hashedPassword: string
 }
 
 type Team = {
