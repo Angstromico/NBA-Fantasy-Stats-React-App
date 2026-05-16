@@ -52,14 +52,17 @@ try {
 ### 3. Alert-Based Error Messages
 **Severity:** MEDIUM | **Files:** `src/components/Login.tsx`, `src/components/GameForm.tsx`
 
-```tsx
+~~```tsx
 alert('Username and password cannot be empty.')
 alert('Registration successful!')
-```
+alert('Username already exists.')
+```~~
 
-**Impact:** Alerts can be blocked, provide poor UX, and are inaccessible to screen readers.
+~~**Impact:** Alerts can be blocked, provide poor UX, and are inaccessible to screen readers.~~
 
-**Recommendation:** Implement inline form validation with error messages rendered in the UI.
+~~**Recommendation:** Implement inline form validation with error messages rendered in the UI.~~
+
+**STATUS: RESOLVED** - Replaced `alert()` calls with inline error/success messages in both `Login.tsx` and `GameForm.tsx`.
 
 ---
 

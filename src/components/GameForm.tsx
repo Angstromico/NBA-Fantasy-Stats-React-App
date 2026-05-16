@@ -41,6 +41,7 @@ const GameForm: React.FC<{
   })
 
   const [currentSchedule, setCurrentSchedule] = useState<any[]>([])
+  const [error, setError] = useState('')
 
   useEffect(() => {
     if (selectedTeam && selectedSeason) {
@@ -92,18 +93,20 @@ const GameForm: React.FC<{
       newGame.minutes = 0
     }
     setGame(newGame)
+    setError('')
   }
 
   const submitGame = () => {
     if (!game.team) {
-      alert('Please select a team')
+      setError('Please select a team')
       return
     }
     if (!game.opponent) {
-      alert('No opponent scheduled for this game')
+      setError('No opponent scheduled for this game')
       return
     }
     addGameStats(game)
+    setError('')
   }
 
   const availableSeasons = getAvailableSeasons()
@@ -112,13 +115,18 @@ const GameForm: React.FC<{
     <div className='GameForm'>
       <h2>Enter Game Stats - {gameType === 'regular' ? 'Regular Season' : 'Playoffs'} Game {currentGameNumber}</h2>
       
+      {error && <div className='error-message' role='alert' style={{ color: 'red', marginBottom: '10px' }}>{error}</div>}
+
       {/* Season and Team Selection */}
       <div className="form-row">
         <div>
           <label htmlFor='season'>Season</label>
           <select
             value={selectedSeason}
-            onChange={(e) => onSeasonChange(e.target.value)}
+            onChange={(e) => {
+              onSeasonChange(e.target.value)
+              setError('')
+            }}
             id='season'
             required
           >
@@ -134,7 +142,10 @@ const GameForm: React.FC<{
           <label htmlFor='team'>Team</label>
           <select
             value={selectedTeam}
-            onChange={(e) => onTeamChange(e.target.value)}
+            onChange={(e) => {
+              onTeamChange(e.target.value)
+              setError('')
+            }}
             id='team'
             required
           >
