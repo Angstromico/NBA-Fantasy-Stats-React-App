@@ -28,15 +28,15 @@ localStorage.setItem('users', JSON.stringify(newUsers))
 ### 2. Unsafe JSON.parse Without Error Handling
 **Severity:** HIGH | **File:** `src/App.tsx:30-31, 40, 60`
 
-```tsx
+~~```tsx
 setUsers(JSON.parse(savedUsers))
 setStats(JSON.parse(savedStats))
 setDarkMode(JSON.parse(savedDarkMode))
-```
+```~~
 
-**Impact:** Corrupted or malicious localStorage data will crash the entire app with no recovery.
+~~**Impact:** Corrupted or malicious localStorage data will crash the entire app with no recovery.~~
 
-**Recommendation:** Wrap all JSON.parse in try-catch with fallback defaults:
+~~**Recommendation:** Wrap all JSON.parse in try-catch with fallback defaults:~~
 ```tsx
 try {
   setUsers(JSON.parse(savedUsers))
@@ -44,6 +44,8 @@ try {
   setUsers([])
 }
 ```
+
+**STATUS: RESOLVED** - All `JSON.parse` calls in `src/App.tsx` are now wrapped in `try-catch` blocks with safe fallback defaults.
 
 ---
 
