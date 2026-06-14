@@ -242,6 +242,23 @@ header p {
   max-width: 400px;
 }
 
+.form-group {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 1rem;
+}
+
+.form-group label {
+  margin-bottom: 0;
+  white-space: nowrap;
+}
+
+.form-group input {
+  flex: 1;
+  max-width: 250px;
+}
+
 .StatsDisplay {
   max-width: 1100px;
 }
