@@ -44,8 +44,8 @@ const StatsDisplay: React.FC<{
   const displayGames = showAll ? filteredStats : filteredStats.slice(-5)
 
   return (
-    <div className='StatsDisplay'>
-      <h2>Game History</h2>
+    <div className='StatsDisplay glass-card'>
+      <h2>Game Statistics</h2>
       
       {seasonStats.length > 1 && (
         <div className="season-filter">

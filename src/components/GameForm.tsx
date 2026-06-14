@@ -112,10 +112,10 @@ const GameForm: React.FC<{
   const availableSeasons = getAvailableSeasons()
 
   return (
-    <div className='GameForm'>
-      <h2>Enter Game Stats - {gameType === 'regular' ? 'Regular Season' : 'Playoffs'} Game {currentGameNumber}</h2>
+    <div className='GameForm glass-card'>
+      <h2>{gameType === 'regular' ? 'Regular Season' : 'Playoffs'} Game {currentGameNumber}</h2>
       
-      {error && <div className='error-message' role='alert' style={{ color: 'red', marginBottom: '10px' }}>{error}</div>}
+      {error && <div className='message error' role='alert'>{error}</div>}
 
       {/* Season and Team Selection */}
       <div className="form-row">
@@ -161,11 +161,13 @@ const GameForm: React.FC<{
 
       {/* Current Game Info */}
       {selectedTeam && selectedSeason && (
-        <div className="game-info">
-          <h3>Current Game</h3>
-          <p><strong>Date:</strong> {game.date}</p>
-          <p><strong>Opponent:</strong> {game.opponent}</p>
-          <p><strong>Game Type:</strong> {gameType === 'regular' ? 'Regular Season' : 'Playoffs'}</p>
+        <div className="game-info glass-card">
+          <h3>Upcoming Matchup</h3>
+          <div className="game-info-grid">
+            <p><span>Date</span> <strong>{game.date}</strong></p>
+            <p><span>Opponent</span> <strong>{game.opponent}</strong></p>
+            <p><span>Format</span> <strong>{gameType === 'regular' ? 'Regular Season' : 'Playoffs'}</strong></p>
+          </div>
         </div>
       )}
 
@@ -187,7 +189,7 @@ const GameForm: React.FC<{
               }}
               id='absenceType'
             >
-              <option value='none'>Playing</option>
+              <option value='none'>Active</option>
               <option value='rest'>Rest</option>
               <option value='injury'>Injury</option>
               <option value='personal'>Personal</option>
@@ -203,7 +205,7 @@ const GameForm: React.FC<{
                 <label htmlFor='minutes'>Minutes</label>
                 <input
                   type='number'
-                  placeholder='Minutes'
+                  placeholder='0'
                   value={game.minutes || ''}
                   onChange={(e) => updateStats({ minutes: +e.target.value })}
                   id='minutes'
@@ -215,7 +217,7 @@ const GameForm: React.FC<{
                 <label htmlFor='points'>Points</label>
                 <input
                   type='number'
-                  placeholder='Points'
+                  placeholder='0'
                   value={game.points || ''}
                   onChange={(e) => updateStats({ points: +e.target.value })}
                   id='points'
@@ -226,7 +228,7 @@ const GameForm: React.FC<{
                 <label htmlFor='assists'>Assists</label>
                 <input
                   type='number'
-                  placeholder='Assists'
+                  placeholder='0'
                   value={game.assists || ''}
                   onChange={(e) => updateStats({ assists: +e.target.value })}
                   id='assists'
@@ -240,7 +242,7 @@ const GameForm: React.FC<{
                 <label htmlFor='rebounds'>Rebounds</label>
                 <input
                   type='number'
-                  placeholder='Rebounds'
+                  placeholder='0'
                   value={game.rebounds || ''}
                   onChange={(e) => updateStats({ rebounds: +e.target.value })}
                   id='rebounds'
@@ -251,7 +253,7 @@ const GameForm: React.FC<{
                 <label htmlFor='blocks'>Blocks</label>
                 <input
                   type='number'
-                  placeholder='Blocks'
+                  placeholder='0'
                   value={game.blocks || ''}
                   onChange={(e) => updateStats({ blocks: +e.target.value })}
                   id='blocks'
@@ -262,7 +264,7 @@ const GameForm: React.FC<{
                 <label htmlFor='steals'>Steals</label>
                 <input
                   type='number'
-                  placeholder='Steals'
+                  placeholder='0'
                   value={game.steals || ''}
                   onChange={(e) => updateStats({ steals: +e.target.value })}
                   id='steals'
@@ -271,22 +273,22 @@ const GameForm: React.FC<{
               </div>
             </div>
 
-            <div className="form-row">
-              <div>
+            <div className="form-row status-row">
+              <div className="checkbox-group">
                 <label>
                   <input 
                     type='checkbox' 
                     checked={game.won} 
                     onChange={(e) => updateStats({ won: e.target.checked })} 
                   />
-                  Won Game
+                  Team Won Game
                 </label>
               </div>
-              <div>
-                <p>Double-Double: {game.isDoubleDouble ? 'Yes' : 'No'}</p>
+              <div className={`badge ${game.isDoubleDouble ? 'active' : ''}`}>
+                Double-Double
               </div>
-              <div>
-                <p>Triple-Double: {game.isTripleDouble ? 'Yes' : 'No'}</p>
+              <div className={`badge ${game.isTripleDouble ? 'active' : ''}`}>
+                Triple-Double
               </div>
             </div>
           </>
@@ -295,19 +297,21 @@ const GameForm: React.FC<{
         {game.isAbsent && (
           <div className="absence-notice">
             <p>Player is absent ({game.absenceType}). No statistics will be recorded.</p>
-            <label>
-              <input 
-                type='checkbox' 
-                checked={game.won} 
-                onChange={(e) => updateStats({ won: e.target.checked })} 
-              />
-              Team Won Game
-            </label>
+            <div className="checkbox-group">
+              <label>
+                <input 
+                  type='checkbox' 
+                  checked={game.won} 
+                  onChange={(e) => updateStats({ won: e.target.checked })} 
+                />
+                Team Won Game
+              </label>
+            </div>
           </div>
         )}
 
-        <button type='submit' disabled={!selectedTeam || !selectedSeason || !game.opponent}>
-          Submit Game
+        <button type='submit' className='primary-btn' disabled={!selectedTeam || !selectedSeason || !game.opponent}>
+          Submit Stats
         </button>
       </form>
     </div>

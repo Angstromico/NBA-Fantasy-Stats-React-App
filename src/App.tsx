@@ -227,16 +227,18 @@ const App: React.FC = () => {
 
   return (
     <div className='App'>
-      <header>
-        <h1>MVP Race Fantasy NBA Player</h1>
-        <p>Welcome, {currentUser}</p>
+      <header className='glass-card'>
+        <h1>MVP Race NBA</h1>
+        <div className='header-info'>
+          <p>Welcome, {currentUser}</p>
+        </div>
         <div className='header-controls'>
           <div className='game-type-switcher'>
             <button
               onClick={switchToRegularSeason}
               className={currentGameType === 'regular' ? 'active' : ''}
             >
-              Regular Season
+              Regular
             </button>
             <button
               onClick={switchToPlayoffs}
@@ -247,40 +249,44 @@ const App: React.FC = () => {
           </div>
           <button
             onClick={toggleDarkMode}
-            className='dark-mode-toggle'
-            aria-label='Toggle dark mode'
+            className='dark-mode-toggle glass-card'
+            aria-label='Toggle theme'
           >
             {darkMode ? '☀️' : '🌙'}
           </button>
-          <button onClick={logout}>Logout</button>
+          <button onClick={logout} className='logout-btn'>Logout</button>
         </div>
       </header>
-      <GameForm
-        addGameStats={addGameStats}
-        currentGameNumber={currentGameNumber}
-        gameType={currentGameType}
-        selectedTeam={selectedTeam}
-        selectedSeason={selectedSeason}
-        onTeamChange={handleTeamChange}
-        onSeasonChange={handleSeasonChange}
-      />
-      <StatsDisplay
-        stats={stats}
-        careerHighs={careerHighs}
-        statsSummary={statsSummary}
-        seasonStats={seasonStats}
-      />
-      {selectedSeason && selectedTeam && statsSummary && (
-        <ComparisonDisplay
-          playerStats={statsSummary}
-          seasonAwards={
-            seasonStats.find((s) => s.seasonYear === selectedSeason)
-              ?.seasonAwards || null
-          }
-          playerTeam={selectedTeam}
-          season={selectedSeason}
+      <main>
+        <GameForm
+          addGameStats={addGameStats}
+          currentGameNumber={currentGameNumber}
+          gameType={currentGameType}
+          selectedTeam={selectedTeam}
+          selectedSeason={selectedSeason}
+          onTeamChange={handleTeamChange}
+          onSeasonChange={handleSeasonChange}
         />
-      )}
+        
+        <StatsDisplay
+          stats={stats}
+          careerHighs={careerHighs}
+          statsSummary={statsSummary}
+          seasonStats={seasonStats}
+        />
+
+        {selectedSeason && selectedTeam && statsSummary && (
+          <ComparisonDisplay
+            playerStats={statsSummary}
+            seasonAwards={
+              seasonStats.find((s) => s.seasonYear === selectedSeason)
+                ?.seasonAwards || null
+            }
+            playerTeam={selectedTeam}
+            season={selectedSeason}
+          />
+        )}
+      </main>
     </div>
   )
 }

@@ -61,16 +61,17 @@ const Login: React.FC<LoginProps> = ({ users, login, saveUsers }) => {
   }
 
   return (
-    <div className='Login'>
-      <h2>{isRegistering ? 'Register' : 'Login'}</h2>
-      {error && <div className='error-message' role='alert'>{error}</div>}
-      {success && <div className='success-message' role='status'>{success}</div>}
+    <div className='Login glass-card'>
+      <h2>{isRegistering ? 'Create Account' : 'Player Login'}</h2>
+      {error && <div className='message error' role='alert'>{error}</div>}
+      {success && <div className='message success' role='status'>{success}</div>}
       <form onSubmit={handleSubmit}>
         <div className='form-group'>
           <label htmlFor='username'>Username</label>
           <input
             id='username'
             type='text'
+            placeholder='Enter your username'
             value={username}
             onChange={(e) => {
               setUsername(e.target.value)
@@ -84,6 +85,7 @@ const Login: React.FC<LoginProps> = ({ users, login, saveUsers }) => {
           <input
             id='password'
             type='password'
+            placeholder='Enter your password'
             value={password}
             onChange={(e) => {
               setPassword(e.target.value)
@@ -92,8 +94,8 @@ const Login: React.FC<LoginProps> = ({ users, login, saveUsers }) => {
             }}
           />
         </div>
-        <button type='submit'>{isRegistering ? 'Register' : 'Login'}</button>
-        <button type='button' onClick={() => {
+        <button type='submit' className='primary-btn'>{isRegistering ? 'Register' : 'Login'}</button>
+        <button type='button' className='secondary-btn' onClick={() => {
           setIsRegistering(!isRegistering)
           setError('')
           setSuccess('')
