@@ -222,7 +222,13 @@ const App: React.FC = () => {
   }
 
   if (!currentUser) {
-    return <Login users={users} login={login} saveUsers={saveUsers} />
+    return (
+      <div className='App'>
+        <main>
+          <Login users={users} login={login} saveUsers={saveUsers} />
+        </main>
+      </div>
+    )
   }
 
   return (
