@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import type { GameStats, AbsenceType, GameType, Team } from '../interfaces'
+import type { GameStats, AbsenceType, GameType } from '../interfaces'
 import { NBA_TEAMS, getTeamSchedule, getAvailableSeasons } from '../data/nbaData'
 
 const GameForm: React.FC<{ 
@@ -40,7 +40,6 @@ const GameForm: React.FC<{
     season: selectedSeason
   })
 
-  const [currentSchedule, setCurrentSchedule] = useState<any[]>([])
   const [error, setError] = useState('')
 
   useEffect(() => {
@@ -49,20 +48,31 @@ const GameForm: React.FC<{
         NBA_TEAMS.find(t => `${t.city} ${t.name}` === selectedTeam)?.id || '',
         selectedSeason
       )
-      setCurrentSchedule(schedule)
       
       // Set current game date and opponent based on schedule
       const currentGameIndex = currentGameNumber - 1
       if (schedule[currentGameIndex]) {
         const currentScheduledGame = schedule[currentGameIndex]
-        setGame(prev => ({
-          ...prev,
+        setGame({
+          id: crypto.randomUUID(),
           date: currentScheduledGame.date,
           opponent: currentScheduledGame.opponent,
           team: selectedTeam,
           season: selectedSeason,
-          gameType: currentScheduledGame.isPlayoff ? 'playoffs' : 'regular'
-        }))
+          gameType: currentScheduledGame.isPlayoff ? 'playoffs' : 'regular',
+          gameNumber: currentGameNumber,
+          absenceType: 'none',
+          isAbsent: false,
+          points: 0,
+          assists: 0,
+          rebounds: 0,
+          blocks: 0,
+          steals: 0,
+          minutes: 0,
+          won: false,
+          isDoubleDouble: false,
+          isTripleDouble: false,
+        })
       }
     }
   }, [selectedTeam, selectedSeason, currentGameNumber])
