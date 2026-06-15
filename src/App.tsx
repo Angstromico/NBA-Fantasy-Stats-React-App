@@ -122,17 +122,22 @@ const App: React.FC = () => {
     username: string,
     password: string,
   ): Promise<boolean> => {
-    const user = users.find((u) => u.username === username)
-    if (!user) {
+    try {
+      const user = users.find((u) => u.username === username)
+      if (!user || !user.hashedPassword) {
+        return false
+      }
+
+      const isValid = await bcrypt.compare(password, user.hashedPassword)
+      if (isValid) {
+        setCurrentUser(username)
+        localStorage.setItem('currentUser', username)
+      }
+      return isValid
+    } catch (error) {
+      console.error('Login error:', error)
       return false
     }
-
-    const isValid = await bcrypt.compare(password, user.hashedPassword)
-    if (isValid) {
-      setCurrentUser(username)
-      localStorage.setItem('currentUser', username)
-    }
-    return isValid
   }
 
   const logout = () => {

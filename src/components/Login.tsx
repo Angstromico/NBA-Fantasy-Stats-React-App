@@ -28,13 +28,19 @@ const Login: React.FC<LoginProps> = ({ users, login, saveUsers }) => {
       return
     }
 
-    const hashedPassword = await bcrypt.hash(password, 10)
-    const newUsers = [...users, { username, hashedPassword }]
-    saveUsers(newUsers)
-    setSuccess('Registration successful! You can now log in.')
-    setError('')
-    setPassword('')
-    setIsRegistering(false)
+    try {
+      const hashedPassword = await bcrypt.hash(password, 10)
+      const newUsers = [...users, { username, hashedPassword }]
+      saveUsers(newUsers)
+      setSuccess('Registration successful! You can now log in.')
+      setError('')
+      setPassword('')
+      setIsRegistering(false)
+    } catch (err) {
+      console.error('Registration error:', err)
+      setError('An error occurred during registration. Please try again.')
+      setSuccess('')
+    }
   }
 
   const handleLogin = async () => {
@@ -44,9 +50,15 @@ const Login: React.FC<LoginProps> = ({ users, login, saveUsers }) => {
       return
     }
 
-    const success = await login(username, password)
-    if (!success) {
-      setError('Invalid username or password.')
+    try {
+      const success = await login(username, password)
+      if (!success) {
+        setError('Invalid username or password.')
+        setSuccess('')
+      }
+    } catch (err) {
+      console.error('Login error:', err)
+      setError('An error occurred during login. Please try again.')
       setSuccess('')
     }
   }
