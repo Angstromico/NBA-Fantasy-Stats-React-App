@@ -10,41 +10,33 @@
   /* Default Light Palette */
   --bg-dark: #f1f5f9;
   --bg-darker: #f8fafc;
-  --accent-primary: #0284c7; /* Darker Sky Blue for light mode */
-  --accent-secondary: #4f46e5; /* Indigo */
-  --accent-tertiary: #db2777; /* Pink/Rose */
-  --accent-success: #16a34a; /* Green */
-  --accent-error: #dc2626; /* Red */
+  --accent-primary: #0284c7;
+  --accent-secondary: #4f46e5;
+  --accent-tertiary: #db2777;
+  --accent-success: #16a34a;
+  --accent-error: #dc2626;
   --text-primary: #0f172a;
   --text-secondary: #475569;
   
-  /* Glassmorphism Defaults */
   --glass-bg: rgba(255, 255, 255, 0.7);
   --glass-border: rgba(0, 0, 0, 0.1);
   --glass-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.07);
   --glass-blur: blur(12px);
 
   color-scheme: light;
-  color: var(--text-primary);
-  background-color: var(--bg-darker);
-
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
 }
 
 body.dark-mode {
   /* Modern Dark Vibrant Palette */
   --bg-dark: #0f172a;
   --bg-darker: #020617;
-  --accent-primary: #38bdf8; /* Sky Blue */
-  --accent-secondary: #818cf8; /* Indigo */
-  --accent-tertiary: #f472b6; /* Pink/Rose */
-  --accent-success: #4ade80; /* Neon Green */
-  --accent-error: #f87171; /* Bright Red */
-  --text-primary: #f8fafc;
-  --text-secondary: #94a3b8;
+  --accent-primary: #38bdf8;
+  --accent-secondary: #818cf8;
+  --accent-tertiary: #f472b6;
+  --accent-success: #4ade80;
+  --accent-error: #f87171;
+  --text-primary: #ffffff; /* Pure white for maximum contrast */
+  --text-secondary: #e2e8f0; /* Very light slate for contrast */
   
   --glass-bg: rgba(30, 41, 59, 0.7);
   --glass-border: rgba(255, 255, 255, 0.1);
@@ -59,8 +51,12 @@ body {
   min-height: 100vh;
   background: radial-gradient(circle at top right, var(--bg-dark), var(--bg-darker));
   background-attachment: fixed;
+  color: var(--text-primary);
+  background-color: var(--bg-darker);
   transition: background 0.3s ease, color 0.3s ease;
   overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
 main {
@@ -82,6 +78,7 @@ h1, h2, h3, h4, h5 {
   letter-spacing: -0.025em;
   font-weight: 700;
   margin-bottom: 1rem;
+  color: var(--text-primary);
 }
 
 a {
@@ -126,18 +123,29 @@ button:disabled {
   cursor: not-allowed;
 }
 
-input, select {
+input, select, textarea {
   background: var(--glass-bg);
   border: 1px solid var(--glass-border);
   border-radius: 8px;
   padding: 0.75rem 1rem;
   color: var(--text-primary);
   font-family: inherit;
+  font-size: 1rem;
   transition: all 0.3s;
 }
 
-input:focus, select:focus {
+input:focus, select:focus, textarea:focus {
   outline: none;
   border-color: var(--accent-primary);
   box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.2);
+}
+
+input::placeholder {
+  color: var(--text-secondary);
+  opacity: 0.8;
+}
+
+/* Ensure all elements inherit color correctly */
+* {
+  box-sizing: border-box;
 }

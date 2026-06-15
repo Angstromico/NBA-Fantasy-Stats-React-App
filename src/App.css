@@ -232,6 +232,7 @@ header p {
   flex-direction: column;
   gap: 0.25rem;
   margin: 0;
+  color: var(--text-primary);
 }
 
 .game-info-grid span {
@@ -310,6 +311,7 @@ header p {
   margin-left: auto;
   margin-right: auto;
   max-width: 800px;
+  color: var(--text-primary);
 }
 
 @media (min-width: 768px) {
@@ -482,6 +484,7 @@ label {
   border: 1px solid var(--glass-border);
   transition: all 0.3s;
   text-align: left;
+  color: var(--text-primary);
 }
 
 @media (min-width: 768px) {
@@ -500,11 +503,13 @@ label {
 .game-record h4 {
   font-size: 1rem;
   margin-bottom: 0.5rem;
+  color: var(--text-primary);
 }
 
 .game-record p {
   font-size: 0.875rem;
   margin: 0.25rem 0;
+  color: var(--text-secondary);
 }
 
 .game-record.absent {
@@ -521,6 +526,7 @@ label {
   border-radius: 20px;
   background: var(--bg-dark);
   border: 1px solid var(--glass-border);
+  color: var(--text-primary);
 }
 
 @media (min-width: 768px) {
@@ -630,6 +636,7 @@ label {
   border-radius: 16px;
   border: 1px solid var(--glass-border);
   margin-bottom: 1.5rem;
+  color: var(--text-primary);
 }
 
 @media (min-width: 768px) {
@@ -679,9 +686,11 @@ label {
 .milestone-grid h5 {
   font-size: 0.75rem;
   margin-bottom: 0.5rem;
+  color: var(--text-primary);
 }
 
 .milestone-grid p {
   font-size: 0.8rem;
   margin: 0.25rem 0;
+  color: var(--text-secondary);
 }
