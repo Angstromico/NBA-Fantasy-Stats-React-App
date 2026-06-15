@@ -48,8 +48,14 @@ main {
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  padding: 2rem;
+  padding: 0.5rem;
   margin: 0 auto;
+}
+
+@media (min-width: 768px) {
+  main {
+    padding: 2rem;
+  }
 }
 
 h1, h2, h3, h4, h5 {

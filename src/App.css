@@ -2,14 +2,21 @@
 
 .App {
   text-align: center;
-  padding: 2rem;
+  padding: 1rem;
   max-width: 1200px;
   width: 100%;
   margin: 0 auto;
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  gap: 2rem;
+  gap: 1.5rem;
+}
+
+@media (min-width: 768px) {
+  .App {
+    padding: 2rem;
+    gap: 2rem;
+  }
 }
 
 /* Glassmorphism Utility */
@@ -18,9 +25,15 @@
   backdrop-filter: var(--glass-blur);
   -webkit-backdrop-filter: var(--glass-blur);
   border: 1px solid var(--glass-border);
-  border-radius: 24px;
+  border-radius: 20px;
   box-shadow: var(--glass-shadow);
   transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+}
+
+@media (min-width: 768px) {
+  .glass-card {
+    border-radius: 24px;
+  }
 }
 
 .glass-card:hover {
@@ -29,31 +42,59 @@
 
 header {
   display: flex;
-  justify-content: space-between;
+  flex-direction: column;
+  justify-content: center;
   align-items: center;
-  padding: 1.5rem 2rem;
-  margin-bottom: 1rem;
+  padding: 1rem;
+  gap: 1rem;
+  margin-bottom: 0.5rem;
+}
+
+@media (min-width: 768px) {
+  header {
+    flex-direction: row;
+    justify-content: space-between;
+    padding: 1.5rem 2rem;
+    margin-bottom: 1rem;
+  }
 }
 
 header h1 {
   margin: 0;
-  font-size: 1.75rem;
+  font-size: 1.5rem;
   background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   font-weight: 800;
 }
 
+@media (min-width: 768px) {
+  header h1 {
+    font-size: 1.75rem;
+  }
+}
+
 header p {
   margin: 0;
   color: var(--text-secondary);
   font-weight: 500;
+  font-size: 0.875rem;
 }
 
 .header-controls {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
-  gap: 1rem;
+  justify-content: center;
+  gap: 0.75rem;
+  width: 100%;
+}
+
+@media (min-width: 768px) {
+  .header-controls {
+    width: auto;
+    gap: 1rem;
+  }
 }
 
 .game-type-switcher {
@@ -62,6 +103,13 @@ header p {
   padding: 4px;
   border-radius: 14px;
   border: 1px solid var(--glass-border);
+  width: 100%;
+}
+
+@media (min-width: 768px) {
+  .game-type-switcher {
+    width: auto;
+  }
 }
 
 .game-type-switcher button {
@@ -69,10 +117,19 @@ header p {
   backdrop-filter: none;
   border: none;
   box-shadow: none;
-  padding: 8px 16px;
+  padding: 8px 12px;
   border-radius: 10px;
-  font-size: 0.875rem;
+  font-size: 0.75rem;
   color: var(--text-secondary);
+  flex: 1;
+}
+
+@media (min-width: 768px) {
+  .game-type-switcher button {
+    padding: 8px 16px;
+    font-size: 0.875rem;
+    flex: none;
+  }
 }
 
 .game-type-switcher button.active {
@@ -82,14 +139,22 @@ header p {
 }
 
 .dark-mode-toggle {
-  width: 44px;
-  height: 44px;
+  width: 40px;
+  height: 40px;
   padding: 0 !important;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.25rem !important;
+  font-size: 1.1rem !important;
   border-radius: 50% !important;
+}
+
+@media (min-width: 768px) {
+  .dark-mode-toggle {
+    width: 44px;
+    height: 44px;
+    font-size: 1.25rem !important;
+  }
 }
 
 .primary-btn {
@@ -131,7 +196,7 @@ header p {
   padding: 1rem;
   border-radius: 12px;
   margin-bottom: 1.5rem;
-  font-size: 0.9rem;
+  font-size: 0.85rem;
   font-weight: 600;
   text-align: center;
 }
@@ -150,9 +215,16 @@ header p {
 
 .game-info-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-  gap: 1.5rem;
+  grid-template-columns: 1fr;
+  gap: 1rem;
   margin-top: 1rem;
+}
+
+@media (min-width: 480px) {
+  .game-info-grid {
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 1.5rem;
+  }
 }
 
 .game-info-grid p {
@@ -163,14 +235,14 @@ header p {
 }
 
 .game-info-grid span {
-  font-size: 0.75rem;
+  font-size: 0.7rem;
   text-transform: uppercase;
   color: var(--text-secondary);
   font-weight: 600;
 }
 
 .game-info-grid strong {
-  font-size: 1.1rem;
+  font-size: 1rem;
   color: var(--text-primary);
 }
 
@@ -187,24 +259,33 @@ header p {
   text-transform: none !important;
   color: var(--text-primary) !important;
   font-weight: 500 !important;
-  font-size: 1rem !important;
+  font-size: 0.9rem !important;
+}
+
+@media (min-width: 768px) {
+  .checkbox-group label {
+    font-size: 1rem !important;
+  }
 }
 
 .checkbox-group input[type="checkbox"] {
-  width: 1.25rem;
-  height: 1.25rem;
+  width: 1.1rem;
+  height: 1.1rem;
   accent-color: var(--accent-primary);
 }
 
 .status-row {
+  display: flex;
+  flex-wrap: wrap;
   align-items: center;
+  gap: 1rem;
   margin-top: 1rem;
 }
 
 .badge {
-  padding: 0.5rem 1rem;
+  padding: 0.4rem 0.75rem;
   border-radius: 20px;
-  font-size: 0.8rem;
+  font-size: 0.75rem;
   font-weight: 700;
   background: rgba(255, 255, 255, 0.05);
   color: var(--text-secondary);
@@ -223,12 +304,20 @@ header p {
 .Login,
 .GameForm,
 .StatsDisplay {
-  padding: 2.5rem;
+  padding: 1.5rem;
   width: 100%;
   box-sizing: border-box;
   margin-left: auto;
   margin-right: auto;
   max-width: 800px;
+}
+
+@media (min-width: 768px) {
+  .Login,
+  .GameForm,
+  .StatsDisplay {
+    padding: 2.5rem;
+  }
 }
 
 .Login {
@@ -244,19 +333,35 @@ header p {
 
 .form-group {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 1rem;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0.5rem;
+}
+
+@media (min-width: 480px) {
+  .form-group {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+  }
 }
 
 .form-group label {
   margin-bottom: 0;
   white-space: nowrap;
+  font-size: 0.75rem;
 }
 
 .form-group input {
   flex: 1;
-  max-width: 250px;
+  width: 100%;
+}
+
+@media (min-width: 480px) {
+  .form-group input {
+    max-width: 250px;
+  }
 }
 
 .StatsDisplay {
@@ -266,13 +371,19 @@ header p {
 form {
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
+  gap: 1.25rem;
 }
 
 .form-row {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-  gap: 1.5rem;
+  grid-template-columns: 1fr;
+  gap: 1.25rem;
+}
+
+@media (min-width: 600px) {
+  .form-row {
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  }
 }
 
 .form-row > div {
@@ -282,7 +393,7 @@ form {
 }
 
 label {
-  font-size: 0.875rem;
+  font-size: 0.75rem;
   font-weight: 600;
   color: var(--accent-primary);
   text-transform: uppercase;
@@ -293,63 +404,107 @@ label {
   background: rgba(245, 158, 11, 0.1);
   border: 1px solid rgba(245, 158, 11, 0.3);
   border-radius: 12px;
-  padding: 1.25rem;
-  margin: 1rem 0;
+  padding: 1rem;
+  margin: 0.5rem 0;
 }
 
 .absence-notice p {
   margin: 0;
   color: #f59e0b;
+  font-size: 0.875rem;
 }
 
 .StatsDisplay h2 {
-  font-size: 2rem;
-  margin-bottom: 2rem;
+  font-size: 1.5rem;
+  margin-bottom: 1.5rem;
   color: var(--text-primary);
   position: relative;
   display: inline-block;
 }
 
+@media (min-width: 768px) {
+  .StatsDisplay h2 {
+    font-size: 2rem;
+    margin-bottom: 2rem;
+  }
+}
+
 .StatsDisplay h2::after {
   content: '';
   position: absolute;
-  bottom: -8px;
-  left: 25%;
-  right: 25%;
-  height: 4px;
+  bottom: -6px;
+  left: 15%;
+  right: 15%;
+  height: 3px;
   background: linear-gradient(90deg, transparent, var(--accent-primary), transparent);
   border-radius: 2px;
 }
 
 .StatsDisplay h3 {
   color: var(--accent-secondary);
-  margin-top: 2rem;
+  margin-top: 1.5rem;
+  font-size: 1.1rem;
+}
+
+@media (min-width: 768px) {
+  .StatsDisplay h3 {
+    margin-top: 2rem;
+    font-size: 1.25rem;
+  }
 }
 
 .season-filter {
-  margin-bottom: 2.5rem;
-  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+  padding: 1rem;
   background: rgba(255, 255, 255, 0.03);
   border-radius: 16px;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 1rem;
+  gap: 0.75rem;
+}
+
+@media (min-width: 480px) {
+  .season-filter {
+    flex-direction: row;
+    padding: 1.5rem;
+    margin-bottom: 2.5rem;
+    gap: 1rem;
+  }
 }
 
 .game-record {
-  margin-bottom: 1.5rem;
-  padding: 1.5rem;
+  margin-bottom: 1rem;
+  padding: 1rem;
   border-radius: 16px;
   background: rgba(255, 255, 255, 0.02);
   border: 1px solid var(--glass-border);
   transition: all 0.3s;
+  text-align: left;
+}
+
+@media (min-width: 768px) {
+  .game-record {
+    margin-bottom: 1.5rem;
+    padding: 1.5rem;
+  }
 }
 
 .game-record:hover {
   background: rgba(255, 255, 255, 0.05);
   border-color: rgba(255, 255, 255, 0.2);
   transform: scale(1.01);
+}
+
+.game-record h4 {
+  font-size: 1rem;
+  margin-bottom: 0.5rem;
+}
+
+.game-record p {
+  font-size: 0.875rem;
+  margin: 0.25rem 0;
 }
 
 .game-record.absent {
@@ -361,11 +516,22 @@ label {
 .season-stats-section,
 .career-highs-section,
 .totals-section {
-  margin: 3rem 0;
-  padding: 2rem;
-  border-radius: 24px;
+  margin: 1.5rem 0;
+  padding: 1rem;
+  border-radius: 20px;
   background: rgba(255, 255, 255, 0.02);
   border: 1px solid var(--glass-border);
+}
+
+@media (min-width: 768px) {
+  .summary-section,
+  .season-stats-section,
+  .career-highs-section,
+  .totals-section {
+    margin: 3rem 0;
+    padding: 2rem;
+    border-radius: 24px;
+  }
 }
 
 .summary-grid,
@@ -373,9 +539,29 @@ label {
 .highs-grid,
 .totals-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-  gap: 1.5rem;
-  margin: 1.5rem 0;
+  grid-template-columns: 1fr;
+  gap: 1rem;
+  margin: 1rem 0;
+}
+
+@media (min-width: 400px) {
+  .summary-grid,
+  .averages-grid,
+  .highs-grid,
+  .totals-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 768px) {
+  .summary-grid,
+  .averages-grid,
+  .highs-grid,
+  .totals-grid {
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 1.5rem;
+    margin: 1.5rem 0;
+  }
 }
 
 .summary-grid > div,
@@ -383,93 +569,119 @@ label {
 .highs-grid > div,
 .totals-grid > div {
   background: rgba(255, 255, 255, 0.03);
-  padding: 1.5rem;
-  border-radius: 16px;
+  padding: 1rem;
+  border-radius: 12px;
   border: 1px solid var(--glass-border);
   text-align: center;
+}
+
+@media (min-width: 768px) {
+  .summary-grid > div,
+  .averages-grid > div,
+  .highs-grid > div,
+  .totals-grid > div {
+    padding: 1.5rem;
+    border-radius: 16px;
+  }
 }
 
 .summary-grid h3,
 .averages-grid h4,
 .highs-grid h4,
 .totals-grid h4 {
-  font-size: 0.75rem;
+  font-size: 0.65rem;
   text-transform: uppercase;
   color: var(--text-secondary);
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.25rem;
+}
+
+@media (min-width: 768px) {
+  .summary-grid h3,
+  .averages-grid h4,
+  .highs-grid h4,
+  .totals-grid h4 {
+    font-size: 0.75rem;
+    margin-bottom: 0.5rem;
+  }
 }
 
 .summary-grid p,
 .averages-grid p,
 .highs-grid p,
 .totals-grid p {
-  font-size: 1.5rem;
+  font-size: 1.1rem;
   font-weight: 800;
   color: var(--accent-primary);
   margin: 0;
 }
 
+@media (min-width: 768px) {
+  .summary-grid p,
+  .averages-grid p,
+  .highs-grid p,
+  .totals-grid p {
+    font-size: 1.5rem;
+  }
+}
+
 .season-card {
   background: rgba(255, 255, 255, 0.03);
-  padding: 2rem;
-  border-radius: 20px;
+  padding: 1rem;
+  border-radius: 16px;
   border: 1px solid var(--glass-border);
-  margin-bottom: 2rem;
+  margin-bottom: 1.5rem;
+}
+
+@media (min-width: 768px) {
+  .season-card {
+    padding: 2rem;
+    border-radius: 20px;
+    margin-bottom: 2rem;
+  }
 }
 
 .milestones {
-  margin-top: 2rem;
-  padding: 1.5rem;
+  margin-top: 1.5rem;
+  padding: 1rem;
   background: rgba(0, 0, 0, 0.2);
-  border-radius: 16px;
+  border-radius: 12px;
+}
+
+@media (min-width: 768px) {
+  .milestones {
+    margin-top: 2rem;
+    padding: 1.5rem;
+    border-radius: 16px;
+  }
 }
 
 .milestone-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-  gap: 1rem;
+  grid-template-columns: 1fr;
+  gap: 0.75rem;
   margin-top: 1rem;
+}
+
+@media (min-width: 480px) {
+  .milestone-grid {
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 1rem;
+  }
 }
 
 .milestone-grid > div {
   background: rgba(56, 189, 248, 0.05);
-  padding: 1rem;
-  border-radius: 12px;
+  padding: 0.75rem;
+  border-radius: 10px;
   border: 1px solid rgba(56, 189, 248, 0.1);
 }
 
-@media (max-width: 768px) {
-  .App {
-    padding: 1rem;
-  }
+.milestone-grid h5 {
+  font-size: 0.75rem;
+  margin-bottom: 0.5rem;
+}
 
-  header {
-    flex-direction: column;
-    gap: 1.5rem;
-    padding: 1.5rem;
-  }
-
-  .header-controls {
-    flex-direction: column;
-    width: 100%;
-  }
-
-  .game-type-switcher {
-    width: 100%;
-  }
-
-  .game-type-switcher button {
-    flex: 1;
-  }
-
-  .form-row {
-    grid-template-columns: 1fr;
-  }
-
-  .summary-grid,
-  .averages-grid,
-  .highs-grid,
-  .totals-grid {
-    grid-template-columns: 1fr 1fr;
-  }
+.milestone-grid p {
+  font-size: 0.8rem;
+  margin: 0.25rem 0;
 }
