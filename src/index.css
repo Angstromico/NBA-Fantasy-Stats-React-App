@@ -3,6 +3,34 @@
   line-height: 1.6;
   font-weight: 400;
 
+  /* Default Light Palette */
+  --bg-dark: #f1f5f9;
+  --bg-darker: #f8fafc;
+  --accent-primary: #0284c7; /* Darker Sky Blue for light mode */
+  --accent-secondary: #4f46e5; /* Indigo */
+  --accent-tertiary: #db2777; /* Pink/Rose */
+  --accent-success: #16a34a; /* Green */
+  --accent-error: #dc2626; /* Red */
+  --text-primary: #0f172a;
+  --text-secondary: #475569;
+  
+  /* Glassmorphism Defaults */
+  --glass-bg: rgba(255, 255, 255, 0.7);
+  --glass-border: rgba(0, 0, 0, 0.1);
+  --glass-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.07);
+  --glass-blur: blur(12px);
+
+  color-scheme: light;
+  color: var(--text-primary);
+  background-color: var(--bg-darker);
+
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body.dark-mode {
   /* Modern Dark Vibrant Palette */
   --bg-dark: #0f172a;
   --bg-darker: #020617;
@@ -14,20 +42,11 @@
   --text-primary: #f8fafc;
   --text-secondary: #94a3b8;
   
-  /* Glassmorphism Defaults */
   --glass-bg: rgba(30, 41, 59, 0.7);
   --glass-border: rgba(255, 255, 255, 0.1);
   --glass-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
-  --glass-blur: blur(12px);
 
   color-scheme: dark;
-  color: var(--text-primary);
-  background-color: var(--bg-darker);
-
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
 }
 
 body {
@@ -37,8 +56,9 @@ body {
   align-items: center;
   min-width: 320px;
   min-height: 100vh;
-  background: radial-gradient(circle at top right, #1e293b, #020617);
+  background: radial-gradient(circle at top right, var(--bg-dark), var(--bg-darker));
   background-attachment: fixed;
+  transition: background 0.3s ease, color 0.3s ease;
 }
 
 main {
@@ -87,14 +107,14 @@ button {
   color: var(--text-primary);
   cursor: pointer;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  box-shadow: var(--glass-shadow);
 }
 
 button:hover:not(:disabled) {
   background-color: rgba(56, 189, 248, 0.2);
   border-color: var(--accent-primary);
   transform: translateY(-2px);
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
 }
 
 button:active:not(:disabled) {

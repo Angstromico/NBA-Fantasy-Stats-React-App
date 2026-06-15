@@ -37,7 +37,7 @@
 }
 
 .glass-card:hover {
-  border-color: rgba(255, 255, 255, 0.2);
+  border-color: var(--accent-primary);
 }
 
 header {
@@ -99,7 +99,7 @@ header p {
 
 .game-type-switcher {
   display: flex;
-  background: rgba(0, 0, 0, 0.2);
+  background: var(--bg-dark);
   padding: 4px;
   border-radius: 14px;
   border: 1px solid var(--glass-border);
@@ -165,7 +165,7 @@ header p {
 }
 
 .primary-btn:hover {
-  background: #7dd3fc !important; /* Lighter sky blue */
+  opacity: 0.9;
   box-shadow: 0 0 20px rgba(56, 189, 248, 0.4) !important;
 }
 
@@ -287,7 +287,7 @@ header p {
   border-radius: 20px;
   font-size: 0.75rem;
   font-weight: 700;
-  background: rgba(255, 255, 255, 0.05);
+  background: var(--bg-dark);
   color: var(--text-secondary);
   border: 1px solid var(--glass-border);
   text-align: center;
@@ -456,7 +456,7 @@ label {
 .season-filter {
   margin-bottom: 1.5rem;
   padding: 1rem;
-  background: rgba(255, 255, 255, 0.03);
+  background: var(--bg-dark);
   border-radius: 16px;
   display: flex;
   flex-direction: column;
@@ -478,7 +478,7 @@ label {
   margin-bottom: 1rem;
   padding: 1rem;
   border-radius: 16px;
-  background: rgba(255, 255, 255, 0.02);
+  background: var(--bg-dark);
   border: 1px solid var(--glass-border);
   transition: all 0.3s;
   text-align: left;
@@ -492,8 +492,8 @@ label {
 }
 
 .game-record:hover {
-  background: rgba(255, 255, 255, 0.05);
-  border-color: rgba(255, 255, 255, 0.2);
+  background: var(--glass-bg);
+  border-color: var(--accent-primary);
   transform: scale(1.01);
 }
 
@@ -519,7 +519,7 @@ label {
   margin: 1.5rem 0;
   padding: 1rem;
   border-radius: 20px;
-  background: rgba(255, 255, 255, 0.02);
+  background: var(--bg-dark);
   border: 1px solid var(--glass-border);
 }
 
@@ -568,7 +568,7 @@ label {
 .averages-grid > div,
 .highs-grid > div,
 .totals-grid > div {
-  background: rgba(255, 255, 255, 0.03);
+  background: var(--glass-bg);
   padding: 1rem;
   border-radius: 12px;
   border: 1px solid var(--glass-border);
@@ -625,7 +625,7 @@ label {
 }
 
 .season-card {
-  background: rgba(255, 255, 255, 0.03);
+  background: var(--bg-dark);
   padding: 1rem;
   border-radius: 16px;
   border: 1px solid var(--glass-border);
@@ -643,7 +643,7 @@ label {
 .milestones {
   margin-top: 1.5rem;
   padding: 1rem;
-  background: rgba(0, 0, 0, 0.2);
+  background: rgba(0, 0, 0, 0.05);
   border-radius: 12px;
 }
 
@@ -670,10 +670,10 @@ label {
 }
 
 .milestone-grid > div {
-  background: rgba(56, 189, 248, 0.05);
+  background: var(--glass-bg);
   padding: 0.75rem;
   border-radius: 10px;
-  border: 1px solid rgba(56, 189, 248, 0.1);
+  border: 1px solid var(--glass-border);
 }
 
 .milestone-grid h5 {
