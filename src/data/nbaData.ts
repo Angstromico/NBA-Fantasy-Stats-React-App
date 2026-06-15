@@ -214,7 +214,7 @@ const generatePlayoffSchedule = (teamId: string, season: string, awards: SeasonA
   return games
 }
 
-const getFinalsOpponent = (conference: 'Eastern' | 'Western', season: string): string => {
+const getFinalsOpponent = (conference: 'Eastern' | 'Western', _season: string): string => {
   // This would ideally be based on actual finals data
   // For now, return a placeholder
   return conference === 'Eastern' ? 'Western Conference Champion' : 'Eastern Conference Champion'

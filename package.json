@@ -11,6 +11,10 @@
     "prepare": "husky"
   },
   "lint-staged": {
+    "*.{ts,tsx}": [
+      "eslint --fix",
+      "cspell --no-must-find-files"
+    ],
     "**/*": "cspell --no-must-find-files"
   },
   "dependencies": {
