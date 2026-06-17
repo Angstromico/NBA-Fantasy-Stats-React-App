@@ -11,7 +11,7 @@ type Team = {
   division: string
 }
 
-type AbsenceType = 'none' | 'rest' | 'injury' | 'personal' | 'suspension'
+type AbsenceType = 'none' | 'rest' | 'injury' | 'personal' | 'suspension' | 'not_called_up' | 'lower_division' | 'lesson'
 
 type GameType = 'regular' | 'playoffs'
 

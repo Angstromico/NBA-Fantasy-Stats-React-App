@@ -145,27 +145,29 @@ const App: React.FC = () => {
     localStorage.removeItem('currentUser')
   }
 
-  const addGameStats = (game: GameStats) => {
-    const newStats = [...stats, game]
+  const addGameStats = (games: GameStats | GameStats[]) => {
+    const gamesToAdd = Array.isArray(games) ? games : [games]
+    const newStats = [...stats, ...gamesToAdd]
     saveStats(newStats)
 
-    // Update game numbers
-    const currentSeasonGames = newStats.filter(
-      (g) => g.season === selectedSeason && g.team === selectedTeam,
-    )
-    if (game.gameType === 'regular') {
-      setCurrentGameNumber(
-        currentSeasonGames.filter((g) => g.gameType === 'regular').length + 1,
-      )
-    }
+    const lastGame = gamesToAdd[gamesToAdd.length - 1]
 
-    // Check if we should switch to playoffs (after 82 regular season games)
-    const regularSeasonGames = currentSeasonGames.filter(
-      (g) => g.gameType === 'regular',
+    // Update game numbers based on the last game added
+    const currentSeasonGames = newStats.filter(
+      (g) => g.season === lastGame.season && g.team === lastGame.team,
     )
-    if (regularSeasonGames.length >= 82) {
-      setCurrentGameType('playoffs')
-      setCurrentGameNumber(1)
+    
+    if (lastGame.gameType === 'regular') {
+      const regularCount = currentSeasonGames.filter((g) => g.gameType === 'regular').length
+      setCurrentGameNumber(regularCount + 1)
+      
+      if (regularCount >= 82) {
+        setCurrentGameType('playoffs')
+        setCurrentGameNumber(1)
+      }
+    } else {
+      const playoffCount = currentSeasonGames.filter((g) => g.gameType === 'playoffs').length
+      setCurrentGameNumber(playoffCount + 1)
     }
   }
 

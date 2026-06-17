@@ -71,7 +71,7 @@ const StatsDisplay: React.FC<{
           <p>Date: {game.date}</p>
           <p>Team: {game.team} vs {game.opponent}</p>
           {game.isAbsent ? (
-            <p><strong>Absent: {game.absenceType}</strong></p>
+            <p><strong>Absent: {game.absenceType.replace(/_/g, ' ')}</strong></p>
           ) : (
             <>
               <p>Minutes: {game.minutes}</p>

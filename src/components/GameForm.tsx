@@ -3,7 +3,7 @@ import type { GameStats, AbsenceType, GameType } from '../interfaces'
 import { NBA_TEAMS, getTeamSchedule, getAvailableSeasons } from '../data/nbaData'
 
 const GameForm: React.FC<{ 
-  addGameStats: (game: GameStats) => void
+  addGameStats: (games: GameStats | GameStats[]) => void
   currentGameNumber: number
   gameType: GameType
   selectedTeam: string
@@ -40,6 +40,9 @@ const GameForm: React.FC<{
     season: selectedSeason
   })
 
+  const [skipMode, setSkipMode] = useState(false)
+  const [skipCount, setSkipCount] = useState(1)
+  const [skipToSeasonEnd, setSkipToSeasonEnd] = useState(false)
   const [error, setError] = useState('')
 
   useEffect(() => {
@@ -111,11 +114,52 @@ const GameForm: React.FC<{
       setError('Please select a team')
       return
     }
-    if (!game.opponent) {
-      setError('No opponent scheduled for this game')
-      return
+
+    if (skipMode) {
+      const schedule = getTeamSchedule(
+        NBA_TEAMS.find(t => `${t.city} ${t.name}` === selectedTeam)?.id || '',
+        selectedSeason
+      )
+
+      let gamesToSkip = skipCount
+      if (skipToSeasonEnd) {
+        gamesToSkip = schedule.length - (currentGameNumber - 1)
+      }
+
+      const bulkGames: GameStats[] = []
+      for (let i = 0; i < gamesToSkip; i++) {
+        const index = (currentGameNumber - 1) + i
+        if (schedule[index]) {
+          const scheduledGame = schedule[index]
+          bulkGames.push({
+            ...game,
+            id: crypto.randomUUID(),
+            date: scheduledGame.date,
+            opponent: scheduledGame.opponent,
+            gameNumber: currentGameNumber + i,
+            gameType: scheduledGame.isPlayoff ? 'playoffs' : 'regular',
+            isAbsent: true,
+            // Stats are already 0'd by updateStats when absenceType is set
+          })
+        }
+      }
+
+      if (bulkGames.length === 0) {
+        setError('No games found to skip')
+        return
+      }
+
+      addGameStats(bulkGames)
+      setSkipMode(false)
+      setSkipCount(1)
+      setSkipToSeasonEnd(false)
+    } else {
+      if (!game.opponent) {
+        setError('No opponent scheduled for this game')
+        return
+      }
+      addGameStats(game)
     }
-    addGameStats(game)
     setError('')
   }
 
@@ -123,7 +167,25 @@ const GameForm: React.FC<{
 
   return (
     <div className='GameForm glass-card'>
-      <h2>{gameType === 'regular' ? 'Regular Season' : 'Playoffs'} Game {currentGameNumber}</h2>
+      <div className="form-header">
+        <h2>{gameType === 'regular' ? 'Regular Season' : 'Playoffs'} Game {currentGameNumber}</h2>
+        <div className="skip-toggle">
+          <label className="switch">
+            <input 
+              type="checkbox" 
+              checked={skipMode} 
+              onChange={(e) => {
+                setSkipMode(e.target.checked)
+                if (e.target.checked && game.absenceType === 'none') {
+                  updateStats({ absenceType: 'rest', isAbsent: true })
+                }
+              }} 
+            />
+            <span className="slider round"></span>
+          </label>
+          <span>Bulk Skip Mode</span>
+        </div>
+      </div>
       
       {error && <div className='message error' role='alert'>{error}</div>}
 
@@ -170,7 +232,7 @@ const GameForm: React.FC<{
       </div>
 
       {/* Current Game Info */}
-      {selectedTeam && selectedSeason && (
+      {!skipMode && selectedTeam && selectedSeason && (
         <div className="game-info glass-card">
           <h3>Upcoming Matchup</h3>
           <div className="game-info-grid">
@@ -189,13 +251,14 @@ const GameForm: React.FC<{
       >
         <div className="form-row">
           <div>
-            <label htmlFor='absenceType'>Absence Status</label>
+            <label htmlFor='absenceType'>Absence Reason</label>
             <select
               value={game.absenceType}
               onChange={(e) => {
                 const absenceType = e.target.value as AbsenceType
                 const isAbsent = absenceType !== 'none'
                 updateStats({ absenceType, isAbsent })
+                if (!isAbsent) setSkipMode(false)
               }}
               id='absenceType'
             >
@@ -204,11 +267,37 @@ const GameForm: React.FC<{
               <option value='injury'>Injury</option>
               <option value='personal'>Personal</option>
               <option value='suspension'>Suspension</option>
+              <option value='not_called_up'>Not Called Up</option>
+              <option value='lower_division'>Lower Division</option>
+              <option value='lesson'>Lesson</option>
             </select>
           </div>
+          {skipMode && (
+             <div>
+              <label htmlFor='skipCount'>Number of Games</label>
+              <div className="skip-input-group">
+                <input
+                  type='number'
+                  value={skipCount}
+                  onChange={(e) => setSkipCount(Math.max(1, +e.target.value))}
+                  disabled={skipToSeasonEnd}
+                  id='skipCount'
+                  min={1}
+                />
+                <label className="checkbox-label">
+                  <input 
+                    type="checkbox" 
+                    checked={skipToSeasonEnd} 
+                    onChange={(e) => setSkipToSeasonEnd(e.target.checked)} 
+                  />
+                  Until Season End
+                </label>
+              </div>
+           </div>
+          )}
         </div>
 
-        {!game.isAbsent && (
+        {!game.isAbsent && !skipMode && (
           <>
             <div className="form-row">
               <div>
@@ -304,24 +393,34 @@ const GameForm: React.FC<{
           </>
         )}
 
-        {game.isAbsent && (
+        {(game.isAbsent || skipMode) && (
           <div className="absence-notice">
-            <p>Player is absent ({game.absenceType}). No statistics will be recorded.</p>
-            <div className="checkbox-group">
-              <label>
-                <input 
-                  type='checkbox' 
-                  checked={game.won} 
-                  onChange={(e) => updateStats({ won: e.target.checked })} 
-                />
-                Team Won Game
-              </label>
-            </div>
+            <p>
+              {skipMode 
+                ? `Player will be marked as absent for ${skipToSeasonEnd ? 'the rest of the season' : `${skipCount} game(s)`} due to ${game.absenceType.replace(/_/g, ' ')}.`
+                : `Player is absent (${game.absenceType.replace(/_/g, ' ')}). No statistics will be recorded.`
+              }
+            </p>
+            {!skipMode && (
+              <div className="checkbox-group">
+                <label>
+                  <input 
+                    type='checkbox' 
+                    checked={game.won} 
+                    onChange={(e) => updateStats({ won: e.target.checked })} 
+                  />
+                  Team Won Game
+                </label>
+              </div>
+            )}
+            {skipMode && (
+               <p className="hint">Note: Team wins for skipped games will be recorded as losses by default in this mode.</p>
+            )}
           </div>
         )}
 
-        <button type='submit' className='primary-btn' disabled={!selectedTeam || !selectedSeason || !game.opponent}>
-          Submit Stats
+        <button type='submit' className='primary-btn' disabled={!selectedTeam || !selectedSeason || (!skipMode && !game.opponent)}>
+          {skipMode ? 'Confirm Bulk Skip' : 'Submit Stats'}
         </button>
       </form>
     </div>
