@@ -47,11 +47,22 @@ const App: React.FC = () => {
       setCurrentUser(savedCurrentUser)
     }
 
+    const savedTeam = localStorage.getItem('selectedTeam')
+    if (savedTeam) {
+      setSelectedTeam(savedTeam)
+    }
+
+    const savedSeason = localStorage.getItem('selectedSeason')
+    if (savedSeason) {
+      setSelectedSeason(savedSeason)
+    }
+
     try {
       const savedStats = localStorage.getItem('stats')
       if (savedStats) {
         const parsedStats = JSON.parse(savedStats)
         setStats(parsedStats)
+  // ... rest of effect
 
         const regularSeasonGames = parsedStats.filter(
           (g: GameStats) => g.gameType === 'regular',
@@ -103,6 +114,14 @@ const App: React.FC = () => {
     // Save dark mode preference
     localStorage.setItem('darkMode', JSON.stringify(darkMode))
   }, [darkMode])
+
+  useEffect(() => {
+    localStorage.setItem('selectedTeam', selectedTeam)
+  }, [selectedTeam])
+
+  useEffect(() => {
+    localStorage.setItem('selectedSeason', selectedSeason)
+  }, [selectedSeason])
 
   const toggleDarkMode = () => {
     setDarkMode(!darkMode)
