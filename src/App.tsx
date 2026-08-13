@@ -2,7 +2,13 @@
 
 import React, { useState, useEffect } from 'react'
 import bcrypt from 'bcryptjs'
-import { Login, GameForm, StatsDisplay, ComparisonDisplay } from './components'
+import {
+  Login,
+  GameForm,
+  StatsDisplay,
+  ComparisonDisplay,
+  StatsSummaryPage,
+} from './components'
 import type {
   User,
   GameStats,
@@ -32,6 +38,8 @@ type PlayoffProgression =
   | { status: 'active'; nextGameNumber: number; round: number }
   | { status: 'eliminated'; round: number }
   | { status: 'complete' }
+
+type AppView = 'tracker' | 'summary'
 
 const getTeamId = (teamName: string) =>
   NBA_TEAMS.find((team) => `${team.city} ${team.name}` === teamName)?.id || ''
@@ -174,6 +182,7 @@ const App: React.FC = () => {
   const [selectedTeam, setSelectedTeam] = useState('')
   const [selectedSeason, setSelectedSeason] = useState('')
   const [progressionMessage, setProgressionMessage] = useState('')
+  const [appView, setAppView] = useState<AppView>('tracker')
 
   useEffect(() => {
     let initialTeam = ''
@@ -629,20 +638,38 @@ const App: React.FC = () => {
           <p>Welcome, {currentUser}</p>
         </div>
         <div className='header-controls'>
-          <div className='game-type-switcher'>
+          <nav className='app-view-switcher' aria-label='App pages'>
             <button
-              onClick={switchToRegularSeason}
-              className={currentGameType === 'regular' ? 'active' : ''}
+              type='button'
+              onClick={() => setAppView('tracker')}
+              className={appView === 'tracker' ? 'active' : ''}
             >
-              Regular
+              Tracker
             </button>
             <button
-              onClick={switchToPlayoffs}
-              className={currentGameType === 'playoffs' ? 'active' : ''}
+              type='button'
+              onClick={() => setAppView('summary')}
+              className={appView === 'summary' ? 'active' : ''}
             >
-              Playoffs
+              Summary
             </button>
-          </div>
+          </nav>
+          {appView === 'tracker' && (
+            <div className='game-type-switcher'>
+              <button
+                onClick={switchToRegularSeason}
+                className={currentGameType === 'regular' ? 'active' : ''}
+              >
+                Regular
+              </button>
+              <button
+                onClick={switchToPlayoffs}
+                className={currentGameType === 'playoffs' ? 'active' : ''}
+              >
+                Playoffs
+              </button>
+            </div>
+          )}
           <button
             onClick={toggleDarkMode}
             className='dark-mode-toggle glass-card'
@@ -654,37 +681,47 @@ const App: React.FC = () => {
         </div>
       </header>
       <main>
-        <GameForm
-          addGameStats={addGameStats}
-          currentGameNumber={currentGameNumber}
-          gameType={currentGameType}
-          selectedTeam={selectedTeam}
-          selectedSeason={selectedSeason}
-          onTeamChange={handleTeamChange}
-          onSeasonChange={handleSeasonChange}
-        />
-        {progressionMessage && (
-          <div className='message info' role='status'>
-            {progressionMessage}
-          </div>
-        )}
-        
-        <StatsDisplay
-          stats={stats}
-          careerHighs={careerHighs}
-          statsSummary={statsSummary}
-          seasonStats={seasonStats}
-        />
+        {appView === 'tracker' ? (
+          <>
+            <GameForm
+              addGameStats={addGameStats}
+              currentGameNumber={currentGameNumber}
+              gameType={currentGameType}
+              selectedTeam={selectedTeam}
+              selectedSeason={selectedSeason}
+              onTeamChange={handleTeamChange}
+              onSeasonChange={handleSeasonChange}
+            />
+            {progressionMessage && (
+              <div className='message info' role='status'>
+                {progressionMessage}
+              </div>
+            )}
 
-        {selectedSeason && selectedTeam && statsSummary && (
-          <ComparisonDisplay
-            playerStats={statsSummary}
-            seasonAwards={
-              seasonStats.find((s) => s.seasonYear === selectedSeason)
-                ?.seasonAwards || null
-            }
-            playerTeam={selectedTeam}
-            season={selectedSeason}
+            <StatsDisplay
+              stats={stats}
+              careerHighs={careerHighs}
+              statsSummary={statsSummary}
+              seasonStats={seasonStats}
+            />
+
+            {selectedSeason && selectedTeam && statsSummary && (
+              <ComparisonDisplay
+                playerStats={statsSummary}
+                seasonAwards={
+                  seasonStats.find((s) => s.seasonYear === selectedSeason)
+                    ?.seasonAwards || null
+                }
+                playerTeam={selectedTeam}
+                season={selectedSeason}
+              />
+            )}
+          </>
+        ) : (
+          <StatsSummaryPage
+            stats={stats}
+            seasonStats={seasonStats}
+            statsSummary={statsSummary}
           />
         )}
       </main>
