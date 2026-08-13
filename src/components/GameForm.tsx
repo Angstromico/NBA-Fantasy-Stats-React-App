@@ -42,8 +42,69 @@ const GameForm: React.FC<{
 
   const [skipMode, setSkipMode] = useState(false)
   const [skipCount, setSkipCount] = useState(1)
+  const [skipWins, setSkipWins] = useState(1)
   const [skipToSeasonEnd, setSkipToSeasonEnd] = useState(false)
   const [error, setError] = useState('')
+
+  const schedule = getTeamSchedule(
+    NBA_TEAMS.find(t => `${t.city} ${t.name}` === selectedTeam)?.id || '',
+    selectedSeason,
+  )
+  const remainingGames = Math.max(0, schedule.length - (currentGameNumber - 1))
+  const gamesInInterval = Math.min(
+    skipToSeasonEnd ? remainingGames : skipCount,
+    remainingGames,
+  )
+  const intervalWins = Math.min(skipWins, gamesInInterval)
+  const intervalLosses = gamesInInterval - intervalWins
+  const intervalWinPercentage = gamesInInterval
+    ? Math.round((intervalWins / gamesInInterval) * 100)
+    : 0
+  const recordTone = intervalWinPercentage >= 75
+    ? 'is-dominant'
+    : intervalWinPercentage >= 55
+      ? 'is-ahead'
+      : intervalWinPercentage >= 45
+        ? 'is-even'
+        : intervalWinPercentage >= 25
+          ? 'is-behind'
+          : 'is-struggling'
+  const recordSummary = intervalWinPercentage >= 75
+    ? 'Dominating the interval'
+    : intervalWinPercentage >= 55
+      ? 'Winning interval'
+      : intervalWinPercentage >= 45
+        ? 'Even interval'
+        : intervalWinPercentage >= 25
+          ? 'Tough stretch'
+          : 'Reset mode'
+  const recordSymbol = intervalWinPercentage >= 75
+    ? 'W'
+    : intervalWinPercentage >= 45
+      ? '='
+      : 'L'
+  const recordBarStyle = {
+    '--win-share': `${intervalWinPercentage}%`,
+  } as React.CSSProperties
+
+  const setBalancedRecord = (gameCount: number) => {
+    setSkipWins(Math.ceil(gameCount / 2))
+  }
+
+  const updateSkipCount = (value: string) => {
+    const requestedCount = Number(value)
+    const nextCount = Math.min(
+      remainingGames || 1,
+      Math.max(1, Number.isFinite(requestedCount) ? requestedCount : 1),
+    )
+    setSkipCount(nextCount)
+    setBalancedRecord(nextCount)
+  }
+
+  const isWinInInterval = (gameIndex: number, totalGames: number, wins: number) => {
+    // Spread the selected wins through the interval instead of fabricating a streak.
+    return Math.round(((gameIndex + 1) * wins) / totalGames) > Math.round((gameIndex * wins) / totalGames)
+  }
 
   useEffect(() => {
     if (selectedTeam && selectedSeason) {
@@ -116,18 +177,8 @@ const GameForm: React.FC<{
     }
 
     if (skipMode) {
-      const schedule = getTeamSchedule(
-        NBA_TEAMS.find(t => `${t.city} ${t.name}` === selectedTeam)?.id || '',
-        selectedSeason
-      )
-
-      let gamesToSkip = skipCount
-      if (skipToSeasonEnd) {
-        gamesToSkip = schedule.length - (currentGameNumber - 1)
-      }
-
       const bulkGames: GameStats[] = []
-      for (let i = 0; i < gamesToSkip; i++) {
+      for (let i = 0; i < gamesInInterval; i++) {
         const index = (currentGameNumber - 1) + i
         if (schedule[index]) {
           const scheduledGame = schedule[index]
@@ -139,7 +190,7 @@ const GameForm: React.FC<{
             gameNumber: currentGameNumber + i,
             gameType: scheduledGame.isPlayoff ? 'playoffs' : 'regular',
             isAbsent: true,
-            // Stats are already 0'd by updateStats when absenceType is set
+            won: isWinInInterval(i, gamesInInterval, intervalWins),
           })
         }
       }
@@ -152,6 +203,7 @@ const GameForm: React.FC<{
       addGameStats(bulkGames)
       setSkipMode(false)
       setSkipCount(1)
+      setSkipWins(1)
       setSkipToSeasonEnd(false)
     } else {
       if (!game.opponent) {
@@ -178,6 +230,9 @@ const GameForm: React.FC<{
                 setSkipMode(e.target.checked)
                 if (e.target.checked && game.absenceType === 'none') {
                   updateStats({ absenceType: 'rest', isAbsent: true })
+                }
+                if (e.target.checked) {
+                  setBalancedRecord(skipToSeasonEnd ? remainingGames : skipCount)
                 }
               }} 
             />
@@ -279,16 +334,20 @@ const GameForm: React.FC<{
                 <input
                   type='number'
                   value={skipCount}
-                  onChange={(e) => setSkipCount(Math.max(1, +e.target.value))}
+                  onChange={(e) => updateSkipCount(e.target.value)}
                   disabled={skipToSeasonEnd}
                   id='skipCount'
                   min={1}
+                  max={remainingGames || 1}
                 />
                 <label className="checkbox-label">
                   <input 
                     type="checkbox" 
                     checked={skipToSeasonEnd} 
-                    onChange={(e) => setSkipToSeasonEnd(e.target.checked)} 
+                    onChange={(e) => {
+                      setSkipToSeasonEnd(e.target.checked)
+                      setBalancedRecord(e.target.checked ? remainingGames : skipCount)
+                    }}
                   />
                   Until Season End
                 </label>
@@ -397,7 +456,7 @@ const GameForm: React.FC<{
           <div className="absence-notice">
             <p>
               {skipMode 
-                ? `Player will be marked as absent for ${skipToSeasonEnd ? 'the rest of the season' : `${skipCount} game(s)`} due to ${game.absenceType.replace(/_/g, ' ')}.`
+                ? `Player will be marked as absent for ${skipToSeasonEnd ? 'the rest of the season' : `${gamesInInterval} game(s)`} due to ${game.absenceType.replace(/_/g, ' ')}.`
                 : `Player is absent (${game.absenceType.replace(/_/g, ' ')}). No statistics will be recorded.`
               }
             </p>
@@ -414,7 +473,55 @@ const GameForm: React.FC<{
               </div>
             )}
             {skipMode && (
-               <p className="hint">Note: Team wins for skipped games will be recorded as losses by default in this mode.</p>
+              <section className={`bulk-record-panel ${recordTone}`} aria-live="polite">
+                <div className="bulk-record-heading">
+                  <div>
+                    <span className="eyebrow">Projected team record</span>
+                    <h3>{intervalWins}-{intervalLosses}</h3>
+                    <p>{recordSummary}</p>
+                  </div>
+                  <div className="record-orbit" aria-hidden="true">
+                    <span>{recordSymbol}</span>
+                  </div>
+                </div>
+
+                <div className="record-meter" style={recordBarStyle}>
+                  <div className="record-meter-wins" />
+                  <div className="record-meter-losses" />
+                </div>
+                <div className="record-meter-labels" aria-hidden="true">
+                  <span>{intervalWins} wins</span>
+                  <strong>{intervalWinPercentage}%</strong>
+                  <span>{intervalLosses} losses</span>
+                </div>
+
+                <div className="record-selector">
+                  <label htmlFor="skipWins">Wins in this interval</label>
+                  <div className="record-inputs">
+                    <input
+                      type="range"
+                      id="skipWins"
+                      min={0}
+                      max={gamesInInterval}
+                      value={intervalWins}
+                      onChange={(e) => setSkipWins(Number(e.target.value))}
+                      aria-describedby="skipWinsHelp"
+                    />
+                    <input
+                      type="number"
+                      min={0}
+                      max={gamesInInterval}
+                      value={intervalWins}
+                      onChange={(e) => setSkipWins(Math.min(
+                        gamesInInterval,
+                        Math.max(0, Number(e.target.value) || 0),
+                      ))}
+                      aria-label="Number of wins in this interval"
+                    />
+                  </div>
+                  <p id="skipWinsHelp">Losses update automatically. The interval starts with a balanced split.</p>
+                </div>
+              </section>
             )}
           </div>
         )}
