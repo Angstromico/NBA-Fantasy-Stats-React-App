@@ -98,9 +98,15 @@ const StatsDisplay: React.FC<{
           <div className="summary-grid">
             <div>
               <h3>Record</h3>
-              <p>Regular Season: {statsSummary.wins}-{statsSummary.losses}</p>
-              <p>Playoffs: {statsSummary.playoffWins}-{statsSummary.playoffLosses}</p>
-              <p>Win Percentage: {(statsSummary.winPercentage * 100).toFixed(2)}%</p>
+              <p>Player Games: {statsSummary.playerWins}-{statsSummary.playerLosses}</p>
+              <p>Missed Games: {statsSummary.missedWins}-{statsSummary.missedLosses}</p>
+              <p>Team Total: {statsSummary.teamWins}-{statsSummary.teamLosses}</p>
+              <p>Playoffs Team Total: {statsSummary.playoffWins}-{statsSummary.playoffLosses}</p>
+              <p>Player Win Percentage: {(statsSummary.playerWinPercentage * 100).toFixed(2)}%</p>
+              <p>Team Win Percentage: {(statsSummary.winPercentage * 100).toFixed(2)}%</p>
+              {statsSummary.gamesMissed > 0 && (
+                <p>Missed Games Win Percentage: {(statsSummary.missedWinPercentage * 100).toFixed(2)}%</p>
+              )}
               {statsSummary.playoffWins > 0 && (
                 <p>Playoff Win Percentage: {(statsSummary.playoffWinPercentage * 100).toFixed(2)}%</p>
               )}
@@ -159,8 +165,12 @@ const StatsDisplay: React.FC<{
           {seasonStats.map(season => (
             <div key={season.seasonYear} className="season-card">
               <h3>{season.seasonYear} Season</h3>
-              <p>Games Played: {season.gamesPlayed}</p>
-              <p>Record: {season.wins}-{season.losses}</p>
+              <p>Team Games Logged: {season.gamesPlayed}</p>
+              <p>Player Games Played: {season.playerGamesPlayed}</p>
+              <p>Games Missed: {season.gamesMissed}</p>
+              <p>Player Record: {season.playerWins}-{season.playerLosses}</p>
+              <p>Missed Games Record: {season.missedWins}-{season.missedLosses}</p>
+              <p>Team Total Record: {season.teamWins}-{season.teamLosses}</p>
               {season.madePlayoffs && (
                 <>
                   <p>Made Playoffs: Yes</p>

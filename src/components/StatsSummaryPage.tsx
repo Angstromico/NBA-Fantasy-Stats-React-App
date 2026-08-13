@@ -6,6 +6,8 @@ type SummaryRow = {
   label: string
   teams: string
   record: string
+  playerRecord: string
+  missedRecord: string
   regularRecord: string
   playoffRecord: string
   gamesLogged: number
@@ -45,9 +47,12 @@ const buildSummaryRow = (
   isCareer = false,
 ): SummaryRow => {
   const playedGames = games.filter((game) => !game.isAbsent)
+  const missedGames = games.filter((game) => game.isAbsent)
   const regularGames = games.filter((game) => game.gameType === 'regular')
   const playoffGames = games.filter((game) => game.gameType === 'playoffs')
   const wins = games.filter((game) => game.won).length
+  const playerWins = playedGames.filter((game) => game.won).length
+  const missedWins = missedGames.filter((game) => game.won).length
   const regularWins = regularGames.filter((game) => game.won).length
   const playoffWins = playoffGames.filter((game) => game.won).length
   const teams = Array.from(new Set(games.map((game) => game.team))).join(', ')
@@ -57,11 +62,13 @@ const buildSummaryRow = (
     label,
     teams: teams || '-',
     record: `${wins}-${games.length - wins}`,
+    playerRecord: `${playerWins}-${playedGames.length - playerWins}`,
+    missedRecord: `${missedWins}-${missedGames.length - missedWins}`,
     regularRecord: `${regularWins}-${regularGames.length - regularWins}`,
     playoffRecord: `${playoffWins}-${playoffGames.length - playoffWins}`,
     gamesLogged: games.length,
     gamesPlayed: playedGames.length,
-    gamesAbsent: games.length - playedGames.length,
+    gamesAbsent: missedGames.length,
     points: average(playedGames, 'points'),
     assists: average(playedGames, 'assists'),
     rebounds: average(playedGames, 'rebounds'),
@@ -113,14 +120,14 @@ const StatsSummaryPage: React.FC<{
           <h2>Season Summary</h2>
           <p>
             Compare every recorded season against the player&apos;s career
-            totals, including team record, availability, averages, and
-            double-double production.
+            totals, including player record, missed-game record, team totals,
+            availability, averages, and double-double production.
           </p>
         </div>
         <div className='summary-hero-record'>
-          <span>Career Record</span>
-          <strong>{careerRow.record}</strong>
-          <small>{formatPercentage(careerRow.winPercentage)} win rate</small>
+          <span>Player Record</span>
+          <strong>{careerRow.playerRecord}</strong>
+          <small>{formatPercentage(statsSummary?.playerWinPercentage || 0)} win rate when active</small>
         </div>
       </div>
 
@@ -137,6 +144,12 @@ const StatsSummaryPage: React.FC<{
           <div className='summary-kpi-grid'>
             <StatTile label='Logged Games' value={careerRow.gamesLogged} />
             <StatTile label='Games Played' value={careerRow.gamesPlayed} />
+            <StatTile label='Games Missed' value={careerRow.gamesAbsent} />
+            <StatTile
+              label='Team Record'
+              value={careerRow.record}
+              tone='secondary'
+            />
             <StatTile
               label='Career PPG'
               value={formatAverage(statsSummary?.averages.points || 0)}
@@ -155,7 +168,9 @@ const StatsSummaryPage: React.FC<{
                 <tr>
                   <th scope='col'>Scope</th>
                   <th scope='col'>Team</th>
-                  <th scope='col'>Record</th>
+                  <th scope='col'>Player Record</th>
+                  <th scope='col'>Missed Record</th>
+                  <th scope='col'>Team Record</th>
                   <th scope='col'>Regular</th>
                   <th scope='col'>Playoffs</th>
                   <th scope='col'>Logged</th>
@@ -173,10 +188,12 @@ const StatsSummaryPage: React.FC<{
               </thead>
               <tbody>
                 {summaryRows.map((row) => (
-                  <tr key={row.id} className={row.isCareer ? 'career-row' : ''}>
-                    <th scope='row' data-label='Scope'>{row.label}</th>
-                    <td data-label='Team'>{row.teams}</td>
-                    <td data-label='Record'>{row.record}</td>
+                    <tr key={row.id} className={row.isCareer ? 'career-row' : ''}>
+                      <th scope='row' data-label='Scope'>{row.label}</th>
+                      <td data-label='Team'>{row.teams}</td>
+                      <td data-label='Player Record'>{row.playerRecord}</td>
+                      <td data-label='Missed Record'>{row.missedRecord}</td>
+                      <td data-label='Team Record'>{row.record}</td>
                     <td data-label='Regular'>{row.regularRecord}</td>
                     <td data-label='Playoffs'>{row.playoffRecord}</td>
                     <td data-label='Logged'>{row.gamesLogged}</td>

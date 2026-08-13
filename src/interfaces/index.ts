@@ -73,10 +73,18 @@ type SeasonAwards = {
 type SeasonStats = {
   seasonYear: string
   gamesPlayed: number
+  playerGamesPlayed: number
+  gamesMissed: number
   regularSeasonGames: GameStats[]
   playoffGames: GameStats[]
   wins: number
   losses: number
+  teamWins: number
+  teamLosses: number
+  playerWins: number
+  playerLosses: number
+  missedWins: number
+  missedLosses: number
   playoffWins: number
   playoffLosses: number
   madePlayoffs: boolean
@@ -144,8 +152,18 @@ type CareerHighs = {
 type StatsSummary = {
   wins: number
   losses: number
+  teamWins: number
+  teamLosses: number
+  playerWins: number
+  playerLosses: number
+  missedWins: number
+  missedLosses: number
+  gamesPlayed: number
+  gamesMissed: number
   playoffWins: number
   playoffLosses: number
+  playerWinPercentage: number
+  missedWinPercentage: number
   currentStreak: number
   longestWinStreak: number
   longestLossStreak: number

@@ -1257,7 +1257,7 @@ input:checked + .slider:before {
 
 .summary-table {
   border-collapse: collapse;
-  min-width: 1080px;
+  min-width: 1180px;
   width: 100%;
 }
 

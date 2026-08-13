@@ -160,9 +160,15 @@ export const organizeSeasonStats = (allGames: GameStats[]): SeasonStats[] => {
   seasonsMap.forEach((games, seasonYear) => {
     const regularSeasonGames = games.filter(g => g.gameType === 'regular')
     const playoffGames = games.filter(g => g.gameType === 'playoffs')
+    const playedGames = games.filter(g => !g.isAbsent)
+    const missedGames = games.filter(g => g.isAbsent)
     
     const wins = games.filter(g => g.won).length
     const losses = games.length - wins
+    const playerWins = playedGames.filter(g => g.won).length
+    const playerLosses = playedGames.length - playerWins
+    const missedWins = missedGames.filter(g => g.won).length
+    const missedLosses = missedGames.length - missedWins
     const playoffWins = playoffGames.filter(g => g.won).length
     const playoffLosses = playoffGames.length - playoffWins
     
@@ -176,10 +182,18 @@ export const organizeSeasonStats = (allGames: GameStats[]): SeasonStats[] => {
     seasons.push({
       seasonYear,
       gamesPlayed: games.length,
+      playerGamesPlayed: playedGames.length,
+      gamesMissed: missedGames.length,
       regularSeasonGames,
       playoffGames,
       wins,
       losses,
+      teamWins: wins,
+      teamLosses: losses,
+      playerWins,
+      playerLosses,
+      missedWins,
+      missedLosses,
       playoffWins,
       playoffLosses,
       madePlayoffs: checkPlayoffQualification(regularSeasonGames),
@@ -214,9 +228,15 @@ const getSeasonYear = (dateString: string): string => {
 export const calculateStatsSummary = (allGames: GameStats[]): StatsSummary => {
   const regularSeasonGames = allGames.filter(g => g.gameType === 'regular')
   const playoffGames = allGames.filter(g => g.gameType === 'playoffs')
+  const playedGames = allGames.filter(g => !g.isAbsent)
+  const missedGames = allGames.filter(g => g.isAbsent)
   
   const wins = allGames.filter(g => g.won).length
   const losses = allGames.length - wins
+  const playerWins = playedGames.filter(g => g.won).length
+  const playerLosses = playedGames.length - playerWins
+  const missedWins = missedGames.filter(g => g.won).length
+  const missedLosses = missedGames.length - missedWins
   const playoffWins = playoffGames.filter(g => g.won).length
   const playoffLosses = playoffGames.length - playoffWins
   
@@ -225,8 +245,18 @@ export const calculateStatsSummary = (allGames: GameStats[]): StatsSummary => {
   return {
     wins,
     losses,
+    teamWins: wins,
+    teamLosses: losses,
+    playerWins,
+    playerLosses,
+    missedWins,
+    missedLosses,
+    gamesPlayed: playedGames.length,
+    gamesMissed: missedGames.length,
     playoffWins,
     playoffLosses,
+    playerWinPercentage: playedGames.length > 0 ? playerWins / playedGames.length : 0,
+    missedWinPercentage: missedGames.length > 0 ? missedWins / missedGames.length : 0,
     currentStreak: streaks.current,
     longestWinStreak: streaks.longestWin,
     longestLossStreak: streaks.longestLoss,

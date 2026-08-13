@@ -38,13 +38,13 @@ const ComparisonDisplay: React.FC<ComparisonDisplayProps> = ({
   }
 
   const getTeamRecord = () => {
-    const wins = playerStats.wins
-    const losses = playerStats.losses
+    const wins = playerStats.teamWins
+    const losses = playerStats.teamLosses
     return `${wins}-${losses}`
   }
 
   const compareTeamRecords = () => {
-    const playerWins = playerStats.wins
+    const playerWins = playerStats.teamWins
     const championWins = parseInt(seasonAwards.champion.record.split('-')[0])
     const difference = playerWins - championWins
     const percentage = championWins > 0 ? ((difference / championWins) * 100).toFixed(1) : '0'
@@ -122,11 +122,23 @@ const ComparisonDisplay: React.FC<ComparisonDisplayProps> = ({
           </div>
           <div className="summary-item">
             <span className="label">Games Played:</span>
-            <span className="value">{playerStats.wins + playerStats.losses}</span>
+            <span className="value">{playerStats.gamesPlayed}</span>
           </div>
           <div className="summary-item">
-            <span className="label">Win %:</span>
-            <span className="value">{(playerStats.winPercentage * 100).toFixed(1)}%</span>
+            <span className="label">Games Missed:</span>
+            <span className="value">{playerStats.gamesMissed}</span>
+          </div>
+          <div className="summary-item">
+            <span className="label">Player Record:</span>
+            <span className="value">{playerStats.playerWins}-{playerStats.playerLosses}</span>
+          </div>
+          <div className="summary-item">
+            <span className="label">Team Total:</span>
+            <span className="value">{playerStats.teamWins}-{playerStats.teamLosses}</span>
+          </div>
+          <div className="summary-item">
+            <span className="label">Player Win %:</span>
+            <span className="value">{(playerStats.playerWinPercentage * 100).toFixed(1)}%</span>
           </div>
           <div className="summary-item">
             <span className="label">Current Streak:</span>
