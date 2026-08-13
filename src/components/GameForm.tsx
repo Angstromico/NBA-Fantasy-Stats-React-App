@@ -86,6 +86,14 @@ const GameForm: React.FC<{
   const recordBarStyle = {
     '--win-share': `${intervalWinPercentage}%`,
   } as React.CSSProperties
+  const minutesPlayed = Number(game.minutes) || 0
+  const overtimeMinutes = Math.max(0, minutesPlayed - 48)
+  const overtimeWarning = minutesPlayed > 48
+    ? overtimeMinutes >= 12
+      ? `Marathon territory. This is ${minutesPlayed} minutes, or ${overtimeMinutes} minutes beyond regulation.`
+      : `Overtime territory. This is ${minutesPlayed} minutes, which is ${overtimeMinutes} minute${overtimeMinutes === 1 ? '' : 's'} beyond regulation.`
+    : ''
+  const minutesHint = 'NBA regulation is 48 minutes. Overtime is allowed, so the field stays open.'
 
   const setBalancedRecord = (gameCount: number) => {
     setSkipWins(Math.ceil(gameCount / 2))
@@ -361,15 +369,24 @@ const GameForm: React.FC<{
             <div className="form-row">
               <div>
                 <label htmlFor='minutes'>Minutes</label>
-                <input
-                  type='number'
-                  placeholder='0'
-                  value={game.minutes || ''}
-                  onChange={(e) => updateStats({ minutes: +e.target.value })}
-                  id='minutes'
-                  min={0}
-                  max={48}
-                />
+                <div className={`minutes-input-wrap ${minutesPlayed > 48 ? 'overtime' : ''}`}>
+                  <input
+                    type='number'
+                    placeholder='0'
+                    value={game.minutes || ''}
+                    onChange={(e) => updateStats({ minutes: +e.target.value })}
+                    id='minutes'
+                    step={1}
+                    inputMode='numeric'
+                    min={0}
+                  />
+                  <p className='hint minutes-hint'>{minutesHint}</p>
+                  {minutesPlayed > 48 && (
+                    <p className='minutes-warning show' aria-live='polite'>
+                      {overtimeWarning}
+                    </p>
+                  )}
+                </div>
               </div>
               <div>
                 <label htmlFor='points'>Points</label>
