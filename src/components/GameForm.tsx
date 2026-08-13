@@ -1,6 +1,12 @@
 import React, { useState, useEffect } from 'react'
 import type { GameStats, AbsenceType, GameType } from '../interfaces'
-import { NBA_TEAMS, getTeamSchedule, getAvailableSeasons } from '../data/nbaData'
+import {
+  NBA_TEAMS,
+  getAvailableSeasons,
+  getNextSeason,
+  getTeamPlayoffSchedule,
+  getTeamRegularSeasonSchedule,
+} from '../data/nbaData'
 
 const GameForm: React.FC<{ 
   addGameStats: (games: GameStats | GameStats[]) => void
@@ -46,14 +52,37 @@ const GameForm: React.FC<{
   const [skipToSeasonEnd, setSkipToSeasonEnd] = useState(false)
   const [error, setError] = useState('')
 
-  const schedule = getTeamSchedule(
-    NBA_TEAMS.find(t => `${t.city} ${t.name}` === selectedTeam)?.id || '',
-    selectedSeason,
-  )
+  const selectedTeamId = NBA_TEAMS.find(
+    t => `${t.city} ${t.name}` === selectedTeam,
+  )?.id || ''
+  const schedule = gameType === 'playoffs'
+    ? getTeamPlayoffSchedule(selectedTeamId, selectedSeason)
+    : getTeamRegularSeasonSchedule(selectedTeamId, selectedSeason)
   const remainingGames = Math.max(0, schedule.length - (currentGameNumber - 1))
+  const totalRegularGamesAvailable = (() => {
+    if (!selectedTeamId || !selectedSeason) {
+      return 0
+    }
+
+    let season: string | null = selectedSeason
+    let gameNumber = currentGameNumber
+    let availableGames = 0
+
+    while (season) {
+      const seasonSchedule = getTeamRegularSeasonSchedule(selectedTeamId, season)
+      availableGames += Math.max(0, seasonSchedule.length - (gameNumber - 1))
+      season = getNextSeason(season)
+      gameNumber = 1
+    }
+
+    return availableGames
+  })()
+  const availableSkipGames = gameType === 'regular'
+    ? totalRegularGamesAvailable
+    : remainingGames
   const gamesInInterval = Math.min(
     skipToSeasonEnd ? remainingGames : skipCount,
-    remainingGames,
+    availableSkipGames,
   )
   const intervalWins = Math.min(skipWins, gamesInInterval)
   const intervalLosses = gamesInInterval - intervalWins
@@ -102,7 +131,7 @@ const GameForm: React.FC<{
   const updateSkipCount = (value: string) => {
     const requestedCount = Number(value)
     const nextCount = Math.min(
-      remainingGames || 1,
+      availableSkipGames || 1,
       Math.max(1, Number.isFinite(requestedCount) ? requestedCount : 1),
     )
     setSkipCount(nextCount)
@@ -114,24 +143,83 @@ const GameForm: React.FC<{
     return Math.round(((gameIndex + 1) * wins) / totalGames) > Math.round((gameIndex * wins) / totalGames)
   }
 
+  const buildSkippedRegularSeasonGames = (totalGames: number): GameStats[] => {
+    const skippedGames: GameStats[] = []
+    let season: string | null = selectedSeason
+    let gameNumber = currentGameNumber
+
+    while (season && skippedGames.length < totalGames) {
+      const seasonSchedule = getTeamRegularSeasonSchedule(selectedTeamId, season)
+
+      for (
+        let index = gameNumber - 1;
+        index < seasonSchedule.length && skippedGames.length < totalGames;
+        index++
+      ) {
+        const scheduledGame = seasonSchedule[index]
+        const intervalIndex = skippedGames.length
+
+        skippedGames.push({
+          ...game,
+          id: crypto.randomUUID(),
+          date: scheduledGame.date,
+          opponent: scheduledGame.opponent,
+          gameNumber: index + 1,
+          gameType: 'regular',
+          season,
+          isAbsent: true,
+          won: isWinInInterval(intervalIndex, totalGames, intervalWins),
+        })
+      }
+
+      season = getNextSeason(season)
+      gameNumber = 1
+    }
+
+    return skippedGames
+  }
+
+  const buildSkippedPlayoffGames = (totalGames: number): GameStats[] => {
+    const skippedGames: GameStats[] = []
+
+    for (let i = 0; i < totalGames; i++) {
+      const index = (currentGameNumber - 1) + i
+      const scheduledGame = schedule[index]
+
+      if (scheduledGame) {
+        skippedGames.push({
+          ...game,
+          id: crypto.randomUUID(),
+          date: scheduledGame.date,
+          opponent: scheduledGame.opponent,
+          gameNumber: currentGameNumber + i,
+          gameType: 'playoffs',
+          season: selectedSeason,
+          isAbsent: true,
+          won: isWinInInterval(i, totalGames, intervalWins),
+        })
+      }
+    }
+
+    return skippedGames
+  }
+
   useEffect(() => {
     if (selectedTeam && selectedSeason) {
-      const schedule = getTeamSchedule(
-        NBA_TEAMS.find(t => `${t.city} ${t.name}` === selectedTeam)?.id || '',
-        selectedSeason
-      )
-      
+      const activeSchedule = gameType === 'playoffs'
+        ? getTeamPlayoffSchedule(selectedTeamId, selectedSeason)
+        : getTeamRegularSeasonSchedule(selectedTeamId, selectedSeason)
       // Set current game date and opponent based on schedule
       const currentGameIndex = currentGameNumber - 1
-      if (schedule[currentGameIndex]) {
-        const currentScheduledGame = schedule[currentGameIndex]
+      if (activeSchedule[currentGameIndex]) {
+        const currentScheduledGame = activeSchedule[currentGameIndex]
         setGame({
           id: crypto.randomUUID(),
           date: currentScheduledGame.date,
           opponent: currentScheduledGame.opponent,
           team: selectedTeam,
           season: selectedSeason,
-          gameType: currentScheduledGame.isPlayoff ? 'playoffs' : 'regular',
+          gameType,
           gameNumber: currentGameNumber,
           absenceType: 'none',
           isAbsent: false,
@@ -145,9 +233,20 @@ const GameForm: React.FC<{
           isDoubleDouble: false,
           isTripleDouble: false,
         })
+      } else {
+        setGame(currentGame => ({
+          ...currentGame,
+          id: crypto.randomUUID(),
+          date: new Date().toISOString().split('T')[0],
+          opponent: '',
+          team: selectedTeam,
+          season: selectedSeason,
+          gameType,
+          gameNumber: currentGameNumber,
+        }))
       }
     }
-  }, [selectedTeam, selectedSeason, currentGameNumber])
+  }, [selectedTeam, selectedSeason, currentGameNumber, gameType, selectedTeamId])
 
   const calculateDoubleDouble = (stats: GameStats): boolean => {
     const categories = [stats.points, stats.assists, stats.rebounds, stats.blocks, stats.steals]
@@ -185,23 +284,9 @@ const GameForm: React.FC<{
     }
 
     if (skipMode) {
-      const bulkGames: GameStats[] = []
-      for (let i = 0; i < gamesInInterval; i++) {
-        const index = (currentGameNumber - 1) + i
-        if (schedule[index]) {
-          const scheduledGame = schedule[index]
-          bulkGames.push({
-            ...game,
-            id: crypto.randomUUID(),
-            date: scheduledGame.date,
-            opponent: scheduledGame.opponent,
-            gameNumber: currentGameNumber + i,
-            gameType: scheduledGame.isPlayoff ? 'playoffs' : 'regular',
-            isAbsent: true,
-            won: isWinInInterval(i, gamesInInterval, intervalWins),
-          })
-        }
-      }
+      const bulkGames = gameType === 'regular'
+        ? buildSkippedRegularSeasonGames(gamesInInterval)
+        : buildSkippedPlayoffGames(gamesInInterval)
 
       if (bulkGames.length === 0) {
         setError('No games found to skip')
@@ -346,7 +431,7 @@ const GameForm: React.FC<{
                   disabled={skipToSeasonEnd}
                   id='skipCount'
                   min={1}
-                  max={remainingGames || 1}
+                  max={availableSkipGames || 1}
                 />
                 <label className="checkbox-label">
                   <input 

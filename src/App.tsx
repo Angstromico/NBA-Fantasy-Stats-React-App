@@ -14,9 +14,14 @@ import type {
 import {
   calculateCareerHighs as calcCareerHighs,
   calculateStatsSummary as calcStatsSummary,
+  checkPlayoffQualification,
   organizeSeasonStats as orgSeasonStats,
 } from './utils/statsCalculations'
-import { SEASONS_DATA } from './data/nbaData'
+import {
+  getNextSeason,
+  REGULAR_SEASON_GAME_COUNT,
+  SEASONS_DATA,
+} from './data/nbaData'
 import './App.css'
 
 const App: React.FC = () => {
@@ -31,8 +36,57 @@ const App: React.FC = () => {
   const [darkMode, setDarkMode] = useState(false)
   const [selectedTeam, setSelectedTeam] = useState('')
   const [selectedSeason, setSelectedSeason] = useState('')
+  const [progressionMessage, setProgressionMessage] = useState('')
 
   useEffect(() => {
+    let initialTeam = ''
+    let initialSeason = ''
+
+    const initializeGameProgression = (
+      parsedStats: GameStats[],
+      team: string,
+      season: string,
+    ) => {
+      const seasonGames = parsedStats.filter(
+        (g) => g.season === season && g.team === team,
+      )
+      const regularSeasonGames = seasonGames.filter(
+        (g) => g.gameType === 'regular',
+      )
+      const playoffGames = seasonGames.filter(
+        (g) => g.gameType === 'playoffs',
+      )
+
+      if (regularSeasonGames.length >= REGULAR_SEASON_GAME_COUNT) {
+        if (checkPlayoffQualification(regularSeasonGames)) {
+          setCurrentGameType('playoffs')
+          setCurrentGameNumber(playoffGames.length + 1)
+          return
+        }
+
+        const nextSeason = getNextSeason(season)
+        if (nextSeason) {
+          const nextRegularGames = parsedStats.filter(
+            (g) =>
+              g.season === nextSeason &&
+              g.team === team &&
+              g.gameType === 'regular',
+          )
+
+          setSelectedSeason(nextSeason)
+          setCurrentGameType('regular')
+          setCurrentGameNumber(nextRegularGames.length + 1)
+          setProgressionMessage(
+            `${season} is complete without playoff qualification. Advanced to ${nextSeason}.`,
+          )
+          return
+        }
+      }
+
+      setCurrentGameType('regular')
+      setCurrentGameNumber(regularSeasonGames.length + 1)
+    }
+
     try {
       const savedUsers = localStorage.getItem('users')
       if (savedUsers) {
@@ -49,11 +103,13 @@ const App: React.FC = () => {
 
     const savedTeam = localStorage.getItem('selectedTeam')
     if (savedTeam) {
+      initialTeam = savedTeam
       setSelectedTeam(savedTeam)
     }
 
     const savedSeason = localStorage.getItem('selectedSeason')
     if (savedSeason) {
+      initialSeason = savedSeason
       setSelectedSeason(savedSeason)
     }
 
@@ -62,24 +118,8 @@ const App: React.FC = () => {
       if (savedStats) {
         const parsedStats = JSON.parse(savedStats)
         setStats(parsedStats)
-  // ... rest of effect
-
-        const regularSeasonGames = parsedStats.filter(
-          (g: GameStats) => g.gameType === 'regular',
-        )
-        const playoffGames = parsedStats.filter(
-          (g: GameStats) => g.gameType === 'playoffs',
-        )
-
-        if (regularSeasonGames.length > 0) {
-          const maxRegularGameNumber = Math.max(
-            ...regularSeasonGames.map((g: GameStats) => g.gameNumber),
-          )
-          setCurrentGameNumber(maxRegularGameNumber + 1)
-        }
-
-        if (playoffGames.length > 0) {
-          setCurrentGameType('playoffs')
+        if (initialTeam && initialSeason) {
+          initializeGameProgression(parsedStats, initialTeam, initialSeason)
         }
       }
     } catch {
@@ -137,6 +177,71 @@ const App: React.FC = () => {
     localStorage.setItem('stats', JSON.stringify(newStats))
   }
 
+  const getTeamSeasonGames = (
+    allGames: GameStats[],
+    team: string,
+    season: string,
+  ) => allGames.filter((g) => g.season === season && g.team === team)
+
+  const moveToNextSeason = (
+    allGames: GameStats[],
+    team: string,
+    season: string,
+  ) => {
+    const nextSeason = getNextSeason(season)
+
+    if (!nextSeason) {
+      setCurrentGameType('regular')
+      setCurrentGameNumber(REGULAR_SEASON_GAME_COUNT + 1)
+      setProgressionMessage(
+        `${season} is complete and no later season is available in the app data.`,
+      )
+      return
+    }
+
+    const nextRegularGames = getTeamSeasonGames(
+      allGames,
+      team,
+      nextSeason,
+    ).filter((g) => g.gameType === 'regular')
+
+    setSelectedSeason(nextSeason)
+    setCurrentGameType('regular')
+    setCurrentGameNumber(nextRegularGames.length + 1)
+    setProgressionMessage(
+      `${season} is complete without playoff qualification. Advanced to ${nextSeason}.`,
+    )
+  }
+
+  const setGameProgression = (
+    allGames: GameStats[],
+    team: string,
+    season: string,
+  ) => {
+    const seasonGames = getTeamSeasonGames(allGames, team, season)
+    const regularSeasonGames = seasonGames.filter(
+      (g) => g.gameType === 'regular',
+    )
+    const playoffGames = seasonGames.filter(
+      (g) => g.gameType === 'playoffs',
+    )
+
+    if (regularSeasonGames.length >= REGULAR_SEASON_GAME_COUNT) {
+      if (checkPlayoffQualification(regularSeasonGames)) {
+        setCurrentGameType('playoffs')
+        setCurrentGameNumber(playoffGames.length + 1)
+        setProgressionMessage('')
+      } else {
+        moveToNextSeason(allGames, team, season)
+      }
+      return
+    }
+
+    setCurrentGameType('regular')
+    setCurrentGameNumber(regularSeasonGames.length + 1)
+    setProgressionMessage('')
+  }
+
   const login = async (
     username: string,
     password: string,
@@ -170,24 +275,10 @@ const App: React.FC = () => {
     saveStats(newStats)
 
     const lastGame = gamesToAdd[gamesToAdd.length - 1]
+    setSelectedTeam(lastGame.team)
+    setSelectedSeason(lastGame.season)
 
-    // Update game numbers based on the last game added
-    const currentSeasonGames = newStats.filter(
-      (g) => g.season === lastGame.season && g.team === lastGame.team,
-    )
-    
-    if (lastGame.gameType === 'regular') {
-      const regularCount = currentSeasonGames.filter((g) => g.gameType === 'regular').length
-      setCurrentGameNumber(regularCount + 1)
-      
-      if (regularCount >= 82) {
-        setCurrentGameType('playoffs')
-        setCurrentGameNumber(1)
-      }
-    } else {
-      const playoffCount = currentSeasonGames.filter((g) => g.gameType === 'playoffs').length
-      setCurrentGameNumber(playoffCount + 1)
-    }
+    setGameProgression(newStats, lastGame.team, lastGame.season)
   }
 
   const calculateCareerHighs = (games: GameStats[]) => {
@@ -216,8 +307,26 @@ const App: React.FC = () => {
   }
 
   const switchToPlayoffs = () => {
+    if (!selectedTeam || !selectedSeason) {
+      return
+    }
+
+    const seasonGames = getTeamSeasonGames(stats, selectedTeam, selectedSeason)
+    const regularSeasonGames = seasonGames.filter(
+      (g) => g.gameType === 'regular',
+    )
+
+    if (!checkPlayoffQualification(regularSeasonGames)) {
+      setProgressionMessage(
+        `${selectedSeason} has not qualified for the playoffs. Complete an 82-game non-losing season first.`,
+      )
+      return
+    }
+
+    const playoffGames = seasonGames.filter((g) => g.gameType === 'playoffs')
     setCurrentGameType('playoffs')
-    setCurrentGameNumber(1)
+    setCurrentGameNumber(playoffGames.length + 1)
+    setProgressionMessage('')
   }
 
   const switchToRegularSeason = () => {
@@ -233,18 +342,21 @@ const App: React.FC = () => {
         ? Math.max(...regularSeasonGames.map((g) => g.gameNumber))
         : 0
     setCurrentGameNumber(maxGameNumber + 1)
+    setProgressionMessage('')
   }
 
   const handleTeamChange = (team: string) => {
     setSelectedTeam(team)
     setCurrentGameNumber(1)
     setCurrentGameType('regular')
+    setProgressionMessage('')
   }
 
   const handleSeasonChange = (season: string) => {
     setSelectedSeason(season)
     setCurrentGameNumber(1)
     setCurrentGameType('regular')
+    setProgressionMessage('')
   }
 
   if (!currentUser) {
@@ -299,6 +411,11 @@ const App: React.FC = () => {
           onTeamChange={handleTeamChange}
           onSeasonChange={handleSeasonChange}
         />
+        {progressionMessage && (
+          <div className='message info' role='status'>
+            {progressionMessage}
+          </div>
+        )}
         
         <StatsDisplay
           stats={stats}

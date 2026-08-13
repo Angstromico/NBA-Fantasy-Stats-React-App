@@ -25,7 +25,7 @@ const StatsDisplay: React.FC<{
   const filteredStats = selectedSeason === 'all' 
     ? stats 
     : stats.filter(game => {
-        const seasonYear = game.date ? getSeasonYear(game.date) : 'unknown'
+        const seasonYear = game.season || (game.date ? getSeasonYear(game.date) : 'unknown')
         return seasonYear === selectedSeason
       })
 

@@ -137,18 +137,18 @@ export const calculateCareerHighs = (allGames: GameStats[]): CareerHighs => {
 export const checkPlayoffQualification = (regularSeasonGames: GameStats[]): boolean => {
   const wins = regularSeasonGames.filter(g => g.won).length
   const totalGames = regularSeasonGames.length
-  const winPercentage = totalGames > 0 ? wins / totalGames : 0
+  const losses = totalGames - wins
   
-  // Typical playoff qualification: top 10 teams in each conference (usually around 45+ wins)
-  // For a simplified model, we'll use 50% win rate as the threshold
-  return winPercentage >= 0.5 && totalGames >= 60 // Must play at least 60 games
+  // The app does not model full conference standings, so a completed non-losing
+  // 82-game season is the minimum simulated playoff qualification.
+  return totalGames >= 82 && wins >= losses
 }
 
 export const organizeSeasonStats = (allGames: GameStats[]): SeasonStats[] => {
   const seasonsMap = new Map<string, GameStats[]>()
 
   allGames.forEach(game => {
-    const seasonYear = getSeasonYear(game.date)
+    const seasonYear = game.season || getSeasonYear(game.date)
     if (!seasonsMap.has(seasonYear)) {
       seasonsMap.set(seasonYear, [])
     }

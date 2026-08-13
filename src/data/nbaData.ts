@@ -51,6 +51,8 @@ export interface SeasonData {
   schedules: TeamSchedule[]
 }
 
+export const REGULAR_SEASON_GAME_COUNT = 82
+
 // NBA Teams
 export const NBA_TEAMS: NBATeam[] = [
   // Eastern Conference - Atlantic
@@ -135,7 +137,8 @@ const generateTeamSchedule = (teamId: string, season: string, allTeams: NBATeam[
   
   // Conference games (3-4 times each)
   conferenceTeams.forEach(opp => {
-    const times = Math.random() > 0.5 ? 4 : 3
+    const scheduleSeed = teamId.charCodeAt(0) + opp.id.charCodeAt(0)
+    const times = scheduleSeed % 2 === 0 ? 4 : 3
     for (let i = 0; i < times; i++) {
       if (dates.length > 0) {
         games.push({
@@ -170,9 +173,10 @@ const generateTeamSchedule = (teamId: string, season: string, allTeams: NBATeam[
 const generatePlayoffSchedule = (teamId: string, season: string, awards: SeasonAwards, allTeams: NBATeam[]): Game[] => {
   const games: Game[] = []
   const team = allTeams.find(t => t.id === teamId)!
+  const playoffYear = parseInt(season.split('-')[0]) + 1
   
   // First round (Best of 7)
-  const firstRoundDates = ['2025-04-20', '2025-04-22', '2025-04-24', '2025-04-26', '2025-04-28', '2025-04-30', '2025-05-02']
+  const firstRoundDates = [`${playoffYear}-04-20`, `${playoffYear}-04-22`, `${playoffYear}-04-24`, `${playoffYear}-04-26`, `${playoffYear}-04-28`, `${playoffYear}-04-30`, `${playoffYear}-05-02`]
   firstRoundDates.forEach((date, i) => {
     games.push({
       date,
@@ -184,7 +188,7 @@ const generatePlayoffSchedule = (teamId: string, season: string, awards: SeasonA
   })
   
   // Conference Finals (if team advances)
-  const confFinalsDates = ['2025-05-08', '2025-05-10', '2025-05-12', '2025-05-14', '2025-05-16', '2025-05-18', '2025-05-20']
+  const confFinalsDates = [`${playoffYear}-05-08`, `${playoffYear}-05-10`, `${playoffYear}-05-12`, `${playoffYear}-05-14`, `${playoffYear}-05-16`, `${playoffYear}-05-18`, `${playoffYear}-05-20`]
   confFinalsDates.forEach((date, i) => {
     games.push({
       date,
@@ -196,7 +200,7 @@ const generatePlayoffSchedule = (teamId: string, season: string, awards: SeasonA
   })
   
   // NBA Finals (if team advances)
-  const finalsDates = ['2025-05-25', '2025-05-27', '2025-05-29', '2025-05-31', '2025-06-02', '2025-06-04', '2025-06-06']
+  const finalsDates = [`${playoffYear}-05-25`, `${playoffYear}-05-27`, `${playoffYear}-05-29`, `${playoffYear}-05-31`, `${playoffYear}-06-02`, `${playoffYear}-06-04`, `${playoffYear}-06-06`]
   finalsDates.forEach((date, i) => {
     const finalOpponent = awards.champion.team === `${team.city} ${team.name}` 
       ? getFinalsOpponent(team.conference, season)
@@ -434,7 +438,21 @@ export const getTeamSchedule = (teamId: string, season: string): Game[] => {
   return teamSchedule?.games || []
 }
 
+export const getTeamRegularSeasonSchedule = (teamId: string, season: string): Game[] => {
+  return getTeamSchedule(teamId, season).filter(game => !game.isPlayoff)
+}
+
+export const getTeamPlayoffSchedule = (teamId: string, season: string): Game[] => {
+  return getTeamSchedule(teamId, season).filter(game => game.isPlayoff)
+}
+
 // Get available seasons
 export const getAvailableSeasons = (): string[] => {
   return SEASONS_DATA.map(s => s.season)
+}
+
+export const getNextSeason = (season: string): string | null => {
+  const seasons = getAvailableSeasons()
+  const currentIndex = seasons.indexOf(season)
+  return currentIndex >= 0 ? seasons[currentIndex + 1] || null : null
 }
