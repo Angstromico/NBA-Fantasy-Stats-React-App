@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useMemo } from 'react'
 import type { GameStats, AbsenceType, GameType } from '../interfaces'
 import {
   NBA_TEAMS,
@@ -52,14 +52,22 @@ const GameForm: React.FC<{
   const [skipToSeasonEnd, setSkipToSeasonEnd] = useState(false)
   const [error, setError] = useState('')
 
-  const selectedTeamId = NBA_TEAMS.find(
-    t => `${t.city} ${t.name}` === selectedTeam,
-  )?.id || ''
-  const schedule = gameType === 'playoffs'
-    ? getTeamPlayoffSchedule(selectedTeamId, selectedSeason)
-    : getTeamRegularSeasonSchedule(selectedTeamId, selectedSeason)
+  const selectedTeamId = useMemo(
+    () => NBA_TEAMS.find(
+      t => `${t.city} ${t.name}` === selectedTeam,
+    )?.id || '',
+    [selectedTeam],
+  )
+  const schedule = useMemo(
+    () => (
+      gameType === 'playoffs'
+        ? getTeamPlayoffSchedule(selectedTeamId, selectedSeason)
+        : getTeamRegularSeasonSchedule(selectedTeamId, selectedSeason)
+    ),
+    [gameType, selectedSeason, selectedTeamId],
+  )
   const remainingGames = Math.max(0, schedule.length - (currentGameNumber - 1))
-  const totalRegularGamesAvailable = (() => {
+  const totalRegularGamesAvailable = useMemo(() => {
     if (!selectedTeamId || !selectedSeason) {
       return 0
     }
@@ -76,7 +84,7 @@ const GameForm: React.FC<{
     }
 
     return availableGames
-  })()
+  }, [currentGameNumber, selectedSeason, selectedTeamId])
   const availableSkipGames = gameType === 'regular'
     ? totalRegularGamesAvailable
     : remainingGames
@@ -206,13 +214,10 @@ const GameForm: React.FC<{
 
   useEffect(() => {
     if (selectedTeam && selectedSeason) {
-      const activeSchedule = gameType === 'playoffs'
-        ? getTeamPlayoffSchedule(selectedTeamId, selectedSeason)
-        : getTeamRegularSeasonSchedule(selectedTeamId, selectedSeason)
       // Set current game date and opponent based on schedule
       const currentGameIndex = currentGameNumber - 1
-      if (activeSchedule[currentGameIndex]) {
-        const currentScheduledGame = activeSchedule[currentGameIndex]
+      if (schedule[currentGameIndex]) {
+        const currentScheduledGame = schedule[currentGameIndex]
         setGame({
           id: crypto.randomUUID(),
           date: currentScheduledGame.date,
@@ -246,7 +251,7 @@ const GameForm: React.FC<{
         }))
       }
     }
-  }, [selectedTeam, selectedSeason, currentGameNumber, gameType, selectedTeamId])
+  }, [selectedTeam, selectedSeason, currentGameNumber, gameType, schedule])
 
   const calculateDoubleDouble = (stats: GameStats): boolean => {
     const categories = [stats.points, stats.assists, stats.rebounds, stats.blocks, stats.steals]

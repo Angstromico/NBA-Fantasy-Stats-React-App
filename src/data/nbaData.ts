@@ -417,8 +417,14 @@ export const SEASONS_DATA: SeasonData[] = [
 ]
 
 // Generate schedules for all teams and seasons
+let allSchedulesCache: SeasonData[] | null = null
+
 export const generateAllSchedules = (): SeasonData[] => {
-  return SEASONS_DATA.map(seasonData => ({
+  if (allSchedulesCache) {
+    return allSchedulesCache
+  }
+
+  allSchedulesCache = SEASONS_DATA.map(seasonData => ({
     ...seasonData,
     schedules: NBA_TEAMS.map(team => ({
       teamId: team.id,
@@ -429,6 +435,8 @@ export const generateAllSchedules = (): SeasonData[] => {
       ]
     }))
   }))
+
+  return allSchedulesCache
 }
 
 // Get schedule for specific team and season
