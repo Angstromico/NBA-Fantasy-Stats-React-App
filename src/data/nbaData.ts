@@ -52,6 +52,7 @@ export interface SeasonData {
 }
 
 export const REGULAR_SEASON_GAME_COUNT = 82
+export const PLAYOFF_SERIES_WIN_COUNT = 4
 
 // NBA Teams
 export const NBA_TEAMS: NBATeam[] = [

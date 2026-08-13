@@ -18,11 +18,148 @@ import {
   organizeSeasonStats as orgSeasonStats,
 } from './utils/statsCalculations'
 import {
+  NBA_TEAMS,
   getNextSeason,
+  getTeamPlayoffSchedule,
+  PLAYOFF_SERIES_WIN_COUNT,
   REGULAR_SEASON_GAME_COUNT,
   SEASONS_DATA,
 } from './data/nbaData'
 import './App.css'
+
+type PlayoffProgression =
+  | { status: 'not-started'; nextGameNumber: number }
+  | { status: 'active'; nextGameNumber: number; round: number }
+  | { status: 'eliminated'; round: number }
+  | { status: 'complete' }
+
+const getTeamId = (teamName: string) =>
+  NBA_TEAMS.find((team) => `${team.city} ${team.name}` === teamName)?.id || ''
+
+const getPlayoffRoundForGame = (
+  team: string,
+  season: string,
+  gameNumber: number,
+) => {
+  const schedule = getTeamPlayoffSchedule(getTeamId(team), season)
+  return schedule[gameNumber - 1]?.playoffRound || Math.ceil(gameNumber / 7)
+}
+
+const getPlayoffProgression = (
+  allGames: GameStats[],
+  team: string,
+  season: string,
+): PlayoffProgression => {
+  const schedule = getTeamPlayoffSchedule(getTeamId(team), season)
+  const playoffGames = allGames
+    .filter(
+      (game) =>
+        game.team === team &&
+        game.season === season &&
+        game.gameType === 'playoffs',
+    )
+    .sort((a, b) => a.gameNumber - b.gameNumber)
+  const playoffRounds = Array.from(
+    new Set(schedule.map((game) => game.playoffRound).filter(Boolean)),
+  ) as number[]
+
+  if (playoffGames.length === 0) {
+    return { status: 'not-started', nextGameNumber: 1 }
+  }
+
+  for (const round of playoffRounds) {
+    const roundStartIndex = schedule.findIndex(
+      (game) => game.playoffRound === round,
+    )
+    const roundGames = playoffGames.filter(
+      (game) => getPlayoffRoundForGame(team, season, game.gameNumber) === round,
+    )
+    const wins = roundGames.filter((game) => game.won).length
+    const losses = roundGames.length - wins
+
+    if (losses >= PLAYOFF_SERIES_WIN_COUNT) {
+      return { status: 'eliminated', round }
+    }
+
+    if (wins >= PLAYOFF_SERIES_WIN_COUNT) {
+      continue
+    }
+
+    return {
+      status: 'active',
+      round,
+      nextGameNumber: roundStartIndex + roundGames.length + 1,
+    }
+  }
+
+  return { status: 'complete' }
+}
+
+const filterPlayableGames = (
+  existingGames: GameStats[],
+  incomingGames: GameStats[],
+) => {
+  const acceptedGames: GameStats[] = []
+  const eliminatedSeasons = new Set<string>()
+
+  incomingGames.forEach((game) => {
+    if (game.gameType !== 'playoffs') {
+      acceptedGames.push(game)
+      return
+    }
+
+    const seasonKey = `${game.team}:${game.season}`
+    if (eliminatedSeasons.has(seasonKey)) {
+      return
+    }
+
+    const playableGames = [...existingGames, ...acceptedGames]
+    const currentProgression = getPlayoffProgression(
+      playableGames,
+      game.team,
+      game.season,
+    )
+
+    if (
+      currentProgression.status === 'eliminated' ||
+      currentProgression.status === 'complete'
+    ) {
+      eliminatedSeasons.add(seasonKey)
+      return
+    }
+
+    const gameRound = getPlayoffRoundForGame(
+      game.team,
+      game.season,
+      game.gameNumber,
+    )
+
+    if (currentProgression.status === 'not-started' && gameRound !== 1) {
+      return
+    }
+
+    if (
+      currentProgression.status === 'active' &&
+      gameRound !== currentProgression.round
+    ) {
+      return
+    }
+
+    acceptedGames.push(game)
+
+    const nextProgression = getPlayoffProgression(
+      [...existingGames, ...acceptedGames],
+      game.team,
+      game.season,
+    )
+
+    if (nextProgression.status === 'eliminated') {
+      eliminatedSeasons.add(seasonKey)
+    }
+  })
+
+  return acceptedGames
+}
 
 const App: React.FC = () => {
   const [users, setUsers] = useState<User[]>([])
@@ -53,14 +190,73 @@ const App: React.FC = () => {
       const regularSeasonGames = seasonGames.filter(
         (g) => g.gameType === 'regular',
       )
-      const playoffGames = seasonGames.filter(
-        (g) => g.gameType === 'playoffs',
-      )
 
       if (regularSeasonGames.length >= REGULAR_SEASON_GAME_COUNT) {
         if (checkPlayoffQualification(regularSeasonGames)) {
+          const playoffProgression = getPlayoffProgression(
+            parsedStats,
+            team,
+            season,
+          )
+
+          if (playoffProgression.status === 'eliminated') {
+            const nextSeason = getNextSeason(season)
+
+            if (nextSeason) {
+              const nextRegularGames = parsedStats.filter(
+                (g) =>
+                  g.season === nextSeason &&
+                  g.team === team &&
+                  g.gameType === 'regular',
+              )
+
+              setSelectedSeason(nextSeason)
+              setCurrentGameType('regular')
+              setCurrentGameNumber(nextRegularGames.length + 1)
+              setProgressionMessage(
+                `${season} playoff run ended in round ${playoffProgression.round}. Advanced to ${nextSeason}.`,
+              )
+              return
+            }
+
+            setCurrentGameType('regular')
+            setCurrentGameNumber(REGULAR_SEASON_GAME_COUNT + 1)
+            setProgressionMessage(
+              `${season} playoff run ended in round ${playoffProgression.round}. No later season is available in the app data.`,
+            )
+            return
+          }
+
+          if (playoffProgression.status === 'complete') {
+            const nextSeason = getNextSeason(season)
+
+            if (nextSeason) {
+              const nextRegularGames = parsedStats.filter(
+                (g) =>
+                  g.season === nextSeason &&
+                  g.team === team &&
+                  g.gameType === 'regular',
+              )
+
+              setSelectedSeason(nextSeason)
+              setCurrentGameType('regular')
+              setCurrentGameNumber(nextRegularGames.length + 1)
+              setProgressionMessage(
+                `${season} playoff run is complete. Advanced to ${nextSeason}.`,
+              )
+              return
+            }
+
+            setCurrentGameType('regular')
+            setCurrentGameNumber(REGULAR_SEASON_GAME_COUNT + 1)
+            setProgressionMessage(
+              `${season} playoff run is complete. No later season is available in the app data.`,
+            )
+            return
+          }
+
           setCurrentGameType('playoffs')
-          setCurrentGameNumber(playoffGames.length + 1)
+          setCurrentGameNumber(playoffProgression.nextGameNumber)
           return
         }
 
@@ -187,6 +383,7 @@ const App: React.FC = () => {
     allGames: GameStats[],
     team: string,
     season: string,
+    reason = `${season} is complete without playoff qualification.`,
   ) => {
     const nextSeason = getNextSeason(season)
 
@@ -194,7 +391,7 @@ const App: React.FC = () => {
       setCurrentGameType('regular')
       setCurrentGameNumber(REGULAR_SEASON_GAME_COUNT + 1)
       setProgressionMessage(
-        `${season} is complete and no later season is available in the app data.`,
+        `${reason} No later season is available in the app data.`,
       )
       return
     }
@@ -208,9 +405,7 @@ const App: React.FC = () => {
     setSelectedSeason(nextSeason)
     setCurrentGameType('regular')
     setCurrentGameNumber(nextRegularGames.length + 1)
-    setProgressionMessage(
-      `${season} is complete without playoff qualification. Advanced to ${nextSeason}.`,
-    )
+    setProgressionMessage(`${reason} Advanced to ${nextSeason}.`)
   }
 
   const setGameProgression = (
@@ -222,14 +417,37 @@ const App: React.FC = () => {
     const regularSeasonGames = seasonGames.filter(
       (g) => g.gameType === 'regular',
     )
-    const playoffGames = seasonGames.filter(
-      (g) => g.gameType === 'playoffs',
-    )
 
     if (regularSeasonGames.length >= REGULAR_SEASON_GAME_COUNT) {
       if (checkPlayoffQualification(regularSeasonGames)) {
+        const playoffProgression = getPlayoffProgression(
+          allGames,
+          team,
+          season,
+        )
+
+        if (playoffProgression.status === 'eliminated') {
+          moveToNextSeason(
+            allGames,
+            team,
+            season,
+            `${season} playoff run ended in round ${playoffProgression.round}.`,
+          )
+          return
+        }
+
+        if (playoffProgression.status === 'complete') {
+          moveToNextSeason(
+            allGames,
+            team,
+            season,
+            `${season} playoff run is complete.`,
+          )
+          return
+        }
+
         setCurrentGameType('playoffs')
-        setCurrentGameNumber(playoffGames.length + 1)
+        setCurrentGameNumber(playoffProgression.nextGameNumber)
         setProgressionMessage('')
       } else {
         moveToNextSeason(allGames, team, season)
@@ -270,7 +488,16 @@ const App: React.FC = () => {
   }
 
   const addGameStats = (games: GameStats | GameStats[]) => {
-    const gamesToAdd = Array.isArray(games) ? games : [games]
+    const requestedGames = Array.isArray(games) ? games : [games]
+    const gamesToAdd = filterPlayableGames(stats, requestedGames)
+
+    if (gamesToAdd.length === 0) {
+      setProgressionMessage(
+        'No playoff games were added because the current playoff run is already complete.',
+      )
+      return
+    }
+
     const newStats = [...stats, ...gamesToAdd]
     saveStats(newStats)
 
@@ -323,9 +550,34 @@ const App: React.FC = () => {
       return
     }
 
-    const playoffGames = seasonGames.filter((g) => g.gameType === 'playoffs')
+    const playoffProgression = getPlayoffProgression(
+      stats,
+      selectedTeam,
+      selectedSeason,
+    )
+
+    if (playoffProgression.status === 'eliminated') {
+      moveToNextSeason(
+        stats,
+        selectedTeam,
+        selectedSeason,
+        `${selectedSeason} playoff run ended in round ${playoffProgression.round}.`,
+      )
+      return
+    }
+
+    if (playoffProgression.status === 'complete') {
+      moveToNextSeason(
+        stats,
+        selectedTeam,
+        selectedSeason,
+        `${selectedSeason} playoff run is complete.`,
+      )
+      return
+    }
+
     setCurrentGameType('playoffs')
-    setCurrentGameNumber(playoffGames.length + 1)
+    setCurrentGameNumber(playoffProgression.nextGameNumber)
     setProgressionMessage('')
   }
 
