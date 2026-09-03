@@ -23,6 +23,7 @@ const StatsDisplay: React.FC<{
   currentSeason?: string
 }> = ({ stats, careerHighs, statsSummary, seasonStats, currentSeason }) => {
   const [showAll, setShowAll] = useState(false)
+  const [recordCardFlipped, setRecordCardFlipped] = useState(false)
   const [selectedSeason, setSelectedSeason] = useState<string>('all')
 
   const totals = stats.reduce(
@@ -64,6 +65,29 @@ const StatsDisplay: React.FC<{
     return seasonYear === trackedSeason
   })
   const currentSeasonPlayed = currentSeasonGames.filter((game) => !game.isAbsent)
+  const currentSeasonMissed = currentSeasonGames.filter((game) => game.isAbsent)
+  const currentSeasonPlayoffs = currentSeasonGames.filter(
+    (game) => game.gameType === 'playoffs',
+  )
+  const currentSeasonWins = currentSeasonGames.filter((game) => game.won).length
+  const currentSeasonLosses = currentSeasonGames.length - currentSeasonWins
+  const currentSeasonPlayerWins = currentSeasonPlayed.filter((game) => game.won).length
+  const currentSeasonMissedWins = currentSeasonMissed.filter((game) => game.won).length
+  const currentSeasonPlayoffWins = currentSeasonPlayoffs.filter((game) => game.won).length
+  const currentSeasonPlayerWinPercentage =
+    currentSeasonPlayed.length > 0
+      ? currentSeasonPlayerWins / currentSeasonPlayed.length
+      : 0
+  const currentSeasonMissedWinPercentage =
+    currentSeasonMissed.length > 0
+      ? currentSeasonMissedWins / currentSeasonMissed.length
+      : 0
+  const currentSeasonPlayoffWinPercentage =
+    currentSeasonPlayoffs.length > 0
+      ? currentSeasonPlayoffWins / currentSeasonPlayoffs.length
+      : 0
+  const currentSeasonWinPercentage =
+    currentSeasonGames.length > 0 ? currentSeasonWins / currentSeasonGames.length : 0
 
   return (
     <div className='StatsDisplay glass-card'>
@@ -118,20 +142,59 @@ const StatsDisplay: React.FC<{
         <div className="summary-section">
           <h2>Overall Summary</h2>
           <div className="summary-grid">
-            <div>
-              <h3>Record</h3>
-              <p>Player Games: {statsSummary.playerWins}-{statsSummary.playerLosses}</p>
-              <p>Missed Games: {statsSummary.missedWins}-{statsSummary.missedLosses}</p>
-              <p>Team Total: {statsSummary.teamWins}-{statsSummary.teamLosses}</p>
-              <p>Playoffs Team Total: {statsSummary.playoffWins}-{statsSummary.playoffLosses}</p>
-              <p>Player Win Percentage: {(statsSummary.playerWinPercentage * 100).toFixed(2)}%</p>
-              <p>Team Win Percentage: {(statsSummary.winPercentage * 100).toFixed(2)}%</p>
-              {statsSummary.gamesMissed > 0 && (
-                <p>Missed Games Win Percentage: {(statsSummary.missedWinPercentage * 100).toFixed(2)}%</p>
-              )}
-              {statsSummary.playoffWins > 0 && (
-                <p>Playoff Win Percentage: {(statsSummary.playoffWinPercentage * 100).toFixed(2)}%</p>
-              )}
+            <div
+              className={`flip-card${recordCardFlipped ? ' is-flipped' : ''}`}
+              role='button'
+              tabIndex={0}
+              aria-label='Record card. Click to flip between the current season record and career totals.'
+              onClick={() => setRecordCardFlipped(!recordCardFlipped)}
+              onKeyDown={(event) => {
+                if (event.key === 'Enter' || event.key === ' ') {
+                  event.preventDefault()
+                  setRecordCardFlipped(!recordCardFlipped)
+                }
+              }}
+            >
+              <div className='flip-card-inner'>
+                <div className='flip-card-face' aria-hidden={recordCardFlipped}>
+                  <h3>Current Season</h3>
+                  <span className='flip-subtitle'>{trackedSeason}</span>
+                  <p>Player Games: {currentSeasonPlayerWins}-{currentSeasonPlayed.length - currentSeasonPlayerWins}</p>
+                  <p>Missed Games: {currentSeasonMissedWins}-{currentSeasonMissed.length - currentSeasonMissedWins}</p>
+                  <p>Team Total: {currentSeasonWins}-{currentSeasonLosses}</p>
+                  {currentSeasonPlayoffs.length > 0 && (
+                    <p>Playoffs Team Total: {currentSeasonPlayoffWins}-{currentSeasonPlayoffs.length - currentSeasonPlayoffWins}</p>
+                  )}
+                  <p>Player Win Percentage: {(currentSeasonPlayerWinPercentage * 100).toFixed(2)}%</p>
+                  <p>Team Win Percentage: {(currentSeasonWinPercentage * 100).toFixed(2)}%</p>
+                  {currentSeasonMissed.length > 0 && (
+                    <p>Missed Games Win Percentage: {(currentSeasonMissedWinPercentage * 100).toFixed(2)}%</p>
+                  )}
+                  {currentSeasonPlayoffs.length > 0 && (
+                    <p>Playoff Win Percentage: {(currentSeasonPlayoffWinPercentage * 100).toFixed(2)}%</p>
+                  )}
+                  <span className='flip-cue'>Click for career totals</span>
+                </div>
+                <div
+                  className='flip-card-face flip-card-face-back'
+                  aria-hidden={!recordCardFlipped}
+                >
+                  <h3>Career Totals</h3>
+                  <p>Player Games: {statsSummary.playerWins}-{statsSummary.playerLosses}</p>
+                  <p>Missed Games: {statsSummary.missedWins}-{statsSummary.missedLosses}</p>
+                  <p>Team Total: {statsSummary.teamWins}-{statsSummary.teamLosses}</p>
+                  <p>Playoffs Team Total: {statsSummary.playoffWins}-{statsSummary.playoffLosses}</p>
+                  <p>Player Win Percentage: {(statsSummary.playerWinPercentage * 100).toFixed(2)}%</p>
+                  <p>Team Win Percentage: {(statsSummary.winPercentage * 100).toFixed(2)}%</p>
+                  {statsSummary.gamesMissed > 0 && (
+                    <p>Missed Games Win Percentage: {(statsSummary.missedWinPercentage * 100).toFixed(2)}%</p>
+                  )}
+                  {statsSummary.playoffWins > 0 && (
+                    <p>Playoff Win Percentage: {(statsSummary.playoffWinPercentage * 100).toFixed(2)}%</p>
+                  )}
+                  <span className='flip-cue'>Click for current season</span>
+                </div>
+              </div>
             </div>
             
             <div>

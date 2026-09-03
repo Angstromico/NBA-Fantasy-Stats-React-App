@@ -1407,6 +1407,59 @@ input:checked + .slider:before {
   font-weight: 600;
 }
 
+/* Flip card for the record summary (current season <-> career totals) */
+.flip-card {
+  perspective: 1400px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.flip-card:focus-visible {
+  outline: 2px solid var(--accent-primary);
+  outline-offset: 2px;
+}
+
+.flip-card-inner {
+  display: grid;
+  transform-style: preserve-3d;
+  transition: transform 0.65s cubic-bezier(0.4, 0.2, 0.2, 1);
+}
+
+.flip-card.is-flipped .flip-card-inner {
+  transform: rotateY(180deg);
+}
+
+.flip-card-face {
+  grid-area: 1 / 1;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+
+.flip-card-face-back {
+  transform: rotateY(180deg);
+}
+
+.flip-card .flip-subtitle {
+  display: block;
+  color: var(--text-secondary);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  margin: -0.1rem 0 0.5rem;
+  text-transform: uppercase;
+}
+
+.flip-card .flip-cue {
+  display: block;
+  margin-top: 0.65rem;
+  font-size: 0.62rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-secondary);
+  opacity: 0.75;
+}
+
 .summary-empty-state p {
   color: var(--text-secondary);
   margin-bottom: 0;
