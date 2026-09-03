@@ -146,13 +146,21 @@ const GameForm: React.FC<{
     setBalancedRecord(nextCount)
   }
 
-  const isWinInInterval = (gameIndex: number, totalGames: number, wins: number) => {
-    // Spread the selected wins through the interval instead of fabricating a streak.
-    return Math.round(((gameIndex + 1) * wins) / totalGames) > Math.round((gameIndex * wins) / totalGames)
+  const buildRandomOutcomes = (totalGames: number, wins: number): boolean[] => {
+    // Shuffle the exact win/loss counts so the order feels organic instead of a fixed spread.
+    const outcomes = Array.from({ length: totalGames }, (_, index) => index < wins)
+    for (let i = outcomes.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1))
+      const swap = outcomes[i]
+      outcomes[i] = outcomes[j]
+      outcomes[j] = swap
+    }
+    return outcomes
   }
 
   const buildSkippedRegularSeasonGames = (totalGames: number): GameStats[] => {
     const skippedGames: GameStats[] = []
+    const outcomes = buildRandomOutcomes(totalGames, intervalWins)
     let season: string | null = selectedSeason
     let gameNumber = currentGameNumber
 
@@ -176,7 +184,7 @@ const GameForm: React.FC<{
           gameType: 'regular',
           season,
           isAbsent: true,
-          won: isWinInInterval(intervalIndex, totalGames, intervalWins),
+          won: outcomes[intervalIndex],
         })
       }
 
@@ -189,6 +197,7 @@ const GameForm: React.FC<{
 
   const buildSkippedPlayoffGames = (totalGames: number): GameStats[] => {
     const skippedGames: GameStats[] = []
+    const outcomes = buildRandomOutcomes(totalGames, intervalWins)
 
     for (let i = 0; i < totalGames; i++) {
       const index = (currentGameNumber - 1) + i
@@ -204,7 +213,7 @@ const GameForm: React.FC<{
           gameType: 'playoffs',
           season: selectedSeason,
           isAbsent: true,
-          won: isWinInInterval(i, totalGames, intervalWins),
+          won: outcomes[i],
         })
       }
     }
@@ -626,7 +635,7 @@ const GameForm: React.FC<{
                       aria-label="Number of wins in this interval"
                     />
                   </div>
-                  <p id="skipWinsHelp">Losses update automatically. The interval starts with a balanced split.</p>
+                  <p id="skipWinsHelp">Losses update automatically. Win and loss order is randomized across the skipped games.</p>
                 </div>
               </section>
             )}
