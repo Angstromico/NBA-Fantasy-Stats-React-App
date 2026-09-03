@@ -9,6 +9,7 @@ import {
   ComparisonDisplay,
   StatsSummaryPage,
   RecordsDisplay,
+  AllTimeLeaderboards,
 } from './components'
 import type {
   User,
@@ -26,6 +27,8 @@ import {
 } from './utils/statsCalculations'
 import { getBrokenRecords } from './utils/recordCalculations'
 import type { RecordComparison } from './utils/recordCalculations'
+import { computeTopTwentyEntrances } from './utils/leaderboardCalculations'
+import type { TopTwentyEntrance } from './utils/leaderboardCalculations'
 import {
   NBA_TEAMS,
   getNextSeason,
@@ -186,6 +189,7 @@ const App: React.FC = () => {
   const [selectedSeason, setSelectedSeason] = useState('')
   const [progressionMessage, setProgressionMessage] = useState('')
   const [recordsCongrats, setRecordsCongrats] = useState<RecordComparison[]>([])
+  const [topTwentyCongrats, setTopTwentyCongrats] = useState<TopTwentyEntrance[]>([])
   const [appView, setAppView] = useState<AppView>('tracker')
 
   useEffect(() => {
@@ -525,6 +529,12 @@ const App: React.FC = () => {
       setRecordsCongrats(newlyBroken)
     }
 
+    // Celebrate newly logged games that crack an all-time top-20 leaderboard.
+    const entrances = computeTopTwentyEntrances(gamesToAdd)
+    if (entrances.length > 0) {
+      setTopTwentyCongrats(entrances)
+    }
+
     const lastGame = gamesToAdd[gamesToAdd.length - 1]
     setSelectedTeam(lastGame.team)
     setSelectedSeason(lastGame.season)
@@ -743,6 +753,26 @@ const App: React.FC = () => {
               </div>
             )}
 
+            {topTwentyCongrats.length > 0 && (
+              <div className='congrats-banner' role='status'>
+                <div className='congrats-banner-list'>
+                  {topTwentyCongrats.map((entrance) => (
+                    <p key={`${entrance.boardId}-${entrance.context}`}>
+                      🏆 TOP-20 ENTRY! Your {entrance.value}-{entrance.adjective} game ({entrance.context}) ranks #{entrance.rank} all-time for {entrance.boardTitle}!
+                    </p>
+                  ))}
+                </div>
+                <button
+                  type='button'
+                  className='congrats-dismiss'
+                  onClick={() => setTopTwentyCongrats([])}
+                  aria-label='Dismiss top-20 congratulations'
+                >
+                  ✕
+                </button>
+              </div>
+            )}
+
             <StatsDisplay
               stats={stats}
               careerHighs={careerHighs}
@@ -764,11 +794,17 @@ const App: React.FC = () => {
             )}
           </>
         ) : appView === 'records' ? (
-          <RecordsDisplay
-            stats={stats}
-            congrats={recordsCongrats}
-            onDismissCongrats={() => setRecordsCongrats([])}
-          />
+          <>
+            <RecordsDisplay
+              stats={stats}
+              congrats={recordsCongrats}
+              onDismissCongrats={() => setRecordsCongrats([])}
+            />
+            <AllTimeLeaderboards
+              stats={stats}
+              playerName={currentUser}
+            />
+          </>
         ) : (
           <StatsSummaryPage
             stats={stats}
