@@ -8,6 +8,7 @@ import {
   StatsDisplay,
   ComparisonDisplay,
   StatsSummaryPage,
+  RecordsDisplay,
 } from './components'
 import type {
   User,
@@ -23,6 +24,8 @@ import {
   checkPlayoffQualification,
   organizeSeasonStats as orgSeasonStats,
 } from './utils/statsCalculations'
+import { getBrokenRecords } from './utils/recordCalculations'
+import type { RecordComparison } from './utils/recordCalculations'
 import {
   NBA_TEAMS,
   getNextSeason,
@@ -39,7 +42,7 @@ type PlayoffProgression =
   | { status: 'eliminated'; round: number }
   | { status: 'complete' }
 
-type AppView = 'tracker' | 'summary'
+type AppView = 'tracker' | 'summary' | 'records'
 
 const getTeamId = (teamName: string) =>
   NBA_TEAMS.find((team) => `${team.city} ${team.name}` === teamName)?.id || ''
@@ -182,6 +185,7 @@ const App: React.FC = () => {
   const [selectedTeam, setSelectedTeam] = useState('')
   const [selectedSeason, setSelectedSeason] = useState('')
   const [progressionMessage, setProgressionMessage] = useState('')
+  const [recordsCongrats, setRecordsCongrats] = useState<RecordComparison[]>([])
   const [appView, setAppView] = useState<AppView>('tracker')
 
   useEffect(() => {
@@ -510,6 +514,17 @@ const App: React.FC = () => {
     const newStats = [...stats, ...gamesToAdd]
     saveStats(newStats)
 
+    // Celebrate newly broken NBA records (not ones already achieved before)
+    const previouslyBroken = new Set(
+      getBrokenRecords(stats).map((comparison) => comparison.record.id),
+    )
+    const newlyBroken = getBrokenRecords(newStats).filter(
+      (comparison) => !previouslyBroken.has(comparison.record.id),
+    )
+    if (newlyBroken.length > 0) {
+      setRecordsCongrats(newlyBroken)
+    }
+
     const lastGame = gamesToAdd[gamesToAdd.length - 1]
     setSelectedTeam(lastGame.team)
     setSelectedSeason(lastGame.season)
@@ -653,6 +668,13 @@ const App: React.FC = () => {
             >
               Summary
             </button>
+            <button
+              type='button'
+              onClick={() => setAppView('records')}
+              className={appView === 'records' ? 'active' : ''}
+            >
+              Records
+            </button>
           </nav>
           {appView === 'tracker' && (
             <div className='game-type-switcher'>
@@ -698,6 +720,29 @@ const App: React.FC = () => {
               </div>
             )}
 
+            {recordsCongrats.length > 0 && (
+              <div className='congrats-banner' role='status'>
+                <div className='congrats-banner-list'>
+                  {recordsCongrats.map((comparison) => (
+                    <p key={comparison.record.id}>
+                      🏆 CONGRATULATIONS! You broke the NBA record for{' '}
+                      {comparison.record.label} ({comparison.record.holder},{' '}
+                      {comparison.record.value} {comparison.record.unit}) with{' '}
+                      {comparison.playerValue} {comparison.record.unit}!
+                    </p>
+                  ))}
+                </div>
+                <button
+                  type='button'
+                  className='congrats-dismiss'
+                  onClick={() => setRecordsCongrats([])}
+                  aria-label='Dismiss congratulations'
+                >
+                  ✕
+                </button>
+              </div>
+            )}
+
             <StatsDisplay
               stats={stats}
               careerHighs={careerHighs}
@@ -717,6 +762,12 @@ const App: React.FC = () => {
               />
             )}
           </>
+        ) : appView === 'records' ? (
+          <RecordsDisplay
+            stats={stats}
+            congrats={recordsCongrats}
+            onDismissCongrats={() => setRecordsCongrats([])}
+          />
         ) : (
           <StatsSummaryPage
             stats={stats}

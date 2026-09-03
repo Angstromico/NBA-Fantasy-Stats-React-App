@@ -251,6 +251,61 @@ header p {
   border: 1px solid rgba(56, 189, 248, 0.2);
 }
 
+.congrats-banner {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  padding: 1rem 1.25rem;
+  border-radius: 16px;
+  margin-bottom: 1.5rem;
+  background:
+    radial-gradient(circle at 8% 20%, rgba(250, 204, 21, 0.25), transparent 40%),
+    linear-gradient(135deg, rgba(245, 158, 11, 0.14), rgba(74, 222, 128, 0.12));
+  border: 1px solid rgba(250, 204, 21, 0.45);
+  box-shadow: 0 0 24px rgba(250, 204, 21, 0.18);
+  text-align: left;
+}
+
+.congrats-banner-list {
+  flex: 1;
+}
+
+.congrats-banner-list p {
+  margin: 0.3rem 0;
+  color: var(--text-primary);
+  font-size: 0.9rem;
+  font-weight: 700;
+  line-height: 1.5;
+}
+
+.congrats-banner-list p:first-child {
+  margin-top: 0;
+}
+
+.congrats-banner-list p:last-child {
+  margin-bottom: 0;
+}
+
+.congrats-dismiss {
+  background: transparent;
+  border: 1px solid var(--glass-border);
+  border-radius: 50%;
+  box-shadow: none;
+  color: var(--text-secondary);
+  flex: 0 0 auto;
+  font-size: 0.85rem;
+  height: 2rem;
+  line-height: 1;
+  padding: 0;
+  width: 2rem;
+}
+
+.congrats-dismiss:hover {
+  border-color: var(--accent-error);
+  color: var(--accent-error);
+  transform: none;
+}
+
 .game-info-grid {
   display: grid;
   grid-template-columns: 1fr;

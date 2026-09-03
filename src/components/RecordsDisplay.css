@@ -1,0 +1,331 @@
+/* RecordsDisplay.css */
+
+.RecordsDisplay {
+  color: var(--text-primary);
+  margin-left: auto;
+  margin-right: auto;
+  max-width: 1100px;
+  padding: 1.5rem;
+  text-align: left;
+  width: 100%;
+}
+
+@media (min-width: 768px) {
+  .RecordsDisplay {
+    padding: 2.5rem;
+  }
+}
+
+.records-hero {
+  margin-bottom: 1.5rem;
+}
+
+.records-hero .eyebrow {
+  color: var(--accent-primary);
+  display: block;
+  font-size: 0.7rem;
+  font-weight: 900;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.records-hero h2 {
+  color: var(--text-primary);
+  font-size: clamp(1.8rem, 6vw, 2.75rem);
+  letter-spacing: -0.06em;
+  line-height: 1;
+  margin: 0.4rem 0 0.6rem;
+}
+
+.records-hero p {
+  color: var(--text-secondary);
+  margin: 0;
+  max-width: 62ch;
+}
+
+.records-empty-state {
+  background: var(--bg-dark);
+  border: 1px dashed var(--glass-border);
+  border-radius: 20px;
+  padding: 2rem;
+  text-align: center;
+}
+
+.records-empty-state h3 {
+  color: var(--text-primary);
+  margin-top: 0;
+}
+
+.records-empty-state p {
+  color: var(--text-secondary);
+  margin-bottom: 0;
+}
+
+.records-section {
+  margin: 1.5rem 0;
+  padding: 1rem;
+  border-radius: 20px;
+  background: var(--bg-dark);
+  border: 1px solid var(--glass-border);
+}
+
+@media (min-width: 768px) {
+  .records-section {
+    margin: 2rem 0;
+    padding: 1.75rem;
+    border-radius: 24px;
+  }
+}
+
+.records-section h3 {
+  color: var(--accent-secondary);
+  font-size: 1rem;
+  margin-top: 0;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+@media (min-width: 768px) {
+  .records-section h3 {
+    font-size: 1.1rem;
+  }
+}
+
+.streak-cards {
+  display: grid;
+  gap: 0.85rem;
+  grid-template-columns: 1fr;
+}
+
+@media (min-width: 480px) {
+  .streak-cards {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 900px) {
+  .streak-cards {
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  }
+}
+
+.streak-card {
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: 16px;
+  padding: 1rem;
+  transition: border-color 0.3s ease;
+}
+
+.streak-card:hover {
+  border-color: var(--accent-primary);
+}
+
+.streak-card-title {
+  color: var(--text-secondary);
+  display: block;
+  font-size: 0.68rem;
+  font-weight: 900;
+  letter-spacing: 0.1em;
+  margin-bottom: 0.6rem;
+  text-transform: uppercase;
+}
+
+.streak-card-values {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.streak-card-values > div {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.streak-card-values span {
+  color: var(--text-secondary);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.streak-card-values strong {
+  color: var(--text-primary);
+  font-size: 1.35rem;
+  letter-spacing: -0.04em;
+}
+
+.streak-card-values strong.best {
+  color: var(--accent-primary);
+}
+
+.streak-range {
+  color: var(--text-secondary);
+  display: block;
+  font-size: 0.72rem;
+  margin-top: 0.55rem;
+}
+
+.records-table-shell {
+  background: rgba(15, 23, 42, 0.04);
+  border: 1px solid var(--glass-border);
+  border-radius: 18px;
+  overflow-x: auto;
+  width: 100%;
+}
+
+.records-table {
+  border-collapse: collapse;
+  min-width: 760px;
+  width: 100%;
+}
+
+.records-table th,
+.records-table td {
+  border-bottom: 1px solid var(--glass-border);
+  padding: 0.85rem 0.9rem;
+  text-align: left;
+  vertical-align: middle;
+}
+
+.records-table thead th {
+  background: linear-gradient(180deg, rgba(56, 189, 248, 0.14), rgba(56, 189, 248, 0.04));
+  color: var(--text-secondary);
+  font-size: 0.66rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.records-table tbody th {
+  color: var(--text-primary);
+  font-size: 0.92rem;
+  font-weight: 700;
+}
+
+.records-table tbody th small {
+  color: var(--text-secondary);
+  display: block;
+  font-size: 0.72rem;
+  font-weight: 500;
+  margin-top: 0.2rem;
+}
+
+.records-table tbody td {
+  color: var(--text-secondary);
+  font-size: 0.88rem;
+}
+
+.records-table tbody td > strong {
+  color: var(--text-primary);
+  font-size: 1.05rem;
+}
+
+.records-table tbody td > small {
+  color: var(--text-secondary);
+  display: block;
+  font-size: 0.72rem;
+  margin-top: 0.2rem;
+}
+
+.records-table tbody tr:hover {
+  background: rgba(56, 189, 248, 0.08);
+}
+
+.records-table .record-broken {
+  background: linear-gradient(135deg, rgba(74, 222, 128, 0.12), rgba(250, 204, 21, 0.06));
+}
+
+.records-table .record-broken th,
+.records-table .record-broken td {
+  color: var(--text-primary);
+}
+
+.record-holder {
+  color: var(--text-primary);
+  font-weight: 700;
+}
+
+.record-broken-badge {
+  background: linear-gradient(135deg, #f59e0b, #fbbf24);
+  border-radius: 999px;
+  color: #0f172a;
+  display: inline-block;
+  font-size: 0.68rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  padding: 0.3rem 0.7rem;
+  white-space: nowrap;
+}
+
+.record-progress {
+  color: var(--text-secondary);
+  font-size: 0.8rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+@media (max-width: 720px) {
+  .records-table-shell {
+    background: transparent;
+    border: none;
+    overflow: visible;
+  }
+
+  .records-table {
+    min-width: 0;
+  }
+
+  .records-table thead {
+    display: none;
+  }
+
+  .records-table,
+  .records-table tbody,
+  .records-table tr,
+  .records-table th,
+  .records-table td {
+    display: block;
+    width: 100%;
+  }
+
+  .records-table tr {
+    background: var(--bg-dark);
+    border: 1px solid var(--glass-border);
+    border-radius: 18px;
+    margin-bottom: 1rem;
+    overflow: hidden;
+    padding: 0.85rem;
+  }
+
+  .records-table tbody th {
+    border-bottom: 1px solid var(--glass-border);
+    font-size: 1.05rem;
+    margin-bottom: 0.5rem;
+    padding: 0.25rem 0 0.75rem;
+  }
+
+  .records-table tbody td {
+    border-bottom: none;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.48rem 0;
+    text-align: right;
+    white-space: normal;
+  }
+
+  .records-table td::before {
+    color: var(--text-secondary);
+    content: attr(data-label);
+    font-size: 0.68rem;
+    font-weight: 900;
+    letter-spacing: 0.08em;
+    margin-right: 1rem;
+    text-align: left;
+    text-transform: uppercase;
+  }
+}
