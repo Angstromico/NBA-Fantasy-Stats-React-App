@@ -788,6 +788,86 @@ label {
   color: var(--text-secondary);
 }
 
+/* Ultra-rare all-around lines: never rendered until a player earns one,
+   then they appear with a celebratory glow and a pop-in animation. */
+.elite-lines {
+  margin-top: 1.25rem;
+  padding: 0.85rem 0.9rem;
+  border-radius: 12px;
+  border: 1px solid rgba(250, 204, 21, 0.5);
+  background:
+    radial-gradient(circle at 8% 12%, rgba(250, 204, 21, 0.22), transparent 45%),
+    linear-gradient(135deg, rgba(245, 158, 11, 0.12), rgba(74, 222, 128, 0.1));
+  box-shadow: 0 0 22px rgba(250, 204, 21, 0.16);
+  text-align: left;
+  animation: elite-line-pop 0.65s cubic-bezier(0.2, 0.9, 0.3, 1.2);
+}
+
+.elite-lines-title {
+  margin: 0 0 0.65rem;
+  font-size: 0.8rem;
+  letter-spacing: 0.04em;
+  color: var(--text-primary);
+}
+
+.elite-line {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  padding: 0.55rem 0.75rem;
+  border-radius: 10px;
+  background: rgba(0, 0, 0, 0.16);
+  border: 1px solid rgba(250, 204, 21, 0.22);
+  margin-bottom: 0.5rem;
+}
+
+.elite-line:last-child {
+  margin-bottom: 0;
+}
+
+@media (min-width: 480px) {
+  .elite-line {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+  }
+}
+
+.elite-line-badge {
+  font-size: 0.68rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  color: #b45309;
+  flex: 0 0 auto;
+}
+
+.elite-line--quintuple .elite-line-badge,
+.elite-line--doubleQuintuple .elite-line-badge {
+  color: #d97706;
+}
+
+.elite-line-stats {
+  font-size: 0.85rem;
+  font-weight: 800;
+  color: var(--text-primary);
+}
+
+@keyframes elite-line-pop {
+  0% {
+    transform: scale(0.9) translateY(-4px);
+    opacity: 0;
+  }
+  60% {
+    transform: scale(1.03) translateY(0);
+    opacity: 1;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
 /* Bulk Skip Feature Styles */
 .form-header {
   display: flex;

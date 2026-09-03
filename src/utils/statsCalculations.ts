@@ -3,12 +3,20 @@ import type { GameStats, SeasonStats, StatsSummary, CareerHighs, StatisticalMile
 export const calculateStatisticalMilestones = (games: GameStats[]): StatisticalMilestones => {
   const playedGames = games.filter(game => !game.isAbsent)
   
-  const milestones = {
+  const milestones: StatisticalMilestones = {
     points: { '10+': 0, '20+': 0, '30+': 0, '35+': 0, '40+': 0, '50+': 0, '60+': 0, '70+': 0, '80+': 0, '100+': 0, '100++': 0 },
     assists: { '5+': 0, '10+': 0, '15+': 0, '20+': 0, '25+': 0 },
     rebounds: { '5+': 0, '10+': 0, '15+': 0, '20+': 0, '25+': 0 },
     blocks: { '2+': 0, '5+': 0, '10+': 0 },
-    steals: { '2+': 0, '5+': 0, '10+': 0 }
+    steals: { '2+': 0, '5+': 0, '10+': 0 },
+    // Kept empty until a rare all-around line is achieved, so these tiers
+    // stay hidden from the milestones until a player actually earns one.
+    eliteLines: {
+      quadrupleDoubles: 0,
+      quintupleDoubles: 0,
+      doubleQuintupleDoubles: 0,
+      games: []
+    }
   }
 
   playedGames.forEach(game => {
@@ -48,6 +56,37 @@ export const calculateStatisticalMilestones = (games: GameStats[]): StatisticalM
     if (game.steals >= 2) milestones.steals['2+']++
     if (game.steals >= 5) milestones.steals['5+']++
     if (game.steals >= 10) milestones.steals['10+']++
+
+    // Ultra-rare all-around lines: each game counts once, at the best tier
+    // it reaches. Quadruple = double digits in 4 of the 5 stat categories;
+    // quintuple = double digits in all 5; double quintuple = 20+ in all 5.
+    const statLine = [game.points, game.assists, game.rebounds, game.blocks, game.steals]
+    const doubleDigitStats = statLine.filter(value => value >= 10).length
+    const twentyPlusStats = statLine.filter(value => value >= 20).length
+
+    let tier: 'quadruple' | 'quintuple' | 'doubleQuintuple' | null = null
+    if (twentyPlusStats === 5) {
+      tier = 'doubleQuintuple'
+    } else if (doubleDigitStats === 5) {
+      tier = 'quintuple'
+    } else if (doubleDigitStats >= 4) {
+      tier = 'quadruple'
+    }
+
+    if (tier) {
+      milestones.eliteLines.games.push({
+        tier,
+        date: game.date,
+        points: game.points,
+        assists: game.assists,
+        rebounds: game.rebounds,
+        blocks: game.blocks,
+        steals: game.steals
+      })
+      if (tier === 'quadruple') milestones.eliteLines.quadrupleDoubles++
+      else if (tier === 'quintuple') milestones.eliteLines.quintupleDoubles++
+      else milestones.eliteLines.doubleQuintupleDoubles++
+    }
   })
 
   return milestones

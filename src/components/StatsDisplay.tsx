@@ -315,6 +315,26 @@ const StatsDisplay: React.FC<{
                     ))}
                   </div>
                 </div>
+
+                {season.statisticalMilestones.eliteLines.games.length > 0 && (
+                  <div className="elite-lines">
+                    <h5 className="elite-lines-title">👑 Ultra-Rare All-Around Lines</h5>
+                    {season.statisticalMilestones.eliteLines.games.map((line, index) => (
+                      <div key={`${line.date}-${index}`} className={`elite-line elite-line--${line.tier}`}>
+                        <span className="elite-line-badge">
+                          {line.tier === 'doubleQuintuple'
+                            ? 'DOUBLE QUINTUPLE-DOUBLE'
+                            : line.tier === 'quintuple'
+                              ? 'QUINTUPLE-DOUBLE'
+                              : 'QUADRUPLE-DOUBLE'}
+                        </span>
+                        <span className="elite-line-stats">
+                          {line.date} · {line.points} PTS · {line.assists} AST · {line.rebounds} REB · {line.blocks} BLK · {line.steals} STL
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
           ))}

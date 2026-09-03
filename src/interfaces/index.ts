@@ -134,6 +134,22 @@ type SeasonStats = {
       '5+': number
       '10+': number
     }
+    // Ultra-rare all-around stat lines. Kept empty unless one has been
+    // achieved, so they surface in the milestones only once earned.
+    eliteLines: {
+      quadrupleDoubles: number
+      quintupleDoubles: number
+      doubleQuintupleDoubles: number
+      games: {
+        tier: 'quadruple' | 'quintuple' | 'doubleQuintuple'
+        date: string
+        points: number
+        assists: number
+        rebounds: number
+        blocks: number
+        steals: number
+      }[]
+    }
   }
   seasonAwards?: SeasonAwards
 }
