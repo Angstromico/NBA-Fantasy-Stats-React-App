@@ -1,12 +1,27 @@
 import React, { useState } from 'react'
 import type { GameStats, CareerHighs, StatsSummary, SeasonStats } from '../interfaces'
 
+const playedGames = (games: GameStats[]) => games.filter((game) => !game.isAbsent)
+
+const average = (
+  games: GameStats[],
+  stat: 'points' | 'assists' | 'rebounds' | 'blocks' | 'steals' | 'minutes',
+) => {
+  const played = playedGames(games)
+  if (played.length === 0) {
+    return 0
+  }
+
+  return played.reduce((total, game) => total + game[stat], 0) / played.length
+}
+
 const StatsDisplay: React.FC<{
   stats: GameStats[]
   careerHighs: CareerHighs | null
   statsSummary: StatsSummary | null
   seasonStats: SeasonStats[]
-}> = ({ stats, careerHighs, statsSummary, seasonStats }) => {
+  currentSeason?: string
+}> = ({ stats, careerHighs, statsSummary, seasonStats, currentSeason }) => {
   const [showAll, setShowAll] = useState(false)
   const [selectedSeason, setSelectedSeason] = useState<string>('all')
 
@@ -42,6 +57,13 @@ const StatsDisplay: React.FC<{
   }
 
   const displayGames = showAll ? filteredStats : filteredStats.slice(-5)
+
+  const trackedSeason = currentSeason || seasonStats[0]?.seasonYear || ''
+  const currentSeasonGames = stats.filter((game) => {
+    const seasonYear = game.season || (game.date ? getSeasonYear(game.date) : 'unknown')
+    return seasonYear === trackedSeason
+  })
+  const currentSeasonPlayed = currentSeasonGames.filter((game) => !game.isAbsent)
 
   return (
     <div className='StatsDisplay glass-card'>
@@ -123,6 +145,34 @@ const StatsDisplay: React.FC<{
           <div className="averages-section">
             <h3>Averages</h3>
             <div className="averages-grid">
+            {trackedSeason !== '' && (
+              <div className='averages-current'>
+                <h4>Current Season</h4>
+                <span className='averages-note'>
+                  {trackedSeason}
+                  {currentSeasonPlayed.length > 0 &&
+                    ` · ${currentSeasonPlayed.length} game${
+                      currentSeasonPlayed.length === 1 ? '' : 's'
+                    } played`}
+                </span>
+                {currentSeasonPlayed.length === 0 ? (
+                  <p className='averages-empty'>
+                    {currentSeasonGames.length === 0
+                      ? 'No games logged yet this season'
+                      : 'No games played yet this season'}
+                  </p>
+                ) : (
+                  <>
+                    <p>Points: {average(currentSeasonGames, 'points').toFixed(2)}</p>
+                    <p>Assists: {average(currentSeasonGames, 'assists').toFixed(2)}</p>
+                    <p>Rebounds: {average(currentSeasonGames, 'rebounds').toFixed(2)}</p>
+                    <p>Blocks: {average(currentSeasonGames, 'blocks').toFixed(2)}</p>
+                    <p>Steals: {average(currentSeasonGames, 'steals').toFixed(2)}</p>
+                    <p>Minutes: {average(currentSeasonGames, 'minutes').toFixed(2)}</p>
+                  </>
+                )}
+              </div>
+            )}
               <div>
                 <h4>Overall</h4>
                 <p>Points: {statsSummary.averages.points.toFixed(2)}</p>

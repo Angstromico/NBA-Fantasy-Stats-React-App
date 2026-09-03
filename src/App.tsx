@@ -748,6 +748,7 @@ const App: React.FC = () => {
               careerHighs={careerHighs}
               statsSummary={statsSummary}
               seasonStats={seasonStats}
+              currentSeason={selectedSeason}
             />
 
             {selectedSeason && selectedTeam && statsSummary && (

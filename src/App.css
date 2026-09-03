@@ -1380,6 +1380,33 @@ input:checked + .slider:before {
   margin-top: 0;
 }
 
+/* Current season averages column (tracker page) */
+.averages-grid > .averages-current {
+  background: linear-gradient(160deg, rgba(56, 189, 248, 0.16), rgba(79, 70, 229, 0.1));
+  border-color: rgba(56, 189, 248, 0.55);
+  box-shadow: 0 0 18px rgba(56, 189, 248, 0.14);
+}
+
+.averages-grid > .averages-current h4 {
+  color: var(--accent-primary);
+}
+
+.averages-grid > .averages-current .averages-note {
+  display: block;
+  color: var(--text-secondary);
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  margin-bottom: 0.6rem;
+  text-transform: none;
+}
+
+.averages-grid > .averages-current p.averages-empty {
+  color: var(--text-secondary);
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
 .summary-empty-state p {
   color: var(--text-secondary);
   margin-bottom: 0;
