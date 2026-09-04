@@ -277,6 +277,11 @@ const GameForm: React.FC<{
 
   const updateStats = (updates: Partial<GameStats>) => {
     const newGame = { ...game, ...updates }
+    // A buzzer beater can only end in a win — lock the result in so the
+    // game can never be recorded as a loss while the toggle is on.
+    if (newGame.isBuzzerBeater) {
+      newGame.won = true
+    }
     if (!newGame.isAbsent) {
       newGame.isDoubleDouble = calculateDoubleDouble(newGame)
       newGame.isTripleDouble = calculateTripleDouble(newGame)
@@ -558,9 +563,16 @@ const GameForm: React.FC<{
                     type='checkbox' 
                     checked={game.won} 
                     onChange={(e) => updateStats({ won: e.target.checked })} 
+                    disabled={game.isBuzzerBeater}
+                    title={game.isBuzzerBeater ? 'A buzzer beater always ends in a win' : undefined}
                   />
                   Team Won Game
                 </label>
+                {game.isBuzzerBeater && (
+                  <p className="buzzer-beater-note">
+                    🔥 Buzzer beaters always end in a win — result locked
+                  </p>
+                )}
               </div>
               <div className={`badge ${game.isDoubleDouble ? 'active' : ''}`}>
                 Double-Double

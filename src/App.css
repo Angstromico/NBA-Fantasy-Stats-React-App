@@ -414,6 +414,13 @@ header p {
   animation: buzzer-beater-pulse 1s ease-in-out infinite;
 }
 
+.buzzer-beater-note {
+  margin: 0.25rem 0 0;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #fb923c;
+}
+
 .buzzer-beater-switch input:checked + .slider {
   background-color: #f97316;
   border-color: #f97316;
