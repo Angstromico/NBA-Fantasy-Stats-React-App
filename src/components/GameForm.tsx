@@ -43,6 +43,7 @@ const GameForm: React.FC<{
     won: false,
     isDoubleDouble: false,
     isTripleDouble: false,
+    isBuzzerBeater: false,
     season: selectedSeason
   })
 
@@ -246,6 +247,7 @@ const GameForm: React.FC<{
           won: false,
           isDoubleDouble: false,
           isTripleDouble: false,
+          isBuzzerBeater: false,
         })
       } else {
         setGame(currentGame => ({
@@ -257,6 +259,7 @@ const GameForm: React.FC<{
           season: selectedSeason,
           gameType,
           gameNumber: currentGameNumber,
+          isBuzzerBeater: false,
         }))
       }
     }
@@ -280,6 +283,7 @@ const GameForm: React.FC<{
     } else {
       newGame.isDoubleDouble = false
       newGame.isTripleDouble = false
+      newGame.isBuzzerBeater = false
       newGame.points = 0
       newGame.assists = 0
       newGame.rebounds = 0
@@ -563,6 +567,28 @@ const GameForm: React.FC<{
               </div>
               <div className={`badge ${game.isTripleDouble ? 'active' : ''}`}>
                 Triple-Double
+              </div>
+              <div className={`buzzer-beater-toggle${game.isBuzzerBeater ? ' active' : ''}`}>
+                <label className="switch buzzer-beater-switch">
+                  <input
+                    type="checkbox"
+                    checked={game.isBuzzerBeater}
+                    onChange={(e) => updateStats({ isBuzzerBeater: e.target.checked })}
+                    aria-label="Mark this game as a buzzer beater"
+                  />
+                  <span className="slider round"></span>
+                </label>
+                <span className="buzzer-beater-label">
+                  <span className="buzzer-beater-flame-icon" aria-hidden="true">🔥</span>
+                  Buzzer Beater
+                </span>
+                {game.isBuzzerBeater && (
+                  <span className="buzzer-beater-flames" aria-hidden="true">
+                    <span className="flame flame-1" />
+                    <span className="flame flame-2" />
+                    <span className="flame flame-3" />
+                  </span>
+                )}
               </div>
             </div>
           </>

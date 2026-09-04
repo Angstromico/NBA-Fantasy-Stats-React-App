@@ -41,6 +41,7 @@ type GameStats = {
   won: boolean
   isDoubleDouble: boolean
   isTripleDouble: boolean
+  isBuzzerBeater: boolean
   playoffSeries?: PlayoffSeries
   season: string
 }
@@ -96,6 +97,10 @@ type SeasonStats = {
   tripleDoubles: number
   careerDoubleDoubles: number
   careerTripleDoubles: number
+  buzzerBeaters: number
+  regularBuzzerBeaters: number
+  playoffBuzzerBeaters: number
+  careerBuzzerBeaters: number
   statisticalMilestones: {
     points: {
       '10+': number
@@ -185,6 +190,9 @@ type StatsSummary = {
   longestLossStreak: number
   winPercentage: number
   playoffWinPercentage: number
+  buzzerBeaters: number
+  regularBuzzerBeaters: number
+  playoffBuzzerBeaters: number
   averages: {
     points: number
     assists: number

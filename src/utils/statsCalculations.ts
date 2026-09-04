@@ -214,9 +214,13 @@ export const organizeSeasonStats = (allGames: GameStats[]): SeasonStats[] => {
     const streaks = calculateStreaks(games)
     const doubleDoubles = games.filter(g => g.isDoubleDouble).length
     const tripleDoubles = games.filter(g => g.isTripleDouble).length
+    const buzzerBeaters = games.filter(g => g.isBuzzerBeater).length
+    const regularBuzzerBeaters = regularSeasonGames.filter(g => g.isBuzzerBeater).length
+    const playoffBuzzerBeaters = playoffGames.filter(g => g.isBuzzerBeater).length
     
     const careerDoubleDoubles = allGames.filter(g => g.isDoubleDouble).length
     const careerTripleDoubles = allGames.filter(g => g.isTripleDouble).length
+    const careerBuzzerBeaters = allGames.filter(g => g.isBuzzerBeater).length
 
     seasons.push({
       seasonYear,
@@ -244,6 +248,10 @@ export const organizeSeasonStats = (allGames: GameStats[]): SeasonStats[] => {
       tripleDoubles,
       careerDoubleDoubles,
       careerTripleDoubles,
+      buzzerBeaters,
+      regularBuzzerBeaters,
+      playoffBuzzerBeaters,
+      careerBuzzerBeaters,
       statisticalMilestones: calculateStatisticalMilestones(games)
     })
   })
@@ -301,6 +309,9 @@ export const calculateStatsSummary = (allGames: GameStats[]): StatsSummary => {
     longestLossStreak: streaks.longestLoss,
     winPercentage: allGames.length > 0 ? wins / allGames.length : 0,
     playoffWinPercentage: playoffGames.length > 0 ? playoffWins / playoffGames.length : 0,
+    buzzerBeaters: allGames.filter(g => g.isBuzzerBeater).length,
+    regularBuzzerBeaters: regularSeasonGames.filter(g => g.isBuzzerBeater).length,
+    playoffBuzzerBeaters: playoffGames.filter(g => g.isBuzzerBeater).length,
     averages: calculateAverages(allGames),
     seasonAverages: calculateAverages(regularSeasonGames),
     playoffAverages: calculateAverages(playoffGames)

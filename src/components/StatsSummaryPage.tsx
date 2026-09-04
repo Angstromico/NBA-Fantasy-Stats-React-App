@@ -21,6 +21,8 @@ type SummaryRow = {
   minutes: number
   doubleDoubles: number
   tripleDoubles: number
+  buzzerBeaters: number
+  playoffBuzzerBeaters: number
   winPercentage: number
   isCareer: boolean
 }
@@ -77,6 +79,8 @@ const buildSummaryRow = (
     minutes: average(playedGames, 'minutes'),
     doubleDoubles: playedGames.filter((game) => game.isDoubleDouble).length,
     tripleDoubles: playedGames.filter((game) => game.isTripleDouble).length,
+    buzzerBeaters: games.filter((game) => game.isBuzzerBeater).length,
+    playoffBuzzerBeaters: playoffGames.filter((game) => game.isBuzzerBeater).length,
     winPercentage: games.length ? wins / games.length : 0,
     isCareer,
   }
@@ -85,7 +89,7 @@ const buildSummaryRow = (
 const StatTile: React.FC<{
   label: string
   value: string | number
-  tone?: 'primary' | 'secondary' | 'success'
+  tone?: 'primary' | 'secondary' | 'success' | 'fire'
 }> = ({ label, value, tone = 'primary' }) => (
   <div className={`summary-tile summary-tile-${tone}`}>
     <span>{label}</span>
@@ -160,6 +164,11 @@ const StatsSummaryPage: React.FC<{
               value={bestScoringSeason ? `${bestScoringSeason.label} (${formatAverage(bestScoringSeason.points)})` : '-'}
               tone='success'
             />
+            <StatTile
+              label='Buzzer Beaters 🔥'
+              value={`${careerRow.buzzerBeaters} (${careerRow.playoffBuzzerBeaters} PO)`}
+              tone='fire'
+            />
           </div>
 
           <div className='summary-table-shell' role='region' aria-label='Season and career statistics table'>
@@ -184,6 +193,8 @@ const StatsSummaryPage: React.FC<{
                   <th scope='col'>MPG</th>
                   <th scope='col'>DD</th>
                   <th scope='col'>TD</th>
+                  <th scope='col' title='Buzzer Beaters'>BB</th>
+                  <th scope='col' title='Playoff Buzzer Beaters'>BB PO</th>
                 </tr>
               </thead>
               <tbody>
@@ -207,6 +218,8 @@ const StatsSummaryPage: React.FC<{
                     <td data-label='MPG'>{formatAverage(row.minutes)}</td>
                     <td data-label='DD'>{row.doubleDoubles}</td>
                     <td data-label='TD'>{row.tripleDoubles}</td>
+                    <td data-label='Buzzer Beaters'>{row.buzzerBeaters}</td>
+                    <td data-label='Playoff Buzzer Beaters'>{row.playoffBuzzerBeaters}</td>
                   </tr>
                 ))}
               </tbody>

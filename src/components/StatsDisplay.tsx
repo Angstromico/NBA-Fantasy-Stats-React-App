@@ -128,6 +128,7 @@ const StatsDisplay: React.FC<{
               <p>Steals: {game.steals}</p>
               <p>Double-Double: {game.isDoubleDouble ? 'Yes' : 'No'}</p>
               <p>Triple-Double: {game.isTripleDouble ? 'Yes' : 'No'}</p>
+              <p>Buzzer Beater: {game.isBuzzerBeater ? '🔥 Yes' : 'No'}</p>
             </>
           )}
           <p>Result: {game.won ? 'Won' : 'Lost'}</p>
@@ -369,6 +370,7 @@ const StatsDisplay: React.FC<{
           <p>Total Games: {stats.length}</p>
           <p>Games Played: {stats.filter(g => !g.isAbsent).length}</p>
           <p>Games Absent: {stats.filter(g => g.isAbsent).length}</p>
+          <p>Total Buzzer Beaters: {stats.filter(g => g.isBuzzerBeater).length} 🔥</p>
         </div>
       </div>
     </div>
