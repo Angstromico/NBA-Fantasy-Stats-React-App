@@ -1,10 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:nba_fantasy_stats_react_app/screens/main_shell.dart';
+import 'package:nba_fantasy_stats_react_app/theme/app_theme.dart';
 
 void main() {
   Future<void> pumpShell(WidgetTester tester) async {
-    await tester.pumpWidget(const MaterialApp(home: MainShell(username: 'manuel')));
+    await tester.pumpWidget(MaterialApp(
+      // GlassCard reads the GlassTheme extension, so use the real theme.
+      theme: AppTheme.dark(),
+      home: const MainShell(username: 'manuel'),
+    ));
     await tester.pumpAndSettle();
   }
 

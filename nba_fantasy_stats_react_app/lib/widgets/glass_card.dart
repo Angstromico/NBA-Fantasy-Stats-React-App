@@ -44,7 +44,12 @@ class GlassCard extends StatelessWidget {
               borderRadius: BorderRadius.circular(glass.borderRadius),
               border: Border.all(color: glass.glassBorder),
             ),
-            child: child,
+            // Local transparent Material so tiles/ink inside the glass card
+            // paint correctly instead of asserting against the card fill.
+            child: Material(
+              type: MaterialType.transparency,
+              child: child,
+            ),
           ),
         ),
       ),

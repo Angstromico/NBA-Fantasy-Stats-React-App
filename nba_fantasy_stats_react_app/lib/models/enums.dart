@@ -19,6 +19,10 @@ enum AbsenceType {
         _ => name,
       };
 
+  /// Human-readable label, mirroring the React app's
+  /// `absenceType.replace(/_/g, ' ')` rendering.
+  String get label => wireName.replaceAll('_', ' ');
+
   /// Parses a wire value, tolerating both snake_case and camelCase input.
   static AbsenceType fromWire(String value) => AbsenceType.values.firstWhere(
         (e) => e.wireName == value || e.name == value,
