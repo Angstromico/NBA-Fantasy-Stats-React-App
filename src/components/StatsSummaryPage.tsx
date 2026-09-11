@@ -1,5 +1,6 @@
 import React from 'react'
 import type { GameStats, SeasonStats, StatsSummary } from '../interfaces'
+import PlayerTopStatsSection from './PlayerTopStatsSection'
 
 type SummaryRow = {
   id: string
@@ -225,6 +226,7 @@ const StatsSummaryPage: React.FC<{
               </tbody>
             </table>
           </div>
+          <PlayerTopStatsSection stats={stats} />
         </>
       )}
     </section>
