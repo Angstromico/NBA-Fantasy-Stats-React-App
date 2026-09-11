@@ -1,10 +1,15 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
+import 'package:nba_fantasy_stats_react_app/theme/app_theme.dart';
 
 /// Frosted-glass style container — the reusable card wrapper used across
-/// screens (mirrors the `.glass-card` CSS class).
+/// screens (mirrors the `.glass-card` CSS class in `src/App.css`):
+/// semi-transparent fill, `BackdropFilter` blur, 1px border, and the
+/// `--glass-shadow` drop shadow.
 ///
-/// Minimal version for Step 4; Step 6 upgrades this in place with a
-/// `BackdropFilter` blur driven by the `GlassTheme` extension.
+/// All visual constants come from the `GlassTheme` extension so light and
+/// dark modes render their own palette (Step 6 of FLUTTER_PLAN.md).
 class GlassCard extends StatelessWidget {
   const GlassCard({super.key, required this.child, this.padding});
 
@@ -13,17 +18,36 @@ class GlassCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colorScheme = Theme.of(context).colorScheme;
-    return Container(
-      padding: padding ?? const EdgeInsets.all(20),
+    final glass = Theme.of(context).extension<GlassTheme>()!;
+    return DecoratedBox(
       decoration: BoxDecoration(
-        color: colorScheme.onSurface.withValues(alpha: 0.06),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: colorScheme.outline.withValues(alpha: 0.25),
+        borderRadius: BorderRadius.circular(glass.borderRadius),
+        boxShadow: [
+          BoxShadow(
+            color: glass.shadowColor,
+            offset: glass.shadowOffset,
+            blurRadius: glass.shadowBlurRadius,
+          ),
+        ],
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(glass.borderRadius),
+        child: BackdropFilter(
+          filter: ImageFilter.blur(
+            sigmaX: glass.blurSigma,
+            sigmaY: glass.blurSigma,
+          ),
+          child: Container(
+            padding: padding ?? const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              color: glass.glassColor,
+              borderRadius: BorderRadius.circular(glass.borderRadius),
+              border: Border.all(color: glass.glassBorder),
+            ),
+            child: child,
+          ),
         ),
       ),
-      child: child,
     );
   }
 }

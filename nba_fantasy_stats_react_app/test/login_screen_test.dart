@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:nba_fantasy_stats_react_app/screens/login_screen.dart';
+import 'package:nba_fantasy_stats_react_app/theme/app_theme.dart';
 import 'package:nba_fantasy_stats_react_app/utils/storage_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -10,6 +11,9 @@ Future<void> _pumpLogin(
 }) async {
   await tester.pumpWidget(
     MaterialApp(
+      // GlassCard reads the GlassTheme extension, so the real app theme
+      // must wrap the screen under test.
+      theme: AppTheme.dark(),
       home: LoginScreen(
         onAuthenticated: onAuthenticated ?? (_) {},
       ),
