@@ -10,6 +10,7 @@ import {
   StatsSummaryPage,
   RecordsDisplay,
   AllTimeLeaderboards,
+  ConfirmationModal,
 } from './components'
 import type {
   User,
@@ -194,6 +195,16 @@ const App: React.FC = () => {
   const [recordsCongrats, setRecordsCongrats] = useState<RecordComparison[]>([])
   const [topTwentyCongrats, setTopTwentyCongrats] = useState<TopTwentyEntrance[]>([])
   const [appView, setAppView] = useState<AppView>('tracker')
+  const [modalConfig, setModalConfig] = useState<{
+    isOpen: boolean
+    title: string
+    message: string
+    details?: string
+    confirmText?: string
+    cancelText?: string
+    tone?: 'warning' | 'danger' | 'info'
+    onConfirm: () => void
+  } | null>(null)
 
   const currentSeasonGames = useMemo(() => {
     if (!selectedSeason) return []
@@ -681,18 +692,24 @@ const App: React.FC = () => {
 
     // Warning: switching back to a past season
     if (currentIndex >= 0 && targetIndex >= 0 && targetIndex < currentIndex) {
-      const confirmed = window.confirm(
-        `Warning: You are switching to a past season (${targetSeason}).\n\nPast seasons are completed and cannot have new games added unless you reset that season to start over.\n\nDo you want to switch to ${targetSeason}?`,
-      )
-      if (!confirmed) {
-        return
-      }
-
-      setSelectedSeason(targetSeason)
-      if (selectedTeam) {
-        setGameProgression(stats, selectedTeam, targetSeason)
-      }
-      setProgressionMessage(`Switched to past season ${targetSeason}.`)
+      setModalConfig({
+        isOpen: true,
+        title: 'Switch to Past Season',
+        message: `You are switching back to the ${targetSeason} season.`,
+        details:
+          'Past seasons are completed and cannot have new games added unless you reset that season to start over.',
+        confirmText: `Switch to ${targetSeason}`,
+        cancelText: 'Stay on Current Season',
+        tone: 'warning',
+        onConfirm: () => {
+          setModalConfig(null)
+          setSelectedSeason(targetSeason)
+          if (selectedTeam) {
+            setGameProgression(stats, selectedTeam, targetSeason)
+          }
+          setProgressionMessage(`Switched to past season ${targetSeason}.`)
+        },
+      })
       return
     }
 
@@ -710,56 +727,62 @@ const App: React.FC = () => {
       if (regularSeasonGames.length < REGULAR_SEASON_GAME_COUNT) {
         const unplayedCount =
           REGULAR_SEASON_GAME_COUNT - regularSeasonGames.length
-        const confirmed = window.confirm(
-          `Warning: The current season (${selectedSeason}) is not finished (${regularSeasonGames.length}/${REGULAR_SEASON_GAME_COUNT} games played).\n\nSwitching to a future season (${targetSeason}) will forfeit the remaining ${unplayedCount} game(s) as missed games (losses by absence).\n\nDo you want to proceed?`,
-        )
-        if (!confirmed) {
-          return
-        }
 
-        const teamId = getTeamId(selectedTeam)
-        const schedule = getTeamRegularSeasonSchedule(teamId, selectedSeason)
-        const forfeitedGames: GameStats[] = []
-        for (
-          let i = regularSeasonGames.length;
-          i < REGULAR_SEASON_GAME_COUNT;
-          i++
-        ) {
-          const scheduledGame = schedule[i]
-          forfeitedGames.push({
-            id: `${Date.now()}-${i}-${Math.random().toString(36).slice(2, 7)}`,
-            date: scheduledGame?.date || new Date().toISOString().split('T')[0],
-            team: selectedTeam,
-            opponent: scheduledGame?.opponent || 'Opponent',
-            gameNumber: i + 1,
-            gameType: 'regular',
-            absenceType: 'rest',
-            isAbsent: true,
-            points: 0,
-            assists: 0,
-            rebounds: 0,
-            blocks: 0,
-            steals: 0,
-            minutes: 0,
-            won: false,
-            isDoubleDouble: false,
-            isTripleDouble: false,
-            isBuzzerBeater: false,
-            season: selectedSeason,
-          })
-        }
+        setModalConfig({
+          isOpen: true,
+          title: 'Advance Season Early',
+          message: `The current season (${selectedSeason}) is not finished (${regularSeasonGames.length}/${REGULAR_SEASON_GAME_COUNT} games played).`,
+          details: `Switching to ${targetSeason} will forfeit the remaining ${unplayedCount} game(s) as missed games (losses by absence).`,
+          confirmText: `Forfeit & Advance to ${targetSeason}`,
+          cancelText: 'Stay on Current Season',
+          tone: 'warning',
+          onConfirm: () => {
+            setModalConfig(null)
+            const teamId = getTeamId(selectedTeam)
+            const schedule = getTeamRegularSeasonSchedule(teamId, selectedSeason)
+            const forfeitedGames: GameStats[] = []
+            for (
+              let i = regularSeasonGames.length;
+              i < REGULAR_SEASON_GAME_COUNT;
+              i++
+            ) {
+              const scheduledGame = schedule[i]
+              forfeitedGames.push({
+                id: `${Date.now()}-${i}-${Math.random().toString(36).slice(2, 7)}`,
+                date: scheduledGame?.date || new Date().toISOString().split('T')[0],
+                team: selectedTeam,
+                opponent: scheduledGame?.opponent || 'Opponent',
+                gameNumber: i + 1,
+                gameType: 'regular',
+                absenceType: 'rest',
+                isAbsent: true,
+                points: 0,
+                assists: 0,
+                rebounds: 0,
+                blocks: 0,
+                steals: 0,
+                minutes: 0,
+                won: false,
+                isDoubleDouble: false,
+                isTripleDouble: false,
+                isBuzzerBeater: false,
+                season: selectedSeason,
+              })
+            }
 
-        const updatedStats = [...stats, ...forfeitedGames]
-        saveStats(updatedStats)
-        calculateCareerHighs(updatedStats)
-        calculateStatsSummary(updatedStats)
-        organizeSeasonStats(updatedStats)
+            const updatedStats = [...stats, ...forfeitedGames]
+            saveStats(updatedStats)
+            calculateCareerHighs(updatedStats)
+            calculateStatsSummary(updatedStats)
+            organizeSeasonStats(updatedStats)
 
-        setSelectedSeason(targetSeason)
-        setGameProgression(updatedStats, selectedTeam, targetSeason)
-        setProgressionMessage(
-          `Forfeited ${unplayedCount} unplayed game(s) in ${selectedSeason}. Advanced to ${targetSeason}.`,
-        )
+            setSelectedSeason(targetSeason)
+            setGameProgression(updatedStats, selectedTeam, targetSeason)
+            setProgressionMessage(
+              `Forfeited ${unplayedCount} unplayed game(s) in ${selectedSeason}. Advanced to ${targetSeason}.`,
+            )
+          },
+        })
         return
       }
     }
@@ -771,23 +794,36 @@ const App: React.FC = () => {
   }
 
   const handleResetSeason = (seasonToReset: string) => {
-    const remainingStats = stats.filter(
-      (g) =>
-        !(
-          g.season === seasonToReset &&
-          (!selectedTeam || g.team === selectedTeam)
-        ),
-    )
-    saveStats(remainingStats)
-    calculateCareerHighs(remainingStats)
-    calculateStatsSummary(remainingStats)
-    organizeSeasonStats(remainingStats)
+    setModalConfig({
+      isOpen: true,
+      title: 'Reset Season',
+      message: `Are you sure you want to reset the ${seasonToReset} season for ${selectedTeam || 'this team'}?`,
+      details:
+        'This will permanently delete all games and statistics recorded for this season and start fresh from Game 1.',
+      confirmText: 'Reset Season',
+      cancelText: 'Cancel',
+      tone: 'danger',
+      onConfirm: () => {
+        setModalConfig(null)
+        const remainingStats = stats.filter(
+          (g) =>
+            !(
+              g.season === seasonToReset &&
+              (!selectedTeam || g.team === selectedTeam)
+            ),
+        )
+        saveStats(remainingStats)
+        calculateCareerHighs(remainingStats)
+        calculateStatsSummary(remainingStats)
+        organizeSeasonStats(remainingStats)
 
-    setCurrentGameType('regular')
-    setCurrentGameNumber(1)
-    setProgressionMessage(
-      `${seasonToReset} season for ${selectedTeam} has been reset. Starting fresh from Game 1.`,
-    )
+        setCurrentGameType('regular')
+        setCurrentGameNumber(1)
+        setProgressionMessage(
+          `${seasonToReset} season for ${selectedTeam} has been reset. Starting fresh from Game 1.`,
+        )
+      },
+    })
   }
 
   if (!currentUser) {
@@ -962,6 +998,19 @@ const App: React.FC = () => {
           />
         )}
       </main>
+      {modalConfig && (
+        <ConfirmationModal
+          isOpen={modalConfig.isOpen}
+          title={modalConfig.title}
+          message={modalConfig.message}
+          details={modalConfig.details}
+          confirmText={modalConfig.confirmText}
+          cancelText={modalConfig.cancelText}
+          tone={modalConfig.tone}
+          onConfirm={modalConfig.onConfirm}
+          onCancel={() => setModalConfig(null)}
+        />
+      )}
     </div>
   )
 }

@@ -335,12 +335,7 @@ const GameForm: React.FC<{
 
   const handleResetSeason = () => {
     if (!selectedSeason || !onResetSeason) return
-    const confirmed = window.confirm(
-      `Warning: Are you sure you want to reset the ${selectedSeason} season for ${selectedTeam || 'this team'}?\n\nThis will permanently delete all games and statistics recorded for this season and start fresh from Game 1.\n\nDo you want to continue?`,
-    )
-    if (confirmed) {
-      onResetSeason(selectedSeason)
-    }
+    onResetSeason(selectedSeason)
   }
 
   const availableSeasons = getAvailableSeasons()
