@@ -10,6 +10,34 @@ interface ComparisonDisplayProps {
   currentRecord?: string
 }
 
+const defaultStats: StatsSummary = {
+  wins: 0,
+  losses: 0,
+  teamWins: 0,
+  teamLosses: 0,
+  playerWins: 0,
+  playerLosses: 0,
+  missedWins: 0,
+  missedLosses: 0,
+  gamesPlayed: 0,
+  gamesMissed: 0,
+  playoffWins: 0,
+  playoffLosses: 0,
+  playerWinPercentage: 0,
+  missedWinPercentage: 0,
+  currentStreak: 0,
+  longestWinStreak: 0,
+  longestLossStreak: 0,
+  winPercentage: 0,
+  playoffWinPercentage: 0,
+  buzzerBeaters: 0,
+  regularBuzzerBeaters: 0,
+  playoffBuzzerBeaters: 0,
+  averages: { points: 0, assists: 0, rebounds: 0, blocks: 0, steals: 0, minutes: 0 },
+  seasonAverages: { points: 0, assists: 0, rebounds: 0, blocks: 0, steals: 0, minutes: 0 },
+  playoffAverages: { points: 0, assists: 0, rebounds: 0, blocks: 0, steals: 0, minutes: 0 },
+}
+
 const ComparisonDisplay: React.FC<ComparisonDisplayProps> = ({
   playerStats,
   seasonAwards,
@@ -17,9 +45,11 @@ const ComparisonDisplay: React.FC<ComparisonDisplayProps> = ({
   season,
   currentRecord,
 }) => {
-  if (!playerStats || !seasonAwards) {
+  if (!seasonAwards) {
     return null
   }
+
+  const activeStats = playerStats || defaultStats
 
   const formatComparison = (playerValue: number, referenceValue: number, label: string) => {
     const difference = playerValue - referenceValue
@@ -43,8 +73,8 @@ const ComparisonDisplay: React.FC<ComparisonDisplayProps> = ({
     if (currentRecord) {
       return currentRecord
     }
-    const wins = playerStats.teamWins
-    const losses = playerStats.teamLosses
+    const wins = activeStats.teamWins
+    const losses = activeStats.teamLosses
     return `${wins}-${losses}`
   }
 
@@ -86,19 +116,19 @@ const ComparisonDisplay: React.FC<ComparisonDisplayProps> = ({
         <h3>Individual Performance vs Award Winners</h3>
         
         {formatComparison(
-          playerStats.averages.points,
+          activeStats.averages.points,
           seasonAwards.scoringChampion.ppg,
           `PPG vs ${seasonAwards.scoringChampion.player} (${seasonAwards.scoringChampion.team})`
         )}
         
         {formatComparison(
-          playerStats.averages.assists,
+          activeStats.averages.assists,
           8.0, // Approximate league average for comparison
           `APG vs League Average`
         )}
         
         {formatComparison(
-          playerStats.averages.rebounds,
+          activeStats.averages.rebounds,
           7.0, // Approximate league average for comparison
           `RPG vs League Average`
         )}
@@ -128,29 +158,29 @@ const ComparisonDisplay: React.FC<ComparisonDisplayProps> = ({
           </div>
           <div className="summary-item">
             <span className="label">Games Played:</span>
-            <span className="value">{playerStats.gamesPlayed}</span>
+            <span className="value">{activeStats.gamesPlayed}</span>
           </div>
           <div className="summary-item">
             <span className="label">Games Missed:</span>
-            <span className="value">{playerStats.gamesMissed}</span>
+            <span className="value">{activeStats.gamesMissed}</span>
           </div>
           <div className="summary-item">
             <span className="label">Player Record:</span>
-            <span className="value">{playerStats.playerWins}-{playerStats.playerLosses}</span>
+            <span className="value">{activeStats.playerWins}-{activeStats.playerLosses}</span>
           </div>
           <div className="summary-item">
             <span className="label">Team Total:</span>
-            <span className="value">{playerStats.teamWins}-{playerStats.teamLosses}</span>
+            <span className="value">{activeStats.teamWins}-{activeStats.teamLosses}</span>
           </div>
           <div className="summary-item">
             <span className="label">Player Win %:</span>
-            <span className="value">{(playerStats.playerWinPercentage * 100).toFixed(1)}%</span>
+            <span className="value">{(activeStats.playerWinPercentage * 100).toFixed(1)}%</span>
           </div>
           <div className="summary-item">
             <span className="label">Current Streak:</span>
             <span className="value">
-              {playerStats.currentStreak > 0 ? `W${playerStats.currentStreak}` : 
-               playerStats.currentStreak < 0 ? `L${Math.abs(playerStats.currentStreak)}` : 'None'}
+              {activeStats.currentStreak > 0 ? `W${activeStats.currentStreak}` : 
+               activeStats.currentStreak < 0 ? `L${Math.abs(activeStats.currentStreak)}` : 'None'}
             </span>
           </div>
         </div>

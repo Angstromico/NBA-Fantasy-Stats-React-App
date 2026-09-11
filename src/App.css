@@ -628,6 +628,32 @@ label {
   letter-spacing: 0.05em;
 }
 
+.season-label-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.reset-season-btn {
+  background: transparent;
+  color: #f87171;
+  border: 1px solid rgba(248, 113, 113, 0.4);
+  padding: 0.15rem 0.5rem;
+  font-size: 0.7rem;
+  font-weight: 600;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-transform: none;
+  letter-spacing: normal;
+}
+
+.reset-season-btn:hover {
+  background: rgba(248, 113, 113, 0.15);
+  border-color: #f87171;
+  transform: translateY(-1px);
+}
+
 .absence-notice {
   background: rgba(245, 158, 11, 0.1);
   border: 1px solid rgba(245, 158, 11, 0.3);

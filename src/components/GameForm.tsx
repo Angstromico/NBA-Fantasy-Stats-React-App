@@ -16,6 +16,7 @@ const GameForm: React.FC<{
   selectedSeason: string
   onTeamChange: (team: string) => void
   onSeasonChange: (season: string) => void
+  onResetSeason?: (season: string) => void
 }> = ({ 
   addGameStats, 
   currentGameNumber, 
@@ -23,7 +24,8 @@ const GameForm: React.FC<{
   selectedTeam,
   selectedSeason,
   onTeamChange,
-  onSeasonChange
+  onSeasonChange,
+  onResetSeason,
 }) => {
   const [game, setGame] = useState<GameStats>({
     id: Date.now().toString(),
@@ -331,6 +333,16 @@ const GameForm: React.FC<{
     setError('')
   }
 
+  const handleResetSeason = () => {
+    if (!selectedSeason || !onResetSeason) return
+    const confirmed = window.confirm(
+      `Warning: Are you sure you want to reset the ${selectedSeason} season for ${selectedTeam || 'this team'}?\n\nThis will permanently delete all games and statistics recorded for this season and start fresh from Game 1.\n\nDo you want to continue?`,
+    )
+    if (confirmed) {
+      onResetSeason(selectedSeason)
+    }
+  }
+
   const availableSeasons = getAvailableSeasons()
 
   return (
@@ -363,7 +375,19 @@ const GameForm: React.FC<{
       {/* Season and Team Selection */}
       <div className="form-row">
         <div>
-          <label htmlFor='season'>Season</label>
+          <div className="season-label-row">
+            <label htmlFor='season'>Season</label>
+            {selectedSeason && onResetSeason && (
+              <button
+                type='button'
+                className='reset-season-btn'
+                onClick={handleResetSeason}
+                title={`Reset ${selectedSeason} season`}
+              >
+                Reset Season
+              </button>
+            )}
+          </div>
           <select
             value={selectedSeason}
             onChange={(e) => {

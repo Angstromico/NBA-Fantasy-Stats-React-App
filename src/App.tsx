@@ -32,8 +32,10 @@ import { computeTopTwentyEntrances } from './utils/leaderboardCalculations'
 import type { TopTwentyEntrance } from './utils/leaderboardCalculations'
 import {
   NBA_TEAMS,
+  getAvailableSeasons,
   getNextSeason,
   getTeamPlayoffSchedule,
+  getTeamRegularSeasonSchedule,
   PLAYOFF_SERIES_WIN_COUNT,
   REGULAR_SEASON_GAME_COUNT,
   SEASONS_DATA,
@@ -195,16 +197,18 @@ const App: React.FC = () => {
 
   const currentSeasonGames = useMemo(() => {
     if (!selectedSeason) return []
-    return stats.filter(
-      (game) =>
-        (game.season === selectedSeason ||
-          (!game.season && getSeasonYear(game.date) === selectedSeason)) &&
-        (!selectedTeam || game.team === selectedTeam),
+    const seasonMatches = stats.filter((game) => {
+      const seasonYear =
+        game.season || (game.date ? getSeasonYear(game.date) : 'unknown')
+      return seasonYear === selectedSeason
+    })
+    const teamMatches = seasonMatches.filter(
+      (game) => !selectedTeam || game.team === selectedTeam,
     )
+    return teamMatches.length > 0 ? teamMatches : seasonMatches
   }, [stats, selectedSeason, selectedTeam])
 
   const currentSeasonSummary = useMemo(() => {
-    if (currentSeasonGames.length === 0) return null
     return calcStatsSummary(currentSeasonGames)
   }, [currentSeasonGames])
 
@@ -649,16 +653,141 @@ const App: React.FC = () => {
 
   const handleTeamChange = (team: string) => {
     setSelectedTeam(team)
-    setCurrentGameNumber(1)
-    setCurrentGameType('regular')
-    setProgressionMessage('')
+    if (selectedSeason) {
+      setGameProgression(stats, team, selectedSeason)
+    } else {
+      setCurrentGameNumber(1)
+      setCurrentGameType('regular')
+      setProgressionMessage('')
+    }
   }
 
-  const handleSeasonChange = (season: string) => {
-    setSelectedSeason(season)
-    setCurrentGameNumber(1)
+  const handleSeasonChange = (targetSeason: string) => {
+    if (!targetSeason) {
+      setSelectedSeason('')
+      return
+    }
+
+    if (targetSeason === selectedSeason) {
+      if (selectedTeam) {
+        setGameProgression(stats, selectedTeam, targetSeason)
+      }
+      return
+    }
+
+    const seasons = getAvailableSeasons()
+    const currentIndex = seasons.indexOf(selectedSeason)
+    const targetIndex = seasons.indexOf(targetSeason)
+
+    // Warning: switching back to a past season
+    if (currentIndex >= 0 && targetIndex >= 0 && targetIndex < currentIndex) {
+      const confirmed = window.confirm(
+        `Warning: You are switching to a past season (${targetSeason}).\n\nPast seasons are completed and cannot have new games added unless you reset that season to start over.\n\nDo you want to switch to ${targetSeason}?`,
+      )
+      if (!confirmed) {
+        return
+      }
+
+      setSelectedSeason(targetSeason)
+      if (selectedTeam) {
+        setGameProgression(stats, selectedTeam, targetSeason)
+      }
+      setProgressionMessage(`Switched to past season ${targetSeason}.`)
+      return
+    }
+
+    // Warning: switching forward to a future season when current season is incomplete
+    if (currentIndex >= 0 && targetIndex >= 0 && targetIndex > currentIndex) {
+      const currentTeamGames = getTeamSeasonGames(
+        stats,
+        selectedTeam,
+        selectedSeason,
+      )
+      const regularSeasonGames = currentTeamGames.filter(
+        (g) => g.gameType === 'regular',
+      )
+
+      if (regularSeasonGames.length < REGULAR_SEASON_GAME_COUNT) {
+        const unplayedCount =
+          REGULAR_SEASON_GAME_COUNT - regularSeasonGames.length
+        const confirmed = window.confirm(
+          `Warning: The current season (${selectedSeason}) is not finished (${regularSeasonGames.length}/${REGULAR_SEASON_GAME_COUNT} games played).\n\nSwitching to a future season (${targetSeason}) will forfeit the remaining ${unplayedCount} game(s) as missed games (losses by absence).\n\nDo you want to proceed?`,
+        )
+        if (!confirmed) {
+          return
+        }
+
+        const teamId = getTeamId(selectedTeam)
+        const schedule = getTeamRegularSeasonSchedule(teamId, selectedSeason)
+        const forfeitedGames: GameStats[] = []
+        for (
+          let i = regularSeasonGames.length;
+          i < REGULAR_SEASON_GAME_COUNT;
+          i++
+        ) {
+          const scheduledGame = schedule[i]
+          forfeitedGames.push({
+            id: `${Date.now()}-${i}-${Math.random().toString(36).slice(2, 7)}`,
+            date: scheduledGame?.date || new Date().toISOString().split('T')[0],
+            team: selectedTeam,
+            opponent: scheduledGame?.opponent || 'Opponent',
+            gameNumber: i + 1,
+            gameType: 'regular',
+            absenceType: 'rest',
+            isAbsent: true,
+            points: 0,
+            assists: 0,
+            rebounds: 0,
+            blocks: 0,
+            steals: 0,
+            minutes: 0,
+            won: false,
+            isDoubleDouble: false,
+            isTripleDouble: false,
+            isBuzzerBeater: false,
+            season: selectedSeason,
+          })
+        }
+
+        const updatedStats = [...stats, ...forfeitedGames]
+        saveStats(updatedStats)
+        calculateCareerHighs(updatedStats)
+        calculateStatsSummary(updatedStats)
+        organizeSeasonStats(updatedStats)
+
+        setSelectedSeason(targetSeason)
+        setGameProgression(updatedStats, selectedTeam, targetSeason)
+        setProgressionMessage(
+          `Forfeited ${unplayedCount} unplayed game(s) in ${selectedSeason}. Advanced to ${targetSeason}.`,
+        )
+        return
+      }
+    }
+
+    setSelectedSeason(targetSeason)
+    if (selectedTeam) {
+      setGameProgression(stats, selectedTeam, targetSeason)
+    }
+  }
+
+  const handleResetSeason = (seasonToReset: string) => {
+    const remainingStats = stats.filter(
+      (g) =>
+        !(
+          g.season === seasonToReset &&
+          (!selectedTeam || g.team === selectedTeam)
+        ),
+    )
+    saveStats(remainingStats)
+    calculateCareerHighs(remainingStats)
+    calculateStatsSummary(remainingStats)
+    organizeSeasonStats(remainingStats)
+
     setCurrentGameType('regular')
-    setProgressionMessage('')
+    setCurrentGameNumber(1)
+    setProgressionMessage(
+      `${seasonToReset} season for ${selectedTeam} has been reset. Starting fresh from Game 1.`,
+    )
   }
 
   if (!currentUser) {
@@ -739,6 +868,7 @@ const App: React.FC = () => {
               selectedSeason={selectedSeason}
               onTeamChange={handleTeamChange}
               onSeasonChange={handleSeasonChange}
+              onResetSeason={handleResetSeason}
             />
             {progressionMessage && (
               <div className='message info' role='status'>
@@ -797,12 +927,14 @@ const App: React.FC = () => {
               currentSeason={selectedSeason}
             />
 
-            {selectedSeason && selectedTeam && currentSeasonSummary && (
+            {selectedSeason && selectedTeam && (
               <ComparisonDisplay
                 playerStats={currentSeasonSummary}
                 seasonAwards={
+                  SEASONS_DATA.find((s) => s.season === selectedSeason)?.awards ||
                   seasonStats.find((s) => s.seasonYear === selectedSeason)
-                    ?.seasonAwards || null
+                    ?.seasonAwards ||
+                  null
                 }
                 playerTeam={selectedTeam}
                 season={selectedSeason}
