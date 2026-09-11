@@ -1,3 +1,8 @@
+---
+name: nba-fantasy-stats-standards
+description: Engineering and architectural standards for the NBA Fantasy Stats React project, optimized for Antigravity and Gemini models.
+---
+
 # Project Quality & Architectural Guidelines (SKILL)
 
 This document defines the engineering standards for the NBA Fantasy Stats React project. All contributions must adhere to these rules to ensure scalability, maintainability, type safety, and performance.
