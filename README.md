@@ -108,6 +108,30 @@ export default tseslint.config({
 - Responsive design for better mobile support.
 - Additional features for tracking advanced stats and player comparisons.
 
+## Flutter Android Port
+
+A full step-by-step migration plan to build an equivalent Android app with Flutter is available in [`FLUTTER_PLAN.md`](./FLUTTER_PLAN.md).
+
+The plan covers 15 steps from project scaffold to signed APK release, including:
+
+- Dart data models mirroring the TypeScript interfaces
+- Glassmorphism theme via `BackdropFilter` + `GlassTheme` ThemeExtension
+- Local persistence with `SharedPreferences`
+- All screens: Game Tracker, Season Summary, Records & Leaderboards
+- Champion comparison using current-season record only
+- 3D flip card for Statistical Milestones
+- Player Top Stats section with threshold streaks
+- Glassmorphism confirmation dialogs
+
+Supporting workspace files for AI agents:
+
+| File | Purpose |
+|---|---|
+| [`flutter/SKILL.md`](./flutter/SKILL.md) | Engineering standards for the Flutter project |
+| [`flutter/GEMINI.md`](./flutter/GEMINI.md) | Antigravity & Gemini workspace rules for the Flutter codebase |
+
+---
+
 ## Contributing
 
 We welcome contributions! Please fork the repository and submit a pull request with your changes.
