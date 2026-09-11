@@ -770,6 +770,7 @@ label {
 }
 
 .summary-section,
+.milestones-section,
 .season-stats-section,
 .career-highs-section,
 .totals-section {
@@ -783,6 +784,7 @@ label {
 
 @media (min-width: 768px) {
   .summary-section,
+  .milestones-section,
   .season-stats-section,
   .career-highs-section,
   .totals-section {
@@ -1712,6 +1714,131 @@ input:checked + .slider:before {
 .summary-empty-state p {
   color: var(--text-secondary);
   margin-bottom: 0;
+}
+
+/* Statistical Milestones Flip Card */
+.milestones-flip-card {
+  perspective: 1600px;
+  cursor: pointer;
+  user-select: none;
+  width: 100%;
+  margin-top: 1rem;
+}
+
+.milestones-flip-card .flip-card-inner {
+  display: grid;
+  transform-style: preserve-3d;
+  transition: transform 0.75s cubic-bezier(0.34, 1.25, 0.64, 1);
+}
+
+.milestones-flip-card.is-flipped .flip-card-inner {
+  transform: rotateY(180deg);
+}
+
+.milestones-face {
+  padding: 1.5rem;
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: 18px;
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+  box-shadow: var(--glass-shadow);
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+  text-align: left;
+}
+
+.milestones-flip-card:hover .milestones-face {
+  border-color: var(--accent-primary);
+  box-shadow: 0 12px 36px rgba(56, 189, 248, 0.18);
+}
+
+.milestones-face.flip-card-face-back {
+  background: radial-gradient(circle at 90% 10%, rgba(129, 140, 248, 0.12), transparent 45%), var(--glass-bg);
+  border-color: rgba(129, 140, 248, 0.35);
+}
+
+.milestones-face.flip-card-face-back:hover {
+  border-color: var(--accent-secondary);
+  box-shadow: 0 12px 36px rgba(129, 140, 248, 0.22);
+}
+
+.milestones-face-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.milestones-face-header h3 {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: var(--text-primary);
+}
+
+.milestones-flip-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.35rem 0.75rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--accent-primary);
+  background: rgba(56, 189, 248, 0.12);
+  border: 1px solid rgba(56, 189, 248, 0.3);
+  border-radius: 8px;
+  transition: all 0.2s ease;
+}
+
+.milestones-face.flip-card-face-back .milestones-flip-badge {
+  color: var(--accent-secondary);
+  background: rgba(129, 140, 248, 0.12);
+  border-color: rgba(129, 140, 248, 0.3);
+}
+
+.milestones-flip-card:hover .milestones-flip-badge {
+  transform: scale(1.04);
+}
+
+.milestone-active {
+  color: var(--text-primary) !important;
+  font-weight: 700;
+}
+
+.milestone-active strong {
+  color: var(--accent-primary);
+}
+
+.milestones-face.flip-card-face-back .milestone-active strong {
+  color: var(--accent-secondary);
+}
+
+.defense-subgroup {
+  margin-top: 0.5rem;
+}
+
+.defense-subgroup:first-child {
+  margin-top: 0;
+}
+
+.defense-label {
+  display: block;
+  font-size: 0.68rem;
+  font-weight: 800;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.25rem;
+}
+
+.milestones-face p {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 0.25rem 0;
+  font-size: 0.8rem;
+  color: var(--text-secondary);
 }
 
 @media (max-width: 720px) {

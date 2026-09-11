@@ -1,5 +1,6 @@
-import React, { useState } from 'react'
-import type { GameStats, CareerHighs, StatsSummary, SeasonStats } from '../interfaces'
+import React, { useState, useMemo } from 'react'
+import type { GameStats, CareerHighs, StatsSummary, SeasonStats, StatisticalMilestones } from '../interfaces'
+import { calculateStatisticalMilestones } from '../utils/statsCalculations'
 
 const playedGames = (games: GameStats[]) => games.filter((game) => !game.isAbsent)
 
@@ -15,6 +16,101 @@ const average = (
   return played.reduce((total, game) => total + game[stat], 0) / played.length
 }
 
+const MilestoneFace: React.FC<{
+  title: string
+  subtitle: string
+  milestones: StatisticalMilestones
+  isBack?: boolean
+  flipCue: string
+}> = ({ title, subtitle, milestones, isBack = false, flipCue }) => (
+  <div className={`flip-card-face milestones-face${isBack ? ' flip-card-face-back' : ''}`}>
+    <div className='milestones-face-header'>
+      <div>
+        <h3>{title}</h3>
+        <span className='flip-subtitle'>{subtitle}</span>
+      </div>
+      <span className='milestones-flip-badge'>
+        {isBack ? '🔄 Current Season' : '🔄 All Seasons'}
+      </span>
+    </div>
+
+    <div className='milestone-grid'>
+      <div>
+        <h5>Points Games</h5>
+        {Object.entries(milestones.points).map(([threshold, count]) => {
+          const numThreshold = parseInt(threshold, 10)
+          if (numThreshold >= 70 && count === 0) return null
+          return (
+            <p key={threshold} className={count > 0 ? 'milestone-active' : ''}>
+              <span>{threshold}</span> <strong>{count}</strong>
+            </p>
+          )
+        })}
+      </div>
+
+      <div>
+        <h5>Assists Games</h5>
+        {Object.entries(milestones.assists).map(([threshold, count]) => (
+          <p key={threshold} className={count > 0 ? 'milestone-active' : ''}>
+            <span>{threshold}</span> <strong>{count}</strong>
+          </p>
+        ))}
+      </div>
+
+      <div>
+        <h5>Rebounds Games</h5>
+        {Object.entries(milestones.rebounds).map(([threshold, count]) => (
+          <p key={threshold} className={count > 0 ? 'milestone-active' : ''}>
+            <span>{threshold}</span> <strong>{count}</strong>
+          </p>
+        ))}
+      </div>
+
+      <div>
+        <h5>Defense Games</h5>
+        <div className='defense-subgroup'>
+          <span className='defense-label'>Steals</span>
+          {Object.entries(milestones.steals).map(([threshold, count]) => (
+            <p key={`stl-${threshold}`} className={count > 0 ? 'milestone-active' : ''}>
+              <span>{threshold}</span> <strong>{count}</strong>
+            </p>
+          ))}
+        </div>
+        <div className='defense-subgroup'>
+          <span className='defense-label'>Blocks</span>
+          {Object.entries(milestones.blocks).map(([threshold, count]) => (
+            <p key={`blk-${threshold}`} className={count > 0 ? 'milestone-active' : ''}>
+              <span>{threshold}</span> <strong>{count}</strong>
+            </p>
+          ))}
+        </div>
+      </div>
+    </div>
+
+    {milestones.eliteLines.games.length > 0 && (
+      <div className='elite-lines'>
+        <h5 className='elite-lines-title'>👑 Ultra-Rare All-Around Lines</h5>
+        {milestones.eliteLines.games.map((line, index) => (
+          <div key={`${line.date}-${index}`} className={`elite-line elite-line--${line.tier}`}>
+            <span className='elite-line-badge'>
+              {line.tier === 'doubleQuintuple'
+                ? 'DOUBLE QUINTUPLE-DOUBLE'
+                : line.tier === 'quintuple'
+                  ? 'QUINTUPLE-DOUBLE'
+                  : 'QUADRUPLE-DOUBLE'}
+            </span>
+            <span className='elite-line-stats'>
+              {line.date} · {line.points} PTS · {line.assists} AST · {line.rebounds} REB · {line.blocks} BLK · {line.steals} STL
+            </span>
+          </div>
+        ))}
+      </div>
+    )}
+
+    <span className='flip-cue'>{flipCue}</span>
+  </div>
+)
+
 const StatsDisplay: React.FC<{
   stats: GameStats[]
   careerHighs: CareerHighs | null
@@ -24,6 +120,7 @@ const StatsDisplay: React.FC<{
 }> = ({ stats, careerHighs, statsSummary, seasonStats, currentSeason }) => {
   const [showAll, setShowAll] = useState(false)
   const [recordCardFlipped, setRecordCardFlipped] = useState(false)
+  const [milestonesFlipped, setMilestonesFlipped] = useState(false)
   const [selectedSeason, setSelectedSeason] = useState<string>('all')
 
   const totals = stats.reduce(
@@ -88,6 +185,15 @@ const StatsDisplay: React.FC<{
       : 0
   const currentSeasonWinPercentage =
     currentSeasonGames.length > 0 ? currentSeasonWins / currentSeasonGames.length : 0
+
+  const currentSeasonMilestones = useMemo(
+    () => calculateStatisticalMilestones(currentSeasonGames),
+    [currentSeasonGames],
+  )
+  const allSeasonsMilestones = useMemo(
+    () => calculateStatisticalMilestones(stats),
+    [stats],
+  )
 
   return (
     <div className='StatsDisplay glass-card'>
@@ -293,52 +399,43 @@ const StatsDisplay: React.FC<{
               )}
               <p>Double-Doubles: {season.doubleDoubles}</p>
               <p>Triple-Doubles: {season.tripleDoubles}</p>
-              
-              <div className="milestones">
-                <h4>Statistical Milestones</h4>
-                <div className="milestone-grid">
-                  <div>
-                    <h5>Points Games</h5>
-                    {Object.entries(season.statisticalMilestones.points).map(([threshold, count]) => (
-                      <p key={threshold}>{threshold}: {count}</p>
-                    ))}
-                  </div>
-                  <div>
-                    <h5>Assists Games</h5>
-                    {Object.entries(season.statisticalMilestones.assists).map(([threshold, count]) => (
-                      <p key={threshold}>{threshold}: {count}</p>
-                    ))}
-                  </div>
-                  <div>
-                    <h5>Rebounds Games</h5>
-                    {Object.entries(season.statisticalMilestones.rebounds).map(([threshold, count]) => (
-                      <p key={threshold}>{threshold}: {count}</p>
-                    ))}
-                  </div>
-                </div>
-
-                {season.statisticalMilestones.eliteLines.games.length > 0 && (
-                  <div className="elite-lines">
-                    <h5 className="elite-lines-title">👑 Ultra-Rare All-Around Lines</h5>
-                    {season.statisticalMilestones.eliteLines.games.map((line, index) => (
-                      <div key={`${line.date}-${index}`} className={`elite-line elite-line--${line.tier}`}>
-                        <span className="elite-line-badge">
-                          {line.tier === 'doubleQuintuple'
-                            ? 'DOUBLE QUINTUPLE-DOUBLE'
-                            : line.tier === 'quintuple'
-                              ? 'QUINTUPLE-DOUBLE'
-                              : 'QUADRUPLE-DOUBLE'}
-                        </span>
-                        <span className="elite-line-stats">
-                          {line.date} · {line.points} PTS · {line.assists} AST · {line.rebounds} REB · {line.blocks} BLK · {line.steals} STL
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
             </div>
           ))}
+        </div>
+      )}
+
+      {stats.length > 0 && (
+        <div className="milestones-section">
+          <h2>Statistical Milestones</h2>
+          <div
+            className={`flip-card milestones-flip-card${milestonesFlipped ? ' is-flipped' : ''}`}
+            role='button'
+            tabIndex={0}
+            aria-label='Statistical milestones card. Click to flip between current season and all seasons totals.'
+            onClick={() => setMilestonesFlipped(!milestonesFlipped)}
+            onKeyDown={(event) => {
+              if (event.key === 'Enter' || event.key === ' ') {
+                event.preventDefault()
+                setMilestonesFlipped(!milestonesFlipped)
+              }
+            }}
+          >
+            <div className='flip-card-inner'>
+              <MilestoneFace
+                title='Statistical Milestones'
+                subtitle={`Current Season (${trackedSeason || 'Active'})`}
+                milestones={currentSeasonMilestones}
+                flipCue='Click to flip and view all seasons totals 🔄'
+              />
+              <MilestoneFace
+                title='Statistical Milestones'
+                subtitle='All Seasons (Career Cumulative)'
+                milestones={allSeasonsMilestones}
+                isBack
+                flipCue='Click to flip and return to current season 🔄'
+              />
+            </div>
+          </div>
         </div>
       )}
 
