@@ -1,6 +1,6 @@
 // MVP Race Fantasy NBA Player App
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useMemo } from 'react'
 import bcrypt from 'bcryptjs'
 import {
   Login,
@@ -23,6 +23,7 @@ import {
   calculateCareerHighs as calcCareerHighs,
   calculateStatsSummary as calcStatsSummary,
   checkPlayoffQualification,
+  getSeasonYear,
   organizeSeasonStats as orgSeasonStats,
 } from './utils/statsCalculations'
 import { getBrokenRecords } from './utils/recordCalculations'
@@ -191,6 +192,21 @@ const App: React.FC = () => {
   const [recordsCongrats, setRecordsCongrats] = useState<RecordComparison[]>([])
   const [topTwentyCongrats, setTopTwentyCongrats] = useState<TopTwentyEntrance[]>([])
   const [appView, setAppView] = useState<AppView>('tracker')
+
+  const currentSeasonGames = useMemo(() => {
+    if (!selectedSeason) return []
+    return stats.filter(
+      (game) =>
+        (game.season === selectedSeason ||
+          (!game.season && getSeasonYear(game.date) === selectedSeason)) &&
+        (!selectedTeam || game.team === selectedTeam),
+    )
+  }, [stats, selectedSeason, selectedTeam])
+
+  const currentSeasonSummary = useMemo(() => {
+    if (currentSeasonGames.length === 0) return null
+    return calcStatsSummary(currentSeasonGames)
+  }, [currentSeasonGames])
 
   useEffect(() => {
     let initialTeam = ''
@@ -781,15 +797,16 @@ const App: React.FC = () => {
               currentSeason={selectedSeason}
             />
 
-            {selectedSeason && selectedTeam && statsSummary && (
+            {selectedSeason && selectedTeam && currentSeasonSummary && (
               <ComparisonDisplay
-                playerStats={statsSummary}
+                playerStats={currentSeasonSummary}
                 seasonAwards={
                   seasonStats.find((s) => s.seasonYear === selectedSeason)
                     ?.seasonAwards || null
                 }
                 playerTeam={selectedTeam}
                 season={selectedSeason}
+                currentRecord={`${currentSeasonSummary.teamWins}-${currentSeasonSummary.teamLosses}`}
               />
             )}
           </>

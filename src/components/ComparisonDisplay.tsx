@@ -7,13 +7,15 @@ interface ComparisonDisplayProps {
   seasonAwards: SeasonAwards | null
   playerTeam: string
   season: string
+  currentRecord?: string
 }
 
 const ComparisonDisplay: React.FC<ComparisonDisplayProps> = ({
   playerStats,
   seasonAwards,
   playerTeam,
-  season
+  season,
+  currentRecord,
 }) => {
   if (!playerStats || !seasonAwards) {
     return null
@@ -38,21 +40,25 @@ const ComparisonDisplay: React.FC<ComparisonDisplayProps> = ({
   }
 
   const getTeamRecord = () => {
+    if (currentRecord) {
+      return currentRecord
+    }
     const wins = playerStats.teamWins
     const losses = playerStats.teamLosses
     return `${wins}-${losses}`
   }
 
   const compareTeamRecords = () => {
-    const playerWins = playerStats.teamWins
-    const championWins = parseInt(seasonAwards.champion.record.split('-')[0])
+    const record = getTeamRecord()
+    const playerWins = parseInt(record.split('-')[0], 10) || 0
+    const championWins = parseInt(seasonAwards.champion.record.split('-')[0], 10)
     const difference = playerWins - championWins
     const percentage = championWins > 0 ? ((difference / championWins) * 100).toFixed(1) : '0'
     
     return (
       <div className={`comparison-item ${difference >= 0 ? 'better' : 'worse'}`}>
-        <span className="label">Team Record:</span>
-        <span className="player-value">{getTeamRecord()}</span>
+        <span className="label">Current Record:</span>
+        <span className="player-value">{record}</span>
         <span className="vs">vs</span>
         <span className="reference-value">{seasonAwards.champion.record} ({seasonAwards.champion.team})</span>
         <span className={`difference ${difference >= 0 ? 'positive' : 'negative'}`}>

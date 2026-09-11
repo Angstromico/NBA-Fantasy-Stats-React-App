@@ -259,7 +259,7 @@ export const organizeSeasonStats = (allGames: GameStats[]): SeasonStats[] => {
   return seasons.sort((a, b) => b.seasonYear.localeCompare(a.seasonYear))
 }
 
-const getSeasonYear = (dateString: string): string => {
+export const getSeasonYear = (dateString: string): string => {
   const date = new Date(dateString)
   const year = date.getFullYear()
   const month = date.getMonth()
