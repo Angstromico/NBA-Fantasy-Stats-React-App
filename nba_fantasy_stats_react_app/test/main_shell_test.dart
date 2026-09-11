@@ -2,8 +2,18 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:nba_fantasy_stats_react_app/screens/main_shell.dart';
 import 'package:nba_fantasy_stats_react_app/theme/app_theme.dart';
+import 'package:nba_fantasy_stats_react_app/utils/storage_service.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
+  TestWidgetsFlutterBinding.ensureInitialized();
+
+  setUp(() async {
+    // The shell renders real screens that read storage.
+    SharedPreferences.setMockInitialValues({});
+    StorageService.setInstance(await SharedPreferences.getInstance());
+  });
+
   Future<void> pumpShell(WidgetTester tester) async {
     await tester.pumpWidget(MaterialApp(
       // GlassCard reads the GlassTheme extension, so use the real theme.
