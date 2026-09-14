@@ -1,18 +1,24 @@
 import 'package:flutter/material.dart';
 import 'package:nba_fantasy_stats_react_app/data/nba_data.dart';
 import 'package:nba_fantasy_stats_react_app/models/enums.dart';
-import 'package:nba_fantasy_stats_react_app/models/team.dart';
 import 'package:nba_fantasy_stats_react_app/models/game_stats.dart';
+import 'package:nba_fantasy_stats_react_app/models/stats_summary.dart';
+import 'package:nba_fantasy_stats_react_app/models/team.dart';
 import 'package:nba_fantasy_stats_react_app/utils/game_progression.dart';
+import 'package:nba_fantasy_stats_react_app/utils/stats_calculations.dart';
 import 'package:nba_fantasy_stats_react_app/utils/storage_service.dart';
+import 'package:nba_fantasy_stats_react_app/widgets/champion_comparison.dart';
 import 'package:nba_fantasy_stats_react_app/widgets/confirmation_dialog.dart';
 import 'package:nba_fantasy_stats_react_app/widgets/glass_card.dart';
 import 'package:nba_fantasy_stats_react_app/widgets/stat_field.dart';
+import 'package:nba_fantasy_stats_react_app/widgets/tracker_stats_section.dart';
 
-/// Game logging screen replicating `GameForm.tsx`: season/team selection,
-/// schedule-driven matchup info, per-game stat entry with auto-derived
-/// double/triple doubles, buzzer-beater win lock, absence handling that
-/// zeroes stats, and bulk-skip mode.
+/// Game logging screen replicating `GameForm.tsx` plus the tracker view's
+/// stats sections (`StatsDisplay` + `ComparisonDisplay` in App.tsx):
+/// season/team selection, schedule-driven matchup info, per-game stat
+/// entry with auto-derived double/triple doubles, buzzer-beater win lock,
+/// absence handling that zeroes stats, bulk-skip mode, and below the form
+/// the full stats summary, averages, milestones, and champion comparison.
 class TrackerScreen extends StatefulWidget {
   const TrackerScreen({
     super.key,
@@ -29,12 +35,13 @@ class TrackerScreen extends StatefulWidget {
   final String username;
 
   /// Lifted state (App.tsx pattern): the shell owns team/season so the
-  /// selection survives tab switches and feeds the comparison card.
+  /// selection survives tab switches.
   final String selectedTeam;
   final String selectedSeason;
 
   /// The live games list from the app shell (the React app's `stats`
-  /// prop) — used to recompute the next game type/number after every save.
+  /// prop) — used to recompute the next game type/number after every save
+  /// and to render the stats sections below the form.
   final List<GameStats>? games;
 
   final void Function(String team)? onTeamChange;
@@ -68,6 +75,7 @@ class _TrackerScreenState extends State<TrackerScreen> {
   String _date = '';
   String? _error;
   int _gamesLogged = 0;
+  int _nextGameNumber = 1;
 
   @override
   void initState() {
@@ -78,9 +86,9 @@ class _TrackerScreenState extends State<TrackerScreen> {
   @override
   void didUpdateWidget(TrackerScreen oldWidget) {
     super.didUpdateWidget(oldWidget);
-    // Recompute the matchup whenever the lifted team/season/game-type
-    // selection changes, or after the shell saves new games (the
-    // `useEffect` dependency array in GameForm.tsx).
+    // Recompute the matchup whenever the lifted team/season selection
+    // changes, or after the shell saves new games (the `useEffect`
+    // dependency array in GameForm.tsx).
     if (oldWidget.selectedTeam != widget.selectedTeam ||
         oldWidget.selectedSeason != widget.selectedSeason ||
         !identical(oldWidget.games, widget.games)) {
@@ -158,8 +166,6 @@ class _TrackerScreenState extends State<TrackerScreen> {
 
   int get _currentGameNumber => _nextGameNumber;
 
-  int _nextGameNumber = 1;
-
   int get _remainingGames => _schedule.isEmpty
       ? 0
       : (_schedule.length - (_currentGameNumber - 1)).clamp(
@@ -172,16 +178,17 @@ class _TrackerScreenState extends State<TrackerScreen> {
     if (team == null || widget.selectedSeason.isEmpty) return 0;
     if (_gameType == GameType.playoffs) return _remainingGames;
 
-    var season = widget.selectedSeason as String?;
+    var season = widget.selectedSeason;
     var gameNumber = _currentGameNumber;
     var available = 0;
-    while (season != null) {
+    while (season.isNotEmpty) {
       final seasonSchedule = getTeamRegularSeasonSchedule(team.id, season);
       available += (seasonSchedule.length - (gameNumber - 1)).clamp(
         0,
         seasonSchedule.length,
       );
-      season = getNextSeason(season);
+      final next = getNextSeason(season);
+      season = next ?? '';
       gameNumber = 1;
     }
     return available;
@@ -267,14 +274,11 @@ class _TrackerScreenState extends State<TrackerScreen> {
     );
   }
 
-  List<bool> _buildRandomOutcomes(int totalGames, int wins) {
-    final outcomes = List<bool>.generate(totalGames, (i) => i < wins)
-      ..shuffle();
-    return outcomes;
-  }
+  List<bool> _buildRandomOutcomes(int totalGames, int wins) =>
+      List<bool>.generate(totalGames, (i) => i < wins)..shuffle();
 
-  /// `buildSkippedRegularSeasonGames` — bulk absences flowing across season
-  /// boundaries when the current season runs out of scheduled games.
+  /// `buildSkippedRegularSeasonGames` — bulk absences flowing across
+  /// season boundaries when the current season runs out of games.
   List<GameStats> _buildSkippedRegularSeasonGames(int totalGames) {
     final skipped = <GameStats>[];
     final outcomes = _buildRandomOutcomes(totalGames, _intervalWins);
@@ -307,8 +311,7 @@ class _TrackerScreenState extends State<TrackerScreen> {
           ),
         );
       }
-      final next = getNextSeason(season);
-      season = next ?? '';
+      season = getNextSeason(season) ?? '';
       gameNumber = 1;
     }
     return skipped;
@@ -381,8 +384,8 @@ class _TrackerScreenState extends State<TrackerScreen> {
         if (!mounted) return;
         setState(
           () => _error =
-              'No playoff games were added because the current playoff run is '
-              'already complete.',
+              'No playoff games were added because the current '
+              'playoff run is already complete.',
         );
         return;
       }
@@ -467,67 +470,129 @@ class _TrackerScreenState extends State<TrackerScreen> {
         child: Center(
           child: ConstrainedBox(
             constraints: const BoxConstraints(maxWidth: 860),
-            child: GlassCard(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  _header(wide),
-                  if (_error != null) ...[
-                    const SizedBox(height: 8),
-                    Text(
-                      _error!,
-                      style: TextStyle(
-                        color: Theme.of(context).colorScheme.error,
-                      ),
-                    ),
-                  ],
-                  const SizedBox(height: 12),
-                  _selectionRow(),
-                  if (_hasSelection && !_skipMode) ...[
-                    const SizedBox(height: 12),
-                    _matchupCard(),
-                  ],
-                  const SizedBox(height: 12),
-                  _absenceRow(),
-                  if (!_isAbsent && !_skipMode) ...[
-                    const SizedBox(height: 12),
-                    _statFields(wide),
-                    SwitchListTile(
-                      contentPadding: EdgeInsets.zero,
-                      dense: true,
-                      title: const Text('Won'),
-                      value: _won,
-                      onChanged: (v) {
-                        setState(() => _won = v);
-                        _onAnyChange();
-                      },
-                    ),
-                    SwitchListTile(
-                      contentPadding: EdgeInsets.zero,
-                      dense: true,
-                      title: const Text('Buzzer Beater'),
-                      value: _buzzer,
-                      onChanged: (v) {
-                        setState(() => _buzzer = v);
-                        _onAnyChange();
-                      },
-                    ),
-                  ],
-                  if (_skipMode) ...[const SizedBox(height: 12), _skipConfig()],
-                  const SizedBox(height: 16),
-                  FilledButton(
-                    onPressed: _submitGame,
-                    child: Text(
-                      _skipMode
-                          ? 'Log $_gamesInInterval Skipped Game(s)'
-                          : 'Log Game',
-                    ),
-                  ),
-                ],
-              ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                _formCard(wide),
+                // The tracker view renders `StatsDisplay` +
+                // `ComparisonDisplay` under the form in App.tsx.
+                _statsBelowForm(),
+              ],
             ),
           ),
         ),
+      ),
+    );
+  }
+
+  /// The stats sections rendered under the form.
+  Widget _statsBelowForm() {
+    final games = widget.games ?? const <GameStats>[];
+    if (games.isEmpty) return const SizedBox.shrink();
+
+    final seasons = organizeSeasonStats(games);
+    final summary = calculateStatsSummary(games);
+    final highs = calculateCareerHighs(games);
+
+    final season = widget.selectedSeason.isNotEmpty
+        ? widget.selectedSeason
+        : (seasons.isNotEmpty ? seasons.first.seasonYear : '');
+    final team = widget.selectedTeam;
+    final seasonData = seasonsData.where((s) => s.season == season).firstOrNull;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        TrackerStatsSection(
+          stats: games,
+          careerHighs: highs,
+          statsSummary: summary,
+          seasonStats: seasons,
+          currentSeason: season,
+        ),
+        if (team.isNotEmpty && season.isNotEmpty)
+          Padding(
+            padding: const EdgeInsets.only(top: 16),
+            child: ChampionComparison(
+              playerStats: _seasonSummary(summary, games, season, team),
+              seasonAwards: seasonData?.awards,
+              playerTeam: team,
+              season: season,
+            ),
+          ),
+      ],
+    );
+  }
+
+  /// Builds the current-team-season summary used by the comparison card
+  /// (`currentSeasonSummary` in App.tsx).
+  StatsSummary _seasonSummary(
+    StatsSummary career,
+    List<GameStats> games,
+    String season,
+    String team,
+  ) {
+    final seasonTeamGames = games
+        .where((g) => g.season == season && g.team == team)
+        .toList();
+    if (seasonTeamGames.isEmpty) return career;
+    return calculateStatsSummary(seasonTeamGames);
+  }
+
+  Widget _formCard(bool wide) {
+    return GlassCard(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          _header(wide),
+          if (_error != null) ...[
+            const SizedBox(height: 8),
+            Text(
+              _error!,
+              style: TextStyle(color: Theme.of(context).colorScheme.error),
+            ),
+          ],
+          const SizedBox(height: 12),
+          _selectionRow(),
+          if (_hasSelection && !_skipMode) ...[
+            const SizedBox(height: 12),
+            _matchupCard(),
+          ],
+          const SizedBox(height: 12),
+          _absenceRow(),
+          if (!_isAbsent && !_skipMode) ...[
+            const SizedBox(height: 12),
+            _statFields(wide),
+            SwitchListTile(
+              contentPadding: EdgeInsets.zero,
+              dense: true,
+              title: const Text('Won'),
+              value: _won,
+              onChanged: (v) {
+                setState(() => _won = v);
+                _onAnyChange();
+              },
+            ),
+            SwitchListTile(
+              contentPadding: EdgeInsets.zero,
+              dense: true,
+              title: const Text('Buzzer Beater'),
+              value: _buzzer,
+              onChanged: (v) {
+                setState(() => _buzzer = v);
+                _onAnyChange();
+              },
+            ),
+          ],
+          if (_skipMode) ...[const SizedBox(height: 12), _skipConfig()],
+          const SizedBox(height: 16),
+          FilledButton(
+            onPressed: _submitGame,
+            child: Text(
+              _skipMode ? 'Log $_gamesInInterval Skipped Game(s)' : 'Log Game',
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -660,7 +725,6 @@ class _TrackerScreenState extends State<TrackerScreen> {
 
   Widget _matchupCard() {
     final theme = Theme.of(context);
-    // Keep `theme` used below.
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
@@ -765,6 +829,7 @@ class _TrackerScreenState extends State<TrackerScreen> {
           children: [
             Expanded(
               child: TextFormField(
+                key: const ValueKey('skip_count'),
                 initialValue: '$_skipCount',
                 keyboardType: TextInputType.number,
                 decoration: InputDecoration(
@@ -787,6 +852,7 @@ class _TrackerScreenState extends State<TrackerScreen> {
             const SizedBox(width: 12),
             Expanded(
               child: TextFormField(
+                key: const ValueKey('skip_wins'),
                 initialValue: '$_skipWins',
                 keyboardType: TextInputType.number,
                 decoration: InputDecoration(
