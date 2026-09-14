@@ -1,0 +1,96 @@
+/* MobileAppPromo.css */
+
+.MobileAppPromo {
+  margin: 2rem auto 0 auto;
+  padding: 1.5rem;
+  width: 100%;
+  max-width: 1100px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1.5rem;
+  flex-wrap: wrap;
+  background: var(--glass-bg);
+  border: 1px solid var(--glass-border);
+  border-radius: 16px;
+  box-shadow: var(--glass-shadow);
+  backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
+}
+
+.mobile-app-promo-copy {
+  display: flex;
+  align-items: flex-start;
+  gap: 1rem;
+  min-width: 260px;
+  flex: 1;
+}
+
+.mobile-app-promo-icon {
+  font-size: 2rem;
+  line-height: 1;
+}
+
+.mobile-app-promo-copy h3 {
+  margin: 0 0 0.35rem 0;
+  font-size: 1.05rem;
+  color: var(--text-primary);
+}
+
+.mobile-app-promo-copy p {
+  margin: 0;
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+}
+
+.mobile-app-promo-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.4rem;
+}
+
+.mobile-app-download-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.65rem 1.4rem;
+  border-radius: 12px;
+  background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+  color: #ffffff;
+  font-weight: 700;
+  font-size: 0.95rem;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.mobile-app-download-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 18px 0 rgba(31, 38, 135, 0.25);
+}
+
+.mobile-app-download-btn:focus-visible {
+  outline: 2px solid var(--accent-primary);
+  outline-offset: 2px;
+}
+
+.mobile-app-promo-meta {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+}
+
+@media (max-width: 640px) {
+  .MobileAppPromo {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .mobile-app-promo-actions {
+    align-items: stretch;
+  }
+
+  .mobile-app-download-btn {
+    justify-content: center;
+  }
+}

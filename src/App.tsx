@@ -11,6 +11,7 @@ import {
   RecordsDisplay,
   AllTimeLeaderboards,
   ConfirmationModal,
+  MobileAppPromo,
 } from './components'
 import type {
   User,
@@ -829,6 +830,7 @@ const App: React.FC = () => {
   if (!currentUser) {
     return (
       <div className='App'>
+        <MobileAppPromo />
         <main>
           <Login users={users} login={login} saveUsers={saveUsers} />
         </main>
@@ -893,6 +895,7 @@ const App: React.FC = () => {
           <button onClick={logout} className='logout-btn'>Logout</button>
         </div>
       </header>
+      <MobileAppPromo />
       <main>
         {appView === 'tracker' ? (
           <>
