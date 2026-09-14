@@ -15,23 +15,26 @@ class SeasonAwards {
   });
 
   factory SeasonAwards.fromJson(Map<String, dynamic> json) => SeasonAwards(
-        mvp: AwardWinner.fromJson(json['mvp'] as Map<String, dynamic>),
-        champion: Champion.fromJson(json['champion'] as Map<String, dynamic>),
-        scoringChampion: ScoringChampion.fromJson(
-            json['scoringChampion'] as Map<String, dynamic>),
-        defensivePlayerOfYear: AwardWinner.fromJson(
-            json['defensivePlayerOfYear'] as Map<String, dynamic>),
-        winningestTeam: WinningestTeam.fromJson(
-            json['winningestTeam'] as Map<String, dynamic>),
-      );
+    mvp: AwardWinner.fromJson(json['mvp'] as Map<String, dynamic>),
+    champion: Champion.fromJson(json['champion'] as Map<String, dynamic>),
+    scoringChampion: ScoringChampion.fromJson(
+      json['scoringChampion'] as Map<String, dynamic>,
+    ),
+    defensivePlayerOfYear: AwardWinner.fromJson(
+      json['defensivePlayerOfYear'] as Map<String, dynamic>,
+    ),
+    winningestTeam: WinningestTeam.fromJson(
+      json['winningestTeam'] as Map<String, dynamic>,
+    ),
+  );
 
   Map<String, dynamic> toJson() => {
-        'mvp': mvp.toJson(),
-        'champion': champion.toJson(),
-        'scoringChampion': scoringChampion.toJson(),
-        'defensivePlayerOfYear': defensivePlayerOfYear.toJson(),
-        'winningestTeam': winningestTeam.toJson(),
-      };
+    'mvp': mvp.toJson(),
+    'champion': champion.toJson(),
+    'scoringChampion': scoringChampion.toJson(),
+    'defensivePlayerOfYear': defensivePlayerOfYear.toJson(),
+    'winningestTeam': winningestTeam.toJson(),
+  };
 
   @override
   bool operator ==(Object other) =>
@@ -44,8 +47,13 @@ class SeasonAwards {
           winningestTeam == other.winningestTeam;
 
   @override
-  int get hashCode => Object.hash(mvp, champion, scoringChampion,
-      defensivePlayerOfYear, winningestTeam);
+  int get hashCode => Object.hash(
+    mvp,
+    champion,
+    scoringChampion,
+    defensivePlayerOfYear,
+    winningestTeam,
+  );
 }
 
 /// `{ player, team }` award block — used by `mvp` and `defensivePlayerOfYear`.
@@ -56,9 +64,9 @@ class AwardWinner {
   const AwardWinner({required this.player, required this.team});
 
   factory AwardWinner.fromJson(Map<String, dynamic> json) => AwardWinner(
-        player: json['player'] as String,
-        team: json['team'] as String,
-      );
+    player: json['player'] as String,
+    team: json['team'] as String,
+  );
 
   Map<String, dynamic> toJson() => {'player': player, 'team': team};
 
@@ -78,10 +86,8 @@ class Champion {
 
   const Champion({required this.team, required this.record});
 
-  factory Champion.fromJson(Map<String, dynamic> json) => Champion(
-        team: json['team'] as String,
-        record: json['record'] as String,
-      );
+  factory Champion.fromJson(Map<String, dynamic> json) =>
+      Champion(team: json['team'] as String, record: json['record'] as String);
 
   Map<String, dynamic> toJson() => {'team': team, 'record': record};
 
@@ -140,13 +146,16 @@ class WinningestTeam {
   });
 
   factory WinningestTeam.fromJson(Map<String, dynamic> json) => WinningestTeam(
-        team: json['team'] as String,
-        record: json['record'] as String,
-        wins: json['wins'] as int,
-      );
+    team: json['team'] as String,
+    record: json['record'] as String,
+    wins: json['wins'] as int,
+  );
 
-  Map<String, dynamic> toJson() =>
-      {'team': team, 'record': record, 'wins': wins};
+  Map<String, dynamic> toJson() => {
+    'team': team,
+    'record': record,
+    'wins': wins,
+  };
 
   @override
   bool operator ==(Object other) =>

@@ -28,24 +28,24 @@ class EliteLineGame {
   });
 
   factory EliteLineGame.fromJson(Map<String, dynamic> json) => EliteLineGame(
-        tier: json['tier'] as String,
-        date: json['date'] as String,
-        points: json['points'] as int,
-        assists: json['assists'] as int,
-        rebounds: json['rebounds'] as int,
-        blocks: json['blocks'] as int,
-        steals: json['steals'] as int,
-      );
+    tier: json['tier'] as String,
+    date: json['date'] as String,
+    points: json['points'] as int,
+    assists: json['assists'] as int,
+    rebounds: json['rebounds'] as int,
+    blocks: json['blocks'] as int,
+    steals: json['steals'] as int,
+  );
 
   Map<String, dynamic> toJson() => {
-        'tier': tier,
-        'date': date,
-        'points': points,
-        'assists': assists,
-        'rebounds': rebounds,
-        'blocks': blocks,
-        'steals': steals,
-      };
+    'tier': tier,
+    'date': date,
+    'points': points,
+    'assists': assists,
+    'rebounds': rebounds,
+    'blocks': blocks,
+    'steals': steals,
+  };
 
   @override
   bool operator ==(Object other) =>
@@ -79,20 +79,20 @@ class EliteLines {
   });
 
   factory EliteLines.fromJson(Map<String, dynamic> json) => EliteLines(
-        quadrupleDoubles: json['quadrupleDoubles'] as int,
-        quintupleDoubles: json['quintupleDoubles'] as int,
-        doubleQuintupleDoubles: json['doubleQuintupleDoubles'] as int,
-        games: (json['games'] as List<dynamic>)
-            .map((g) => EliteLineGame.fromJson(g as Map<String, dynamic>))
-            .toList(),
-      );
+    quadrupleDoubles: json['quadrupleDoubles'] as int,
+    quintupleDoubles: json['quintupleDoubles'] as int,
+    doubleQuintupleDoubles: json['doubleQuintupleDoubles'] as int,
+    games: (json['games'] as List<dynamic>)
+        .map((g) => EliteLineGame.fromJson(g as Map<String, dynamic>))
+        .toList(),
+  );
 
   Map<String, dynamic> toJson() => {
-        'quadrupleDoubles': quadrupleDoubles,
-        'quintupleDoubles': quintupleDoubles,
-        'doubleQuintupleDoubles': doubleQuintupleDoubles,
-        'games': games.map((g) => g.toJson()).toList(),
-      };
+    'quadrupleDoubles': quadrupleDoubles,
+    'quintupleDoubles': quintupleDoubles,
+    'doubleQuintupleDoubles': doubleQuintupleDoubles,
+    'games': games.map((g) => g.toJson()).toList(),
+  };
 
   @override
   bool operator ==(Object other) =>
@@ -104,8 +104,12 @@ class EliteLines {
           _listEquals(games, other.games);
 
   @override
-  int get hashCode => Object.hash(quadrupleDoubles, quintupleDoubles,
-      doubleQuintupleDoubles, Object.hashAll(games));
+  int get hashCode => Object.hash(
+    quadrupleDoubles,
+    quintupleDoubles,
+    doubleQuintupleDoubles,
+    Object.hashAll(games),
+  );
 }
 
 /// Statistical milestones — mirrors `SeasonStats['statisticalMilestones']`
@@ -134,8 +138,9 @@ class StatisticalMilestones {
         rebounds: _readCounts(json['rebounds']),
         blocks: _readCounts(json['blocks']),
         steals: _readCounts(json['steals']),
-        eliteLines:
-            EliteLines.fromJson(json['eliteLines'] as Map<String, dynamic>),
+        eliteLines: EliteLines.fromJson(
+          json['eliteLines'] as Map<String, dynamic>,
+        ),
       );
 
   static StatMilestoneCounts _readCounts(Object? raw) =>
@@ -144,13 +149,13 @@ class StatisticalMilestones {
       );
 
   Map<String, dynamic> toJson() => {
-        'points': points,
-        'assists': assists,
-        'rebounds': rebounds,
-        'blocks': blocks,
-        'steals': steals,
-        'eliteLines': eliteLines.toJson(),
-      };
+    'points': points,
+    'assists': assists,
+    'rebounds': rebounds,
+    'blocks': blocks,
+    'steals': steals,
+    'eliteLines': eliteLines.toJson(),
+  };
 
   @override
   bool operator ==(Object other) =>
@@ -165,13 +170,13 @@ class StatisticalMilestones {
 
   @override
   int get hashCode => Object.hash(
-        Object.hashAllUnordered(points.entries),
-        Object.hashAllUnordered(assists.entries),
-        Object.hashAllUnordered(rebounds.entries),
-        Object.hashAllUnordered(blocks.entries),
-        Object.hashAllUnordered(steals.entries),
-        eliteLines,
-      );
+    Object.hashAllUnordered(points.entries),
+    Object.hashAllUnordered(assists.entries),
+    Object.hashAllUnordered(rebounds.entries),
+    Object.hashAllUnordered(blocks.entries),
+    Object.hashAllUnordered(steals.entries),
+    eliteLines,
+  );
 }
 
 /// One NBA season of aggregated stats — mirrors `SeasonStats` in
@@ -244,84 +249,83 @@ class SeasonStats {
   });
 
   factory SeasonStats.fromJson(Map<String, dynamic> json) => SeasonStats(
-        seasonYear: json['seasonYear'] as String,
-        gamesPlayed: json['gamesPlayed'] as int,
-        playerGamesPlayed: json['playerGamesPlayed'] as int,
-        gamesMissed: json['gamesMissed'] as int,
-        regularSeasonGames: _readGames(json['regularSeasonGames']),
-        playoffGames: _readGames(json['playoffGames']),
-        wins: json['wins'] as int,
-        losses: json['losses'] as int,
-        teamWins: json['teamWins'] as int,
-        teamLosses: json['teamLosses'] as int,
-        playerWins: json['playerWins'] as int,
-        playerLosses: json['playerLosses'] as int,
-        missedWins: json['missedWins'] as int,
-        missedLosses: json['missedLosses'] as int,
-        playoffWins: json['playoffWins'] as int,
-        playoffLosses: json['playoffLosses'] as int,
-        madePlayoffs: json['madePlayoffs'] as bool,
-        playoffSeries: (json['playoffSeries'] as List<dynamic>? ?? [])
-            .map((s) =>
-                PlayoffSeries.fromJson(s as Map<String, dynamic>))
-            .toList(),
-        currentStreak: json['currentStreak'] as int,
-        longestWinStreak: json['longestWinStreak'] as int,
-        longestLossStreak: json['longestLossStreak'] as int,
-        doubleDoubles: json['doubleDoubles'] as int,
-        tripleDoubles: json['tripleDoubles'] as int,
-        careerDoubleDoubles: json['careerDoubleDoubles'] as int,
-        careerTripleDoubles: json['careerTripleDoubles'] as int,
-        buzzerBeaters: json['buzzerBeaters'] as int,
-        regularBuzzerBeaters: json['regularBuzzerBeaters'] as int,
-        playoffBuzzerBeaters: json['playoffBuzzerBeaters'] as int,
-        careerBuzzerBeaters: json['careerBuzzerBeaters'] as int,
-        statisticalMilestones: StatisticalMilestones.fromJson(
-            json['statisticalMilestones'] as Map<String, dynamic>),
-        seasonAwards: json['seasonAwards'] == null
-            ? null
-            : SeasonAwards.fromJson(
-                json['seasonAwards'] as Map<String, dynamic>),
-      );
+    seasonYear: json['seasonYear'] as String,
+    gamesPlayed: json['gamesPlayed'] as int,
+    playerGamesPlayed: json['playerGamesPlayed'] as int,
+    gamesMissed: json['gamesMissed'] as int,
+    regularSeasonGames: _readGames(json['regularSeasonGames']),
+    playoffGames: _readGames(json['playoffGames']),
+    wins: json['wins'] as int,
+    losses: json['losses'] as int,
+    teamWins: json['teamWins'] as int,
+    teamLosses: json['teamLosses'] as int,
+    playerWins: json['playerWins'] as int,
+    playerLosses: json['playerLosses'] as int,
+    missedWins: json['missedWins'] as int,
+    missedLosses: json['missedLosses'] as int,
+    playoffWins: json['playoffWins'] as int,
+    playoffLosses: json['playoffLosses'] as int,
+    madePlayoffs: json['madePlayoffs'] as bool,
+    playoffSeries: (json['playoffSeries'] as List<dynamic>? ?? [])
+        .map((s) => PlayoffSeries.fromJson(s as Map<String, dynamic>))
+        .toList(),
+    currentStreak: json['currentStreak'] as int,
+    longestWinStreak: json['longestWinStreak'] as int,
+    longestLossStreak: json['longestLossStreak'] as int,
+    doubleDoubles: json['doubleDoubles'] as int,
+    tripleDoubles: json['tripleDoubles'] as int,
+    careerDoubleDoubles: json['careerDoubleDoubles'] as int,
+    careerTripleDoubles: json['careerTripleDoubles'] as int,
+    buzzerBeaters: json['buzzerBeaters'] as int,
+    regularBuzzerBeaters: json['regularBuzzerBeaters'] as int,
+    playoffBuzzerBeaters: json['playoffBuzzerBeaters'] as int,
+    careerBuzzerBeaters: json['careerBuzzerBeaters'] as int,
+    statisticalMilestones: StatisticalMilestones.fromJson(
+      json['statisticalMilestones'] as Map<String, dynamic>,
+    ),
+    seasonAwards: json['seasonAwards'] == null
+        ? null
+        : SeasonAwards.fromJson(json['seasonAwards'] as Map<String, dynamic>),
+  );
 
-  static List<GameStats> _readGames(Object? raw) => (raw as List<dynamic>? ?? [])
-      .map((g) => GameStats.fromJson(g as Map<String, dynamic>))
-      .toList();
+  static List<GameStats> _readGames(Object? raw) =>
+      (raw as List<dynamic>? ?? [])
+          .map((g) => GameStats.fromJson(g as Map<String, dynamic>))
+          .toList();
 
   Map<String, dynamic> toJson() {
     final json = <String, dynamic>{
-        'seasonYear': seasonYear,
-        'gamesPlayed': gamesPlayed,
-        'playerGamesPlayed': playerGamesPlayed,
-        'gamesMissed': gamesMissed,
-        'regularSeasonGames':
-            regularSeasonGames.map((g) => g.toJson()).toList(),
-        'playoffGames': playoffGames.map((g) => g.toJson()).toList(),
-        'wins': wins,
-        'losses': losses,
-        'teamWins': teamWins,
-        'teamLosses': teamLosses,
-        'playerWins': playerWins,
-        'playerLosses': playerLosses,
-        'missedWins': missedWins,
-        'missedLosses': missedLosses,
-        'playoffWins': playoffWins,
-        'playoffLosses': playoffLosses,
-        'madePlayoffs': madePlayoffs,
-        'playoffSeries': playoffSeries.map((s) => s.toJson()).toList(),
-        'currentStreak': currentStreak,
-        'longestWinStreak': longestWinStreak,
-        'longestLossStreak': longestLossStreak,
-        'doubleDoubles': doubleDoubles,
-        'tripleDoubles': tripleDoubles,
-        'careerDoubleDoubles': careerDoubleDoubles,
-        'careerTripleDoubles': careerTripleDoubles,
-        'buzzerBeaters': buzzerBeaters,
-        'regularBuzzerBeaters': regularBuzzerBeaters,
-        'playoffBuzzerBeaters': playoffBuzzerBeaters,
-        'careerBuzzerBeaters': careerBuzzerBeaters,
-        'statisticalMilestones': statisticalMilestones.toJson(),
-      };
+      'seasonYear': seasonYear,
+      'gamesPlayed': gamesPlayed,
+      'playerGamesPlayed': playerGamesPlayed,
+      'gamesMissed': gamesMissed,
+      'regularSeasonGames': regularSeasonGames.map((g) => g.toJson()).toList(),
+      'playoffGames': playoffGames.map((g) => g.toJson()).toList(),
+      'wins': wins,
+      'losses': losses,
+      'teamWins': teamWins,
+      'teamLosses': teamLosses,
+      'playerWins': playerWins,
+      'playerLosses': playerLosses,
+      'missedWins': missedWins,
+      'missedLosses': missedLosses,
+      'playoffWins': playoffWins,
+      'playoffLosses': playoffLosses,
+      'madePlayoffs': madePlayoffs,
+      'playoffSeries': playoffSeries.map((s) => s.toJson()).toList(),
+      'currentStreak': currentStreak,
+      'longestWinStreak': longestWinStreak,
+      'longestLossStreak': longestLossStreak,
+      'doubleDoubles': doubleDoubles,
+      'tripleDoubles': tripleDoubles,
+      'careerDoubleDoubles': careerDoubleDoubles,
+      'careerTripleDoubles': careerTripleDoubles,
+      'buzzerBeaters': buzzerBeaters,
+      'regularBuzzerBeaters': regularBuzzerBeaters,
+      'playoffBuzzerBeaters': playoffBuzzerBeaters,
+      'careerBuzzerBeaters': careerBuzzerBeaters,
+      'statisticalMilestones': statisticalMilestones.toJson(),
+    };
     // Optional fields are omitted when null, matching JSON.stringify in the
     // React app (undefined properties are dropped, not written as null).
     if (seasonAwards != null) {
@@ -336,8 +340,16 @@ class SeasonStats {
       other is SeasonStats && _jsonEquals(this, other);
 
   @override
-  int get hashCode => Object.hash(seasonYear, gamesPlayed, gamesMissed, wins,
-      losses, madePlayoffs, currentStreak, buzzerBeaters);
+  int get hashCode => Object.hash(
+    seasonYear,
+    gamesPlayed,
+    gamesMissed,
+    wins,
+    losses,
+    madePlayoffs,
+    currentStreak,
+    buzzerBeaters,
+  );
 }
 
 bool _listEquals(List<Object?> a, List<Object?> b) {

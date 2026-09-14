@@ -34,8 +34,9 @@ class StatRow extends StatelessWidget {
                     fontWeight: FontWeight.bold,
                     color: theme.colorScheme.primary,
                   )
-                : theme.textTheme.bodyMedium
-                    ?.copyWith(fontWeight: FontWeight.bold),
+                : theme.textTheme.bodyMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                  ),
           ),
         ],
       ),

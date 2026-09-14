@@ -3,20 +3,17 @@ class User {
   final String username;
   final String hashedPassword;
 
-  const User({
-    required this.username,
-    required this.hashedPassword,
-  });
+  const User({required this.username, required this.hashedPassword});
 
   factory User.fromJson(Map<String, dynamic> json) => User(
-        username: json['username'] as String,
-        hashedPassword: json['hashedPassword'] as String,
-      );
+    username: json['username'] as String,
+    hashedPassword: json['hashedPassword'] as String,
+  );
 
   Map<String, dynamic> toJson() => {
-        'username': username,
-        'hashedPassword': hashedPassword,
-      };
+    'username': username,
+    'hashedPassword': hashedPassword,
+  };
 
   @override
   bool operator ==(Object other) =>

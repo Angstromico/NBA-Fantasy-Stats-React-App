@@ -10,16 +10,36 @@ import 'package:nba_fantasy_stats_react_app/models/stats_summary.dart';
 /// dependencies (Step 8 of FLUTTER_PLAN.md).
 
 /// Mirrors `calculateStatisticalMilestones`.
-StatisticalMilestones calculateStatisticalMilestones(
-    List<GameStats> games) {
+StatisticalMilestones calculateStatisticalMilestones(List<GameStats> games) {
   final playedGames = games.where((g) => !g.isAbsent).toList();
 
   final points = <String, int>{
-    '10+': 0, '20+': 0, '30+': 0, '35+': 0, '40+': 0, '50+': 0,
-    '60+': 0, '70+': 0, '80+': 0, '100+': 0, '100++': 0,
+    '10+': 0,
+    '20+': 0,
+    '30+': 0,
+    '35+': 0,
+    '40+': 0,
+    '50+': 0,
+    '60+': 0,
+    '70+': 0,
+    '80+': 0,
+    '100+': 0,
+    '100++': 0,
   };
-  final assists = <String, int>{'5+': 0, '10+': 0, '15+': 0, '20+': 0, '25+': 0};
-  final rebounds = <String, int>{'5+': 0, '10+': 0, '15+': 0, '20+': 0, '25+': 0};
+  final assists = <String, int>{
+    '5+': 0,
+    '10+': 0,
+    '15+': 0,
+    '20+': 0,
+    '25+': 0,
+  };
+  final rebounds = <String, int>{
+    '5+': 0,
+    '10+': 0,
+    '15+': 0,
+    '20+': 0,
+    '25+': 0,
+  };
   final blocks = <String, int>{'2+': 0, '5+': 0, '10+': 0};
   final steals = <String, int>{'2+': 0, '5+': 0, '10+': 0};
 
@@ -69,7 +89,11 @@ StatisticalMilestones calculateStatisticalMilestones(
     // Ultra-rare all-around lines: each game counts once, at the best tier
     // it reaches.
     final statLine = [
-      game.points, game.assists, game.rebounds, game.blocks, game.steals,
+      game.points,
+      game.assists,
+      game.rebounds,
+      game.blocks,
+      game.steals,
     ];
     final doubleDigitStats = statLine.where((v) => v >= 10).length;
     final twentyPlusStats = statLine.where((v) => v >= 20).length;
@@ -84,15 +108,17 @@ StatisticalMilestones calculateStatisticalMilestones(
     }
 
     if (tier != null) {
-      eliteGames.add(EliteLineGame(
-        tier: tier,
-        date: game.date,
-        points: game.points,
-        assists: game.assists,
-        rebounds: game.rebounds,
-        blocks: game.blocks,
-        steals: game.steals,
-      ));
+      eliteGames.add(
+        EliteLineGame(
+          tier: tier,
+          date: game.date,
+          points: game.points,
+          assists: game.assists,
+          rebounds: game.rebounds,
+          blocks: game.blocks,
+          steals: game.steals,
+        ),
+      );
       if (tier == 'quadruple') {
         quadrupleDoubles++;
       } else if (tier == 'quintuple') {
@@ -146,7 +172,9 @@ Streaks calculateStreaks(List<GameStats> games) {
     } else {
       if ((currentStreak > 0 && games[i].won) ||
           (currentStreak < 0 && !games[i].won)) {
-        currentStreak = currentStreak > 0 ? currentStreak + 1 : currentStreak - 1;
+        currentStreak = currentStreak > 0
+            ? currentStreak + 1
+            : currentStreak - 1;
       } else {
         break;
       }
@@ -178,7 +206,12 @@ StatAverages calculateAverages(List<GameStats> games) {
   final playedGames = games.where((g) => !g.isAbsent).toList();
   if (playedGames.isEmpty) {
     return const StatAverages(
-      points: 0, assists: 0, rebounds: 0, blocks: 0, steals: 0, minutes: 0,
+      points: 0,
+      assists: 0,
+      rebounds: 0,
+      blocks: 0,
+      steals: 0,
+      minutes: 0,
     );
   }
 
@@ -200,8 +233,14 @@ CareerHighs calculateCareerHighs(List<GameStats> allGames) {
   final playedGames = allGames.where((g) => !g.isAbsent).toList();
   if (playedGames.isEmpty) {
     return const CareerHighs(
-      points: 0, assists: 0, rebounds: 0, blocks: 0, steals: 0, minutes: 0,
-      doubleDoubles: 0, tripleDoubles: 0,
+      points: 0,
+      assists: 0,
+      rebounds: 0,
+      blocks: 0,
+      steals: 0,
+      minutes: 0,
+      doubleDoubles: 0,
+      tripleDoubles: 0,
     );
   }
 
@@ -260,10 +299,12 @@ List<SeasonStats> organizeSeasonStats(List<GameStats> allGames) {
   final seasons = <SeasonStats>[];
 
   seasonsMap.forEach((seasonYear, games) {
-    final regularSeasonGames =
-        games.where((g) => g.gameType == GameType.regular).toList();
-    final playoffGames =
-        games.where((g) => g.gameType == GameType.playoffs).toList();
+    final regularSeasonGames = games
+        .where((g) => g.gameType == GameType.regular)
+        .toList();
+    final playoffGames = games
+        .where((g) => g.gameType == GameType.playoffs)
+        .toList();
     final playedGames = games.where((g) => !g.isAbsent).toList();
     final missedGames = games.where((g) => g.isAbsent).toList();
 
@@ -280,46 +321,47 @@ List<SeasonStats> organizeSeasonStats(List<GameStats> allGames) {
     final doubleDoubles = games.where((g) => g.isDoubleDouble).length;
     final tripleDoubles = games.where((g) => g.isTripleDouble).length;
     final buzzerBeaters = games.where((g) => g.isBuzzerBeater).length;
-    final regularBuzzerBeaters =
-        regularSeasonGames.where((g) => g.isBuzzerBeater).length;
-    final playoffBuzzerBeaters =
-        playoffGames.where((g) => g.isBuzzerBeater).length;
+    final regularBuzzerBeaters = regularSeasonGames
+        .where((g) => g.isBuzzerBeater)
+        .length;
+    final playoffBuzzerBeaters = playoffGames
+        .where((g) => g.isBuzzerBeater)
+        .length;
 
-    seasons.add(SeasonStats(
-      seasonYear: seasonYear,
-      gamesPlayed: games.length,
-      playerGamesPlayed: playedGames.length,
-      gamesMissed: missedGames.length,
-      regularSeasonGames: regularSeasonGames,
-      playoffGames: playoffGames,
-      wins: wins,
-      losses: losses,
-      teamWins: wins,
-      teamLosses: losses,
-      playerWins: playerWins,
-      playerLosses: playerLosses,
-      missedWins: missedWins,
-      missedLosses: missedLosses,
-      playoffWins: playoffWins,
-      playoffLosses: playoffLosses,
-      madePlayoffs: checkPlayoffQualification(regularSeasonGames),
-      playoffSeries: const [],
-      currentStreak: streaks.current,
-      longestWinStreak: streaks.longestWin,
-      longestLossStreak: streaks.longestLoss,
-      doubleDoubles: doubleDoubles,
-      tripleDoubles: tripleDoubles,
-      careerDoubleDoubles:
-          allGames.where((g) => g.isDoubleDouble).length,
-      careerTripleDoubles:
-          allGames.where((g) => g.isTripleDouble).length,
-      buzzerBeaters: buzzerBeaters,
-      regularBuzzerBeaters: regularBuzzerBeaters,
-      playoffBuzzerBeaters: playoffBuzzerBeaters,
-      careerBuzzerBeaters:
-          allGames.where((g) => g.isBuzzerBeater).length,
-      statisticalMilestones: calculateStatisticalMilestones(games),
-    ));
+    seasons.add(
+      SeasonStats(
+        seasonYear: seasonYear,
+        gamesPlayed: games.length,
+        playerGamesPlayed: playedGames.length,
+        gamesMissed: missedGames.length,
+        regularSeasonGames: regularSeasonGames,
+        playoffGames: playoffGames,
+        wins: wins,
+        losses: losses,
+        teamWins: wins,
+        teamLosses: losses,
+        playerWins: playerWins,
+        playerLosses: playerLosses,
+        missedWins: missedWins,
+        missedLosses: missedLosses,
+        playoffWins: playoffWins,
+        playoffLosses: playoffLosses,
+        madePlayoffs: checkPlayoffQualification(regularSeasonGames),
+        playoffSeries: const [],
+        currentStreak: streaks.current,
+        longestWinStreak: streaks.longestWin,
+        longestLossStreak: streaks.longestLoss,
+        doubleDoubles: doubleDoubles,
+        tripleDoubles: tripleDoubles,
+        careerDoubleDoubles: allGames.where((g) => g.isDoubleDouble).length,
+        careerTripleDoubles: allGames.where((g) => g.isTripleDouble).length,
+        buzzerBeaters: buzzerBeaters,
+        regularBuzzerBeaters: regularBuzzerBeaters,
+        playoffBuzzerBeaters: playoffBuzzerBeaters,
+        careerBuzzerBeaters: allGames.where((g) => g.isBuzzerBeater).length,
+        statisticalMilestones: calculateStatisticalMilestones(games),
+      ),
+    );
   });
 
   seasons.sort((a, b) => b.seasonYear.compareTo(a.seasonYear));
@@ -328,10 +370,12 @@ List<SeasonStats> organizeSeasonStats(List<GameStats> allGames) {
 
 /// Mirrors `calculateStatsSummary`.
 StatsSummary calculateStatsSummary(List<GameStats> allGames) {
-  final regularSeasonGames =
-      allGames.where((g) => g.gameType == GameType.regular).toList();
-  final playoffGames =
-      allGames.where((g) => g.gameType == GameType.playoffs).toList();
+  final regularSeasonGames = allGames
+      .where((g) => g.gameType == GameType.regular)
+      .toList();
+  final playoffGames = allGames
+      .where((g) => g.gameType == GameType.playoffs)
+      .toList();
   final playedGames = allGames.where((g) => !g.isAbsent).toList();
   final missedGames = allGames.where((g) => g.isAbsent).toList();
 
@@ -359,21 +403,24 @@ StatsSummary calculateStatsSummary(List<GameStats> allGames) {
     gamesMissed: missedGames.length,
     playoffWins: playoffWins,
     playoffLosses: playoffLosses,
-    playerWinPercentage:
-        playedGames.isNotEmpty ? playerWins / playedGames.length : 0,
-    missedWinPercentage:
-        missedGames.isNotEmpty ? missedWins / missedGames.length : 0,
+    playerWinPercentage: playedGames.isNotEmpty
+        ? playerWins / playedGames.length
+        : 0,
+    missedWinPercentage: missedGames.isNotEmpty
+        ? missedWins / missedGames.length
+        : 0,
     currentStreak: streaks.current,
     longestWinStreak: streaks.longestWin,
     longestLossStreak: streaks.longestLoss,
     winPercentage: allGames.isNotEmpty ? wins / allGames.length : 0,
-    playoffWinPercentage:
-        playoffGames.isNotEmpty ? playoffWins / playoffGames.length : 0,
+    playoffWinPercentage: playoffGames.isNotEmpty
+        ? playoffWins / playoffGames.length
+        : 0,
     buzzerBeaters: allGames.where((g) => g.isBuzzerBeater).length,
-    regularBuzzerBeaters:
-        regularSeasonGames.where((g) => g.isBuzzerBeater).length,
-    playoffBuzzerBeaters:
-        playoffGames.where((g) => g.isBuzzerBeater).length,
+    regularBuzzerBeaters: regularSeasonGames
+        .where((g) => g.isBuzzerBeater)
+        .length,
+    playoffBuzzerBeaters: playoffGames.where((g) => g.isBuzzerBeater).length,
     averages: calculateAverages(allGames),
     seasonAverages: calculateAverages(regularSeasonGames),
     playoffAverages: calculateAverages(playoffGames),

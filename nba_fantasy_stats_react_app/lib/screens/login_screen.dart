@@ -8,10 +8,7 @@ import 'package:nba_fantasy_stats_react_app/widgets/glass_card.dart';
 /// `Login.tsx` — register mode hashes with bcrypt, login mode verifies
 /// against stored hashes (Step 4 of FLUTTER_PLAN.md).
 class LoginScreen extends StatefulWidget {
-  const LoginScreen({
-    super.key,
-    required this.onAuthenticated,
-  });
+  const LoginScreen({super.key, required this.onAuthenticated});
 
   /// Called with the username after a successful register+login or login.
   final void Function(String username) onAuthenticated;
@@ -45,15 +42,17 @@ class _LoginScreenState extends State<LoginScreen> {
     return raw.map((j) => User.fromJson(j as Map<String, dynamic>)).toList();
   }
 
-  Future<void> _persistUsers(List<User> users) =>
-      StorageService.writeJson(
-          StorageService.usersKey, users.map((u) => u.toJson()).toList());
+  Future<void> _persistUsers(List<User> users) => StorageService.writeJson(
+    StorageService.usersKey,
+    users.map((u) => u.toJson()).toList(),
+  );
 
   // Message strings match Login.tsx exactly for behavior parity.
   static const _emptyFieldsError = 'Username and password cannot be empty.';
   static const _usernameTakenError = 'Username already exists.';
   static const _invalidCredentialsError = 'Invalid username or password.';
-  static const _registerSuccess = 'Registration successful! You can now log in.';
+  static const _registerSuccess =
+      'Registration successful! You can now log in.';
   static const _registerFailureError =
       'An error occurred during registration. Please try again.';
   static const _loginFailureError =
@@ -100,11 +99,9 @@ class _LoginScreenState extends State<LoginScreen> {
   Future<void> _login() async {
     try {
       final users = await _loadUsers();
-      final user = users
-          .where((u) => u.username == _userCtrl.text)
-          .firstOrNull;
-      final isValid = user != null &&
-          BCrypt.checkpw(_passCtrl.text, user.hashedPassword);
+      final user = users.where((u) => u.username == _userCtrl.text).firstOrNull;
+      final isValid =
+          user != null && BCrypt.checkpw(_passCtrl.text, user.hashedPassword);
 
       if (!isValid) {
         if (!mounted) return;
@@ -213,12 +210,14 @@ class _LoginScreenState extends State<LoginScreen> {
                     onPressed: _isSubmitting
                         ? null
                         : () => setState(() {
-                              _isRegistering = !_isRegistering;
-                              _clearMessages();
-                            }),
-                    child: Text(_isRegistering
-                        ? 'Already have an account? Login'
-                        : "Don't have an account? Register"),
+                            _isRegistering = !_isRegistering;
+                            _clearMessages();
+                          }),
+                    child: Text(
+                      _isRegistering
+                          ? 'Already have an account? Login'
+                          : "Don't have an account? Register",
+                    ),
                   ),
                 ],
               ),

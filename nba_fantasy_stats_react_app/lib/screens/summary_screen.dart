@@ -82,10 +82,12 @@ _SummaryRow _buildRow(
 }) {
   final playedGames = games.where((g) => !g.isAbsent).toList();
   final missedGames = games.where((g) => g.isAbsent).toList();
-  final regularGames =
-      games.where((g) => g.gameType == GameType.regular).toList();
-  final playoffGames =
-      games.where((g) => g.gameType == GameType.playoffs).toList();
+  final regularGames = games
+      .where((g) => g.gameType == GameType.regular)
+      .toList();
+  final playoffGames = games
+      .where((g) => g.gameType == GameType.playoffs)
+      .toList();
   final wins = games.where((g) => g.won).length;
   final playerWins = playedGames.where((g) => g.won).length;
   final missedWins = missedGames.where((g) => g.won).length;
@@ -117,8 +119,7 @@ _SummaryRow _buildRow(
     doubleDoubles: playedGames.where((g) => g.isDoubleDouble).length,
     tripleDoubles: playedGames.where((g) => g.isTripleDouble).length,
     buzzerBeaters: games.where((g) => g.isBuzzerBeater).length,
-    playoffBuzzerBeaters:
-        playoffGames.where((g) => g.isBuzzerBeater).length,
+    playoffBuzzerBeaters: playoffGames.where((g) => g.isBuzzerBeater).length,
     isCareer: isCareer,
   );
 }
@@ -137,8 +138,9 @@ class _SummaryScreenState extends State<SummaryScreen> {
     List<GameStats> games;
     try {
       final raw = await StorageService.readList(StorageService.gamesKey);
-      games =
-          raw.map((j) => GameStats.fromJson(j as Map<String, dynamic>)).toList();
+      games = raw
+          .map((j) => GameStats.fromJson(j as Map<String, dynamic>))
+          .toList();
     } catch (_) {
       // Storage or parse failure must never leave the screen loading.
       games = [];
@@ -155,17 +157,12 @@ class _SummaryScreenState extends State<SummaryScreen> {
   @override
   Widget build(BuildContext context) {
     if (!_loaded) {
-      return const Scaffold(
-        body: Center(child: CircularProgressIndicator()),
-      );
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
     }
 
     return Scaffold(
       appBar: AppBar(title: const Text('Season Summary')),
-      body: RefreshIndicator(
-        onRefresh: _refresh,
-        child: _buildContent(),
-      ),
+      body: RefreshIndicator(onRefresh: _refresh, child: _buildContent()),
     );
   }
 
@@ -177,8 +174,10 @@ class _SummaryScreenState extends State<SummaryScreen> {
           GlassCard(
             child: Column(
               children: [
-                Text('No games logged yet',
-                    style: Theme.of(context).textTheme.titleMedium),
+                Text(
+                  'No games logged yet',
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
                 const SizedBox(height: 8),
                 Text(
                   'Submit regular-season or playoff games from the tracker to '
@@ -197,10 +196,12 @@ class _SummaryScreenState extends State<SummaryScreen> {
     // `summaryRows` in StatsSummaryPage.tsx.
     final seasons = organizeSeasonStats(_games);
     final seasonRows = seasons
-        .map((s) => _buildRow(
-              s.seasonYear,
-              [...s.regularSeasonGames, ...s.playoffGames],
-            ))
+        .map(
+          (s) => _buildRow(s.seasonYear, [
+            ...s.regularSeasonGames,
+            ...s.playoffGames,
+          ]),
+        )
         .toList();
     final careerRow = _buildRow('Career Total', _games, isCareer: true);
     final summary = calculateStatsSummary(_games);
@@ -208,8 +209,9 @@ class _SummaryScreenState extends State<SummaryScreen> {
 
     final bestScoring = seasonRows.isEmpty
         ? null
-        : seasonRows.reduce((best, row) =>
-            row.points > best.points ? row : best);
+        : seasonRows.reduce(
+            (best, row) => row.points > best.points ? row : best,
+          );
 
     return ListView(
       physics: const AlwaysScrollableScrollPhysics(),
@@ -220,10 +222,14 @@ class _SummaryScreenState extends State<SummaryScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('Player analytics',
-                  style: Theme.of(context).textTheme.labelSmall),
-              Text('Season Summary',
-                  style: Theme.of(context).textTheme.titleLarge),
+              Text(
+                'Player analytics',
+                style: Theme.of(context).textTheme.labelSmall,
+              ),
+              Text(
+                'Season Summary',
+                style: Theme.of(context).textTheme.titleLarge,
+              ),
               const SizedBox(height: 12),
               StatRow(
                 label: 'Player Record',
@@ -274,8 +280,10 @@ class _SummaryScreenState extends State<SummaryScreen> {
                 ? '-'
                 : '${bestScoring.label} (${_fmtAvg(bestScoring.points)})',
           ),
-          _tile('Buzzer Beaters',
-              '${career.buzzerBeaters} (${career.playoffBuzzerBeaters} PO)'),
+          _tile(
+            'Buzzer Beaters',
+            '${career.buzzerBeaters} (${career.playoffBuzzerBeaters} PO)',
+          ),
         ],
       ),
     );
@@ -329,8 +337,10 @@ class _SummaryScreenState extends State<SummaryScreen> {
           StatRow(label: 'BPG', value: _fmtAvg(row.blocks)),
           StatRow(label: 'SPG', value: _fmtAvg(row.steals)),
           StatRow(label: 'MPG', value: _fmtAvg(row.minutes)),
-          StatRow(label: 'DD / TD',
-              value: '${row.doubleDoubles} / ${row.tripleDoubles}'),
+          StatRow(
+            label: 'DD / TD',
+            value: '${row.doubleDoubles} / ${row.tripleDoubles}',
+          ),
           StatRow(
             label: 'Buzzer Beaters',
             value: '${row.buzzerBeaters} (${row.playoffBuzzerBeaters} PO)',

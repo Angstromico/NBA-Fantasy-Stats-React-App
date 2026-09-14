@@ -28,9 +28,9 @@ enum NBARecordMetric {
   seasonWins;
 
   static NBARecordMetric fromWire(String value) => values.firstWhere(
-        (m) => m.name == value,
-        orElse: () => NBARecordMetric.winStreak,
-      );
+    (m) => m.name == value,
+    orElse: () => NBARecordMetric.winStreak,
+  );
 }
 
 /// One verifiable NBA record.

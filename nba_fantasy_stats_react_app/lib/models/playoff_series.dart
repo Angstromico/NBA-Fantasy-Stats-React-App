@@ -15,20 +15,20 @@ class PlayoffSeries {
   });
 
   factory PlayoffSeries.fromJson(Map<String, dynamic> json) => PlayoffSeries(
-        round: json['round'] as int,
-        opponent: json['opponent'] as String,
-        gamesWon: json['gamesWon'] as int,
-        gamesLost: json['gamesLost'] as int,
-        isComplete: json['isComplete'] as bool,
-      );
+    round: json['round'] as int,
+    opponent: json['opponent'] as String,
+    gamesWon: json['gamesWon'] as int,
+    gamesLost: json['gamesLost'] as int,
+    isComplete: json['isComplete'] as bool,
+  );
 
   Map<String, dynamic> toJson() => {
-        'round': round,
-        'opponent': opponent,
-        'gamesWon': gamesWon,
-        'gamesLost': gamesLost,
-        'isComplete': isComplete,
-      };
+    'round': round,
+    'opponent': opponent,
+    'gamesWon': gamesWon,
+    'gamesLost': gamesLost,
+    'isComplete': isComplete,
+  };
 
   @override
   bool operator ==(Object other) =>

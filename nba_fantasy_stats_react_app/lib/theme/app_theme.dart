@@ -49,16 +49,15 @@ class GlassTheme extends ThemeExtension<GlassTheme> {
     Color? shadowColor,
     Offset? shadowOffset,
     double? shadowBlurRadius,
-  }) =>
-      GlassTheme(
-        glassColor: glassColor ?? this.glassColor,
-        glassBorder: glassBorder ?? this.glassBorder,
-        blurSigma: blurSigma ?? this.blurSigma,
-        borderRadius: borderRadius ?? this.borderRadius,
-        shadowColor: shadowColor ?? this.shadowColor,
-        shadowOffset: shadowOffset ?? this.shadowOffset,
-        shadowBlurRadius: shadowBlurRadius ?? this.shadowBlurRadius,
-      );
+  }) => GlassTheme(
+    glassColor: glassColor ?? this.glassColor,
+    glassBorder: glassBorder ?? this.glassBorder,
+    blurSigma: blurSigma ?? this.blurSigma,
+    borderRadius: borderRadius ?? this.borderRadius,
+    shadowColor: shadowColor ?? this.shadowColor,
+    shadowOffset: shadowOffset ?? this.shadowOffset,
+    shadowBlurRadius: shadowBlurRadius ?? this.shadowBlurRadius,
+  );
 
   @override
   GlassTheme lerp(GlassTheme? other, double t) {
@@ -70,8 +69,11 @@ class GlassTheme extends ThemeExtension<GlassTheme> {
       borderRadius: lerpDouble(borderRadius, other.borderRadius, t)!,
       shadowColor: Color.lerp(shadowColor, other.shadowColor, t)!,
       shadowOffset: Offset.lerp(shadowOffset, other.shadowOffset, t)!,
-      shadowBlurRadius:
-          lerpDouble(shadowBlurRadius, other.shadowBlurRadius, t)!,
+      shadowBlurRadius: lerpDouble(
+        shadowBlurRadius,
+        other.shadowBlurRadius,
+        t,
+      )!,
     );
   }
 
@@ -107,62 +109,62 @@ class AppTheme {
   static const Color successDark = Color(0xFF4ADE80);
 
   static ThemeData dark() => ThemeData(
-        useMaterial3: true,
-        brightness: Brightness.dark,
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: const Color(0xFF38BDF8),
-          brightness: Brightness.dark,
-          primary: const Color(0xFF38BDF8), // --accent-primary
-          secondary: const Color(0xFF818CF8), // --accent-secondary
-          tertiary: const Color(0xFFF472B6), // --accent-tertiary
-          error: const Color(0xFFF87171), // --accent-error
-          surface: const Color(0xFF0F172A), // --bg-dark
-          surfaceContainerHighest:
-              const Color(0xFF020617), // --bg-darker
-          onSurface: const Color(0xFFFFFFFF), // --text-primary
-          onSurfaceVariant: const Color(0xFFE2E8F0), // --text-secondary
-        ),
-        scaffoldBackgroundColor: const Color(0xFF0F172A),
-        extensions: const [
-          GlassTheme(
-            glassColor: Color(0xB31E293B), // rgba(30,41,59,0.7)
-            glassBorder: Color(0x1AFFFFFF), // rgba(255,255,255,0.1)
-            blurSigma: 12,
-            borderRadius: 20,
-            shadowColor: Color(0x5E000000), // rgba(0,0,0,0.37)
-            shadowOffset: Offset(0, 8),
-            shadowBlurRadius: 32,
-          ),
-        ],
-      );
+    useMaterial3: true,
+    brightness: Brightness.dark,
+    colorScheme: ColorScheme.fromSeed(
+      seedColor: const Color(0xFF38BDF8),
+      brightness: Brightness.dark,
+      primary: const Color(0xFF38BDF8), // --accent-primary
+      secondary: const Color(0xFF818CF8), // --accent-secondary
+      tertiary: const Color(0xFFF472B6), // --accent-tertiary
+      error: const Color(0xFFF87171), // --accent-error
+      surface: const Color(0xFF0F172A), // --bg-dark
+      surfaceContainerHighest: const Color(0xFF020617), // --bg-darker
+      onSurface: const Color(0xFFFFFFFF), // --text-primary
+      onSurfaceVariant: const Color(0xFFE2E8F0), // --text-secondary
+    ),
+    scaffoldBackgroundColor: const Color(0xFF0F172A),
+    extensions: const [
+      GlassTheme(
+        glassColor: Color(0xB31E293B), // rgba(30,41,59,0.7)
+        glassBorder: Color(0x1AFFFFFF), // rgba(255,255,255,0.1)
+        blurSigma: 12,
+        borderRadius: 20,
+        shadowColor: Color(0x5E000000), // rgba(0,0,0,0.37)
+        shadowOffset: Offset(0, 8),
+        shadowBlurRadius: 32,
+      ),
+    ],
+  );
 
   static ThemeData light() => ThemeData(
-        useMaterial3: true,
-        brightness: Brightness.light,
-        colorScheme: ColorScheme.fromSeed(
-          seedColor: const Color(0xFF0284C7),
-          brightness: Brightness.light,
-          primary: const Color(0xFF0284C7), // --accent-primary
-          secondary: const Color(0xFF4F46E5), // --accent-secondary
-          tertiary: const Color(0xFFDB2777), // --accent-tertiary
-          error: const Color(0xFFDC2626), // --accent-error
-          surface: const Color(0xFFF1F5F9), // --bg-dark (light value)
-          surfaceContainerHighest:
-              const Color(0xFFF8FAFC), // --bg-darker (light value)
-          onSurface: const Color(0xFF0F172A), // --text-primary
-          onSurfaceVariant: const Color(0xFF475569), // --text-secondary
-        ),
-        scaffoldBackgroundColor: const Color(0xFFF1F5F9),
-        extensions: const [
-          GlassTheme(
-            glassColor: Color(0xB3FFFFFF), // rgba(255,255,255,0.7)
-            glassBorder: Color(0x1A000000), // rgba(0,0,0,0.1)
-            blurSigma: 12,
-            borderRadius: 20,
-            shadowColor: Color(0x121F2687), // rgba(31,38,135,0.07)
-            shadowOffset: Offset(0, 8),
-            shadowBlurRadius: 32,
-          ),
-        ],
-      );
+    useMaterial3: true,
+    brightness: Brightness.light,
+    colorScheme: ColorScheme.fromSeed(
+      seedColor: const Color(0xFF0284C7),
+      brightness: Brightness.light,
+      primary: const Color(0xFF0284C7), // --accent-primary
+      secondary: const Color(0xFF4F46E5), // --accent-secondary
+      tertiary: const Color(0xFFDB2777), // --accent-tertiary
+      error: const Color(0xFFDC2626), // --accent-error
+      surface: const Color(0xFFF1F5F9), // --bg-dark (light value)
+      surfaceContainerHighest: const Color(
+        0xFFF8FAFC,
+      ), // --bg-darker (light value)
+      onSurface: const Color(0xFF0F172A), // --text-primary
+      onSurfaceVariant: const Color(0xFF475569), // --text-secondary
+    ),
+    scaffoldBackgroundColor: const Color(0xFFF1F5F9),
+    extensions: const [
+      GlassTheme(
+        glassColor: Color(0xB3FFFFFF), // rgba(255,255,255,0.7)
+        glassBorder: Color(0x1A000000), // rgba(0,0,0,0.1)
+        blurSigma: 12,
+        borderRadius: 20,
+        shadowColor: Color(0x121F2687), // rgba(31,38,135,0.07)
+        shadowOffset: Offset(0, 8),
+        shadowBlurRadius: 32,
+      ),
+    ],
+  );
 }

@@ -21,26 +21,26 @@ class CareerHighs {
   });
 
   factory CareerHighs.fromJson(Map<String, dynamic> json) => CareerHighs(
-        points: json['points'] as int,
-        assists: json['assists'] as int,
-        rebounds: json['rebounds'] as int,
-        blocks: json['blocks'] as int,
-        steals: json['steals'] as int,
-        minutes: json['minutes'] as int,
-        doubleDoubles: json['doubleDoubles'] as int,
-        tripleDoubles: json['tripleDoubles'] as int,
-      );
+    points: json['points'] as int,
+    assists: json['assists'] as int,
+    rebounds: json['rebounds'] as int,
+    blocks: json['blocks'] as int,
+    steals: json['steals'] as int,
+    minutes: json['minutes'] as int,
+    doubleDoubles: json['doubleDoubles'] as int,
+    tripleDoubles: json['tripleDoubles'] as int,
+  );
 
   Map<String, dynamic> toJson() => {
-        'points': points,
-        'assists': assists,
-        'rebounds': rebounds,
-        'blocks': blocks,
-        'steals': steals,
-        'minutes': minutes,
-        'doubleDoubles': doubleDoubles,
-        'tripleDoubles': tripleDoubles,
-      };
+    'points': points,
+    'assists': assists,
+    'rebounds': rebounds,
+    'blocks': blocks,
+    'steals': steals,
+    'minutes': minutes,
+    'doubleDoubles': doubleDoubles,
+    'tripleDoubles': tripleDoubles,
+  };
 
   @override
   bool operator ==(Object other) =>
@@ -56,6 +56,14 @@ class CareerHighs {
           tripleDoubles == other.tripleDoubles;
 
   @override
-  int get hashCode => Object.hash(points, assists, rebounds, blocks, steals,
-      minutes, doubleDoubles, tripleDoubles);
+  int get hashCode => Object.hash(
+    points,
+    assists,
+    rebounds,
+    blocks,
+    steals,
+    minutes,
+    doubleDoubles,
+    tripleDoubles,
+  );
 }

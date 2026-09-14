@@ -15,20 +15,20 @@ class Team {
   });
 
   factory Team.fromJson(Map<String, dynamic> json) => Team(
-        id: json['id'] as String,
-        name: json['name'] as String,
-        city: json['city'] as String,
-        conference: json['conference'] as String,
-        division: json['division'] as String,
-      );
+    id: json['id'] as String,
+    name: json['name'] as String,
+    city: json['city'] as String,
+    conference: json['conference'] as String,
+    division: json['division'] as String,
+  );
 
   Map<String, dynamic> toJson() => {
-        'id': id,
-        'name': name,
-        'city': city,
-        'conference': conference,
-        'division': division,
-      };
+    'id': id,
+    'name': name,
+    'city': city,
+    'conference': conference,
+    'division': division,
+  };
 
   @override
   bool operator ==(Object other) =>

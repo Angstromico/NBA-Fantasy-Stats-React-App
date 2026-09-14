@@ -46,10 +46,7 @@ class GlassCard extends StatelessWidget {
             ),
             // Local transparent Material so tiles/ink inside the glass card
             // paint correctly instead of asserting against the card fill.
-            child: Material(
-              type: MaterialType.transparency,
-              child: child,
-            ),
+            child: Material(type: MaterialType.transparency, child: child),
           ),
         ),
       ),

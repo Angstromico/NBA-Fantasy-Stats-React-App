@@ -39,7 +39,14 @@ class _TrackerScreenState extends State<TrackerScreen> {
 
   @override
   void dispose() {
-    for (final c in [_ptsCtrl, _astCtrl, _rebCtrl, _blkCtrl, _stlCtrl, _minCtrl]) {
+    for (final c in [
+      _ptsCtrl,
+      _astCtrl,
+      _rebCtrl,
+      _blkCtrl,
+      _stlCtrl,
+      _minCtrl,
+    ]) {
       c.dispose();
     }
     super.dispose();
@@ -62,7 +69,14 @@ class _TrackerScreenState extends State<TrackerScreen> {
       if (_isAbsent) {
         _won = false;
         _buzzer = false;
-        for (final c in [_ptsCtrl, _astCtrl, _rebCtrl, _blkCtrl, _stlCtrl, _minCtrl]) {
+        for (final c in [
+          _ptsCtrl,
+          _astCtrl,
+          _rebCtrl,
+          _blkCtrl,
+          _stlCtrl,
+          _minCtrl,
+        ]) {
           c.text = '';
         }
       }
@@ -108,7 +122,14 @@ class _TrackerScreenState extends State<TrackerScreen> {
 
     if (!mounted) return;
     setState(() {
-      for (final c in [_ptsCtrl, _astCtrl, _rebCtrl, _blkCtrl, _stlCtrl, _minCtrl]) {
+      for (final c in [
+        _ptsCtrl,
+        _astCtrl,
+        _rebCtrl,
+        _blkCtrl,
+        _stlCtrl,
+        _minCtrl,
+      ]) {
         c.clear();
       }
       _absenceType = AbsenceType.none;
@@ -127,8 +148,10 @@ class _TrackerScreenState extends State<TrackerScreen> {
           Padding(
             padding: const EdgeInsets.only(right: 16),
             child: Center(
-              child: Text('${widget.username} · $_gamesLogged logged',
-                  style: Theme.of(context).textTheme.bodySmall),
+              child: Text(
+                '${widget.username} · $_gamesLogged logged',
+                style: Theme.of(context).textTheme.bodySmall,
+              ),
             ),
           ),
         ],
@@ -148,12 +171,17 @@ class _TrackerScreenState extends State<TrackerScreen> {
               const SizedBox(height: 16),
               SegmentedButton<GameType>(
                 segments: const [
-                  ButtonSegment(value: GameType.regular, label: Text('Regular')),
-                  ButtonSegment(value: GameType.playoffs, label: Text('Playoffs')),
+                  ButtonSegment(
+                    value: GameType.regular,
+                    label: Text('Regular'),
+                  ),
+                  ButtonSegment(
+                    value: GameType.playoffs,
+                    label: Text('Playoffs'),
+                  ),
                 ],
                 selected: {_gameType},
-                onSelectionChanged: (s) =>
-                    setState(() => _gameType = s.first),
+                onSelectionChanged: (s) => setState(() => _gameType = s.first),
               ),
               const SizedBox(height: 8),
               DropdownButtonFormField<AbsenceType>(
@@ -163,12 +191,14 @@ class _TrackerScreenState extends State<TrackerScreen> {
                   border: OutlineInputBorder(),
                 ),
                 items: AbsenceType.values
-                    .map((a) => DropdownMenuItem(
-                          value: a,
-                          child: Text(
-                            a == AbsenceType.none ? 'Not absent' : a.label,
-                          ),
-                        ))
+                    .map(
+                      (a) => DropdownMenuItem(
+                        value: a,
+                        child: Text(
+                          a == AbsenceType.none ? 'Not absent' : a.label,
+                        ),
+                      ),
+                    )
                     .toList(),
                 onChanged: (a) {
                   setState(() => _absenceType = a ?? AbsenceType.none);

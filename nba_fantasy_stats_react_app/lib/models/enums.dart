@@ -14,10 +14,10 @@ enum AbsenceType {
 
   /// JSON value used by the React app (snake_case).
   String get wireName => switch (this) {
-        AbsenceType.notCalledUp => 'not_called_up',
-        AbsenceType.lowerDivision => 'lower_division',
-        _ => name,
-      };
+    AbsenceType.notCalledUp => 'not_called_up',
+    AbsenceType.lowerDivision => 'lower_division',
+    _ => name,
+  };
 
   /// Human-readable label, mirroring the React app's
   /// `absenceType.replace(/_/g, ' ')` rendering.
@@ -25,9 +25,9 @@ enum AbsenceType {
 
   /// Parses a wire value, tolerating both snake_case and camelCase input.
   static AbsenceType fromWire(String value) => AbsenceType.values.firstWhere(
-        (e) => e.wireName == value || e.name == value,
-        orElse: () => AbsenceType.none,
-      );
+    (e) => e.wireName == value || e.name == value,
+    orElse: () => AbsenceType.none,
+  );
 }
 
 /// Whether a game belongs to the regular season or the playoffs.
@@ -40,7 +40,7 @@ enum GameType {
 
   /// Parses a wire value.
   static GameType fromWire(String value) => GameType.values.firstWhere(
-        (e) => e.wireName == value || e.name == value,
-        orElse: () => GameType.regular,
-      );
+    (e) => e.wireName == value || e.name == value,
+    orElse: () => GameType.regular,
+  );
 }
