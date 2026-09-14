@@ -7,26 +7,32 @@ import 'package:nba_fantasy_stats_react_app/theme/app_theme.dart';
 import 'package:nba_fantasy_stats_react_app/utils/storage_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-Future<void> _pumpTracker(WidgetTester tester) async {
+Future<void> _pumpTracker(
+  WidgetTester tester, {
+  String team = 'Boston Celtics',
+  String season = '2024-2025',
+}) async {
   // Tall surface so the entire form (button included) is on-screen and
   // tappable without scrolling in the 800x600 default test viewport.
-  tester.view.physicalSize = const Size(800, 1800);
+  tester.view.physicalSize = const Size(900, 2000);
   tester.view.devicePixelRatio = 1.0;
   addTearDown(tester.view.resetPhysicalSize);
   addTearDown(tester.view.resetDevicePixelRatio);
 
-  await tester.pumpWidget(MaterialApp(
-    theme: AppTheme.dark(),
-    home: const TrackerScreen(username: 'manuel'),
-  ));
+  await tester.pumpWidget(
+    MaterialApp(
+      theme: AppTheme.dark(),
+      home: TrackerScreen(
+        username: 'manuel',
+        selectedTeam: team,
+        selectedSeason: season,
+      ),
+    ),
+  );
   await tester.pumpAndSettle();
 }
 
-Future<void> _enterStat(
-  WidgetTester tester,
-  String label,
-  String value,
-) async {
+Future<void> _enterStat(WidgetTester tester, String label, String value) async {
   await tester.enterText(find.widgetWithText(TextField, label), value);
 }
 
@@ -49,7 +55,7 @@ void main() {
   });
 
   group('TrackerScreen stat logging', () {
-    testWidgets('logs a basic game and resets the form', (tester) async {
+    testWidgets('logs a scheduled game and resets the form', (tester) async {
       await _pumpTracker(tester);
 
       await _enterStat(tester, 'Points', '25');
@@ -65,15 +71,22 @@ void main() {
       expect(games.first.won, isFalse);
       expect(games.first.isDoubleDouble, isFalse);
       expect(find.textContaining('1 logged'), findsOneWidget);
+      // Schedule-derived fields arrive with the data step.
+      expect(games.first.team, 'Boston Celtics');
+      expect(games.first.season, '2024-2025');
+      expect(games.first.opponent, isNot('Free agent'));
+      expect(games.first.gameNumber, 1);
 
       // Form resets after logging.
-      final ptsField =
-          tester.widget<TextField>(find.widgetWithText(TextField, 'Points'));
+      final ptsField = tester.widget<TextField>(
+        find.widgetWithText(TextField, 'Points'),
+      );
       expect(ptsField.controller!.text, isEmpty);
     });
 
-    testWidgets('derives double-double from two 10+ categories',
-        (tester) async {
+    testWidgets('derives double-double from two 10+ categories', (
+      tester,
+    ) async {
       await _pumpTracker(tester);
 
       await _enterStat(tester, 'Points', '22');
@@ -85,8 +98,9 @@ void main() {
       expect(games.first.isTripleDouble, isFalse);
     });
 
-    testWidgets('derives triple-double from three 10+ categories',
-        (tester) async {
+    testWidgets('derives triple-double from three 10+ categories', (
+      tester,
+    ) async {
       await _pumpTracker(tester);
 
       await _enterStat(tester, 'Points', '30');
@@ -124,8 +138,7 @@ void main() {
       expect(games.first.won, isTrue);
     });
 
-    testWidgets('selecting an absence reason zeroes all stats',
-        (tester) async {
+    testWidgets('selecting an absence reason zeroes all stats', (tester) async {
       await _pumpTracker(tester);
 
       await _enterStat(tester, 'Points', '25');
@@ -133,49 +146,52 @@ void main() {
 
       // Open the absence dropdown and pick "injury" (labels mirror the
       // React app's lowercase rendering of snake_case values).
-      await tester
-          .tap(find.byType(DropdownButtonFormField<AbsenceType>));
+      await tester.tap(find.text('Active'));
       await tester.pumpAndSettle();
       await tester.tap(find.text('injury').last);
       await tester.pumpAndSettle();
 
-      // The zeroed fields are what gets stored when submitting.
       await _logGame(tester);
 
       final games = await _storedGames();
+      expect(games, hasLength(1));
       expect(games.first.isAbsent, isTrue);
       expect(games.first.absenceType, AbsenceType.injury);
       expect(games.first.points, 0);
       expect(games.first.assists, 0);
       expect(games.first.isDoubleDouble, isFalse);
-      expect(games.first.isBuzzerBeater, isFalse);
+      expect(games.first.won, isFalse);
     });
 
     testWidgets('increments game number across logged games', (tester) async {
       await _pumpTracker(tester);
 
-      for (var i = 0; i < 3; i++) {
-        await _enterStat(tester, 'Points', '${10 + i}');
-        await _logGame(tester);
-      }
+      await _enterStat(tester, 'Points', '10');
+      await _logGame(tester);
+      await _enterStat(tester, 'Points', '12');
+      await _logGame(tester);
+      await _enterStat(tester, 'Points', '14');
+      await _logGame(tester);
 
       final games = await _storedGames();
       expect(games, hasLength(3));
-      expect(games.map((g) => g.gameNumber), [1, 2, 3]);
+      expect(games.map((g) => g.gameNumber).toList(), [1, 2, 3]);
+      // Schedule dates/opponents advance with the game number.
+      expect(games[0].date, isNot(games[1].date));
     });
-  });
 
-  group('TrackerScreen game type', () {
     testWidgets('switches between regular and playoffs', (tester) async {
       await _pumpTracker(tester);
 
       await tester.tap(find.text('Playoffs'));
-      await tester.pump();
+      await tester.pumpAndSettle();
       await _enterStat(tester, 'Points', '20');
       await _logGame(tester);
 
       final games = await _storedGames();
       expect(games.first.gameType, GameType.playoffs);
+      // Playoff schedule opponents come from the generated bracket.
+      expect(games.first.opponent, contains('Playoffs'));
     });
   });
 }

@@ -215,7 +215,10 @@ class _SummaryScreenState extends State<SummaryScreen> {
 
     return ListView(
       physics: const AlwaysScrollableScrollPhysics(),
-      padding: const EdgeInsets.all(16),
+      padding: EdgeInsets.symmetric(
+        horizontal: MediaQuery.of(context).size.width > 900 ? 64 : 16,
+        vertical: 16,
+      ),
       children: [
         // Hero — player record headline.
         GlassCard(

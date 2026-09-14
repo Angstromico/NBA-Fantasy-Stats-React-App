@@ -55,15 +55,28 @@ class _RecordsScreenState extends State<RecordsScreen> {
       appBar: AppBar(title: const Text('Records')),
       body: RefreshIndicator(
         onRefresh: _loadGames,
-        child: ListView(
-          physics: const AlwaysScrollableScrollPhysics(),
-          padding: const EdgeInsets.all(16),
-          children: [
-            RecordsDisplay(stats: _games, congrats: const []),
-            const SizedBox(height: 16),
-            AllTimeLeaderboards(stats: _games, playerName: widget.username),
-          ],
-        ),
+        child: LayoutBuilder(builder: (context, constraints) {
+          // Wide screens read better with a centered reading column; on
+          // phones the cards use the full width.
+          final wide = constraints.maxWidth > 900;
+          final content = ListView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            padding: const EdgeInsets.all(16),
+            children: [
+              RecordsDisplay(stats: _games, congrats: const []),
+              const SizedBox(height: 16),
+              AllTimeLeaderboards(stats: _games, playerName: widget.username),
+            ],
+          );
+          return wide
+              ? Center(
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 1100),
+                    child: content,
+                  ),
+                )
+              : content;
+        }),
       ),
     );
   }
