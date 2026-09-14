@@ -10,9 +10,15 @@ import 'package:nba_fantasy_stats_react_app/widgets/stat_row.dart';
 /// FLUTTER_PLAN.md): per-season rows compared against a career total, with
 /// records, availability, averages, and double-double production.
 class SummaryScreen extends StatefulWidget {
-  const SummaryScreen({super.key, required this.username});
+  const SummaryScreen({super.key, required this.username, this.games});
 
   final String username;
+
+  /// The live games list from the app shell (the React app's `stats`
+  /// prop). When provided it always wins over storage, so the summary
+  /// updates the moment a game is logged. Standalone/tests may omit it and
+  /// the screen falls back to reading storage itself.
+  final List<GameStats>? games;
 
   @override
   State<SummaryScreen> createState() => _SummaryScreenState();
@@ -126,15 +132,25 @@ _SummaryRow _buildRow(
 
 class _SummaryScreenState extends State<SummaryScreen> {
   List<GameStats> _games = [];
-  bool _loaded = false;
 
   @override
   void initState() {
     super.initState();
-    _loadGames();
+    if (widget.games != null) {
+      // The shell already pushed the live list — no storage round-trip.
+      _games = widget.games!;
+    } else {
+      _loadGames();
+    }
   }
 
   Future<void> _loadGames() async {
+    // When the shell pushes the live games list, storage is never read.
+    if (widget.games != null) {
+      if (!mounted) return;
+      setState(() => _games = widget.games!);
+      return;
+    }
     List<GameStats> games;
     try {
       final raw = await StorageService.readList(StorageService.gamesKey);
@@ -146,20 +162,24 @@ class _SummaryScreenState extends State<SummaryScreen> {
       games = [];
     }
     if (!mounted) return;
-    setState(() {
-      _games = games;
-      _loaded = true;
-    });
+    setState(() => _games = games);
+  }
+
+  @override
+  void didUpdateWidget(SummaryScreen oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // Re-sync whenever the shell pushes a new games list (e.g. after
+    // logging a game) — the IndexedStack keeps this state object alive, so
+    // prop changes arrive here rather than through initState.
+    if (!identical(oldWidget.games, widget.games)) {
+      setState(() => _games = widget.games ?? _games);
+    }
   }
 
   Future<void> _refresh() => _loadGames();
 
   @override
   Widget build(BuildContext context) {
-    if (!_loaded) {
-      return const Scaffold(body: Center(child: CircularProgressIndicator()));
-    }
-
     return Scaffold(
       appBar: AppBar(title: const Text('Season Summary')),
       body: RefreshIndicator(onRefresh: _refresh, child: _buildContent()),

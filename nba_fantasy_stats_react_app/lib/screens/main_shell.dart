@@ -15,6 +15,7 @@ class MainShell extends StatefulWidget {
     required this.username,
     this.selectedTeam = '',
     this.selectedSeason = '',
+    this.games = const [],
     this.onTeamChange,
     this.onSeasonChange,
     this.onResetSeason,
@@ -24,6 +25,12 @@ class MainShell extends StatefulWidget {
   final String username;
   final String selectedTeam;
   final String selectedSeason;
+
+  /// The live games list owned by [AppHomePage] — pushed down on every
+  /// change so the tabs always render current data (the React app's
+  /// `stats` prop).
+  final List<GameStats> games;
+
   final void Function(String team)? onTeamChange;
   final void Function(String season)? onSeasonChange;
   final void Function(String season)? onResetSeason;
@@ -61,13 +68,14 @@ class _MainShellState extends State<MainShell> {
         username: widget.username,
         selectedTeam: widget.selectedTeam,
         selectedSeason: widget.selectedSeason,
+        games: widget.games,
         onTeamChange: widget.onTeamChange,
         onSeasonChange: widget.onSeasonChange,
         onResetSeason: widget.onResetSeason,
         onGamesLogged: widget.onGamesLogged,
       ),
-      SummaryScreen(username: widget.username),
-      RecordsScreen(username: widget.username),
+      SummaryScreen(username: widget.username, games: widget.games),
+      RecordsScreen(username: widget.username, games: widget.games),
     ];
 
     final wide = MediaQuery.of(context).size.width > 900;

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:nba_fantasy_stats_react_app/models/game_stats.dart';
 import 'package:nba_fantasy_stats_react_app/screens/main_shell.dart';
 import 'package:nba_fantasy_stats_react_app/theme/app_theme.dart';
 import 'package:nba_fantasy_stats_react_app/utils/storage_service.dart';
@@ -14,12 +15,39 @@ void main() {
     StorageService.setInstance(await SharedPreferences.getInstance());
   });
 
-  Future<void> pumpShell(WidgetTester tester) async {
-    await tester.pumpWidget(MaterialApp(
-      // GlassCard reads the GlassTheme extension, so use the real theme.
-      theme: AppTheme.dark(),
-      home: const MainShell(username: 'manuel'),
-    ));
+  Future<void> pumpShell(
+    WidgetTester tester, {
+    String team = 'Boston Celtics',
+    String season = '2024-2025',
+  }) async {
+    // Tall surface so the tracker form (and its Log Game button) fits
+    // on-screen alongside the shell header and bottom navigation bar.
+    tester.view.physicalSize = const Size(900, 2000);
+    tester.view.devicePixelRatio = 1.0;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    // Mirror the real app wiring: the shell's parent (AppHomePage in
+    // production) owns the games list and receives every save.
+    var games = <GameStats>[];
+    await tester.pumpWidget(
+      MaterialApp(
+        // GlassCard reads the GlassTheme extension, so use the real theme.
+        theme: AppTheme.dark(),
+        home: StatefulBuilder(
+          builder: (context, setState) {
+            return MainShell(
+              username: 'manuel',
+              selectedTeam: team,
+              selectedSeason: season,
+              games: games,
+              onGamesLogged: (newGames) =>
+                  setState(() => games = [...games, ...newGames]),
+            );
+          },
+        ),
+      ),
+    );
     await tester.pumpAndSettle();
   }
 
@@ -54,8 +82,9 @@ void main() {
       expect(find.text('Season Summary'), findsNothing);
     });
 
-    testWidgets('preserves tracker state across tab switches (IndexedStack)',
-        (tester) async {
+    testWidgets('preserves tracker state across tab switches (IndexedStack)', (
+      tester,
+    ) async {
       await pumpShell(tester);
 
       // Both screens stay in the tree; IndexedStack only hides the inactive
@@ -79,6 +108,29 @@ void main() {
       await pumpShell(tester);
 
       expect(find.textContaining('manuel'), findsOneWidget);
+    });
+
+    testWidgets('summary and records reflect games logged on the tracker', (
+      tester,
+    ) async {
+      await pumpShell(tester);
+
+      // Log a game on the tracker tab.
+      await tester.enterText(find.widgetWithText(TextField, 'Points'), '25');
+      await tester.tap(find.text('Log Game'));
+      await tester.pumpAndSettle();
+
+      // The summary tab (kept alive in the IndexedStack) must show the
+      // logged game without any manual refresh — regression for the
+      // "no games logged" bug where tabs kept stale empty state.
+      await tester.tap(find.text('Summary'));
+      await tester.pumpAndSettle();
+      expect(find.text('No games logged yet'), findsNothing);
+
+      // Same for the records tab.
+      await tester.tap(find.text('Records'));
+      await tester.pumpAndSettle();
+      expect(find.text('No games logged yet'), findsNothing);
     });
   });
 }

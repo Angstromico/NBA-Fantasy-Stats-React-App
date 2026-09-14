@@ -348,6 +348,7 @@ class _AppHomePageState extends State<AppHomePage> {
                 username: _currentUser!,
                 selectedTeam: _selectedTeam,
                 selectedSeason: _selectedSeason,
+                games: _games,
                 onTeamChange: _handleTeamChange,
                 onSeasonChange: _handleSeasonChange,
                 onResetSeason: _handleResetSeason,

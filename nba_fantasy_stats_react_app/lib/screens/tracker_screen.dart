@@ -19,6 +19,7 @@ class TrackerScreen extends StatefulWidget {
     required this.username,
     this.selectedTeam = '',
     this.selectedSeason = '',
+    this.games,
     this.onTeamChange,
     this.onSeasonChange,
     this.onResetSeason,
@@ -31,6 +32,11 @@ class TrackerScreen extends StatefulWidget {
   /// selection survives tab switches and feeds the comparison card.
   final String selectedTeam;
   final String selectedSeason;
+
+  /// The live games list from the app shell (the React app's `stats`
+  /// prop) — used to recompute the next game type/number after every save.
+  final List<GameStats>? games;
+
   final void Function(String team)? onTeamChange;
   final void Function(String season)? onSeasonChange;
   final void Function(String season)? onResetSeason;
@@ -73,9 +79,11 @@ class _TrackerScreenState extends State<TrackerScreen> {
   void didUpdateWidget(TrackerScreen oldWidget) {
     super.didUpdateWidget(oldWidget);
     // Recompute the matchup whenever the lifted team/season/game-type
-    // selection changes (the `useEffect` dependency array in GameForm.tsx).
+    // selection changes, or after the shell saves new games (the
+    // `useEffect` dependency array in GameForm.tsx).
     if (oldWidget.selectedTeam != widget.selectedTeam ||
-        oldWidget.selectedSeason != widget.selectedSeason) {
+        oldWidget.selectedSeason != widget.selectedSeason ||
+        !identical(oldWidget.games, widget.games)) {
       _loadStoredGames();
     }
   }
@@ -95,15 +103,21 @@ class _TrackerScreenState extends State<TrackerScreen> {
     super.dispose();
   }
 
-  /// Loads the stored games and derives the next game type/number for the
-  /// selected team + season — `initializeGameProgression`/`setGameProgression`
-  /// in App.tsx.
+  /// Loads the games (from the shell prop when available, storage
+  /// otherwise) and derives the next game type/number for the selected
+  /// team + season — `initializeGameProgression`/`setGameProgression` in
+  /// App.tsx.
   Future<void> _loadStoredGames() async {
-    final raw = await StorageService.readList(StorageService.gamesKey);
-    final games = raw
-        .whereType<Map<String, dynamic>>()
-        .map(GameStats.fromJson)
-        .toList();
+    List<GameStats> games;
+    if (widget.games != null) {
+      games = widget.games!;
+    } else {
+      final raw = await StorageService.readList(StorageService.gamesKey);
+      games = raw
+          .whereType<Map<String, dynamic>>()
+          .map(GameStats.fromJson)
+          .toList();
+    }
     if (!mounted) return;
 
     var progression = const GameProgression(
